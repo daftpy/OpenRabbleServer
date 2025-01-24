@@ -1,4 +1,15 @@
 services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    env_file: "./postgres/.env.dev"
+    expose:
+    - "5432"
+    networks:
+      - app_network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   chatserver:
     build:
       context: ./chatserver
@@ -22,6 +33,9 @@ services:
     volumes:
       - ./caddy/Caddyfile.dev:/etc/caddy/Caddyfile:ro
       - ./caddy/caddy_data:/data
+
+volumes:
+  postgres_data:
 
 networks:
   app_network:
