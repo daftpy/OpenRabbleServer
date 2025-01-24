@@ -2,11 +2,15 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		hostname := os.Getenv("PUBLIC_HOSTNAME")
+		log.Printf(hostname)
 		response := map[string]string{
 			"auth_url":  "placeholder",
 			"token_url": "placeholder",
