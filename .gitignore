@@ -1,0 +1,5 @@
+keycloak/*
+
+# Caddy ignores
+caddy/caddy_data/*
+caddy/current-root.crt

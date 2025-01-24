@@ -5,10 +5,23 @@ services:
       dockerfile: dockerfile
     networks:
       - app_network
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     env_file: ".env.dev"
       
+  caddy:
+    image: caddy:latest
+    restart: unless-stopped
+    networks:
+      - app_network
+    depends_on:
+      - chatserver
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile.dev:/etc/caddy/Caddyfile:ro
+      - ./caddy/caddy_data:/data
 
 networks:
   app_network:

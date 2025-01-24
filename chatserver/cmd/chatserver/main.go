@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/discovery", func(w http.ResponseWriter, r *http.Request) {
 		hostname := os.Getenv("PUBLIC_HOSTNAME")
 		log.Printf(hostname)
 		response := map[string]string{

@@ -1,0 +1,11 @@
+chat.localhost {
+    reverse_proxy chatserver:8080 {
+        header_up Host {host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+    log {
+        output stdout
+        level debug
+    }
+    tls internal  # CA for localhost
+}
