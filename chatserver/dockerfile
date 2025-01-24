@@ -1,0 +1,20 @@
+FROM golang:1.23.5 AS builder
+
+WORKDIR /app
+
+COPY go.mod ./
+RUN go mod download
+
+COPY . .
+
+
+RUN go build -o chatserver ./cmd/chatserver
+
+FROM debian:bookworm-slim
+WORKDIR /app
+
+COPY --from=builder /app/chatserver /app/chatserver
+
+EXPOSE 8080
+
+ENTRYPOINT ["/app/chatserver"]

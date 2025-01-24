@@ -1,0 +1,13 @@
+services:
+  chatserver:
+    build:
+      context: ./chatserver
+      dockerfile: dockerfile
+    networks:
+      - app_network
+    ports:
+      - "8080:8080"
+
+networks:
+  app_network:
+    driver: bridge
