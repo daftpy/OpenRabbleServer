@@ -9,6 +9,23 @@ services:
       - app_network
     volumes:
       - postgres_data:/var/lib/postgresql/data
+  
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    # Flags for reverse proxy
+    command:
+      - start-dev
+      - --proxy-headers=xforwarded
+      - --import-realm
+    env_file: "./keycloak/.env.dev"
+    volumes:
+      - ./keycloak/chat-realm.dev.json:/opt/keycloak/data/import/chat-realm.json
+    networks:
+      - app_network
+    expose:
+      - "8080"
+    depends_on:
+      - postgres
 
   chatserver:
     build:

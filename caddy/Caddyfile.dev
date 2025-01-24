@@ -1,8 +1,19 @@
+# Proxy to the chat service
 chat.localhost {
     reverse_proxy chatserver:8080 {
         header_up Host {host}
         header_up X-Forwarded-Proto {scheme}
     }
+    log {
+        output stdout
+        level debug
+    }
+    tls internal  # CA for localhost
+}
+
+# Proxy to Keycloak
+keycloak.localhost {
+    reverse_proxy keycloak:8080
     log {
         output stdout
         level debug
