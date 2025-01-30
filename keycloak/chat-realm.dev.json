@@ -1,0 +1,44 @@
+{
+    "realm": "${REALM_NAME}",
+    "enabled": true,
+    "registrationAllowed": true,
+    "users": [
+      {
+        "username": "Daftpy",
+        "enabled": true,
+        "credentials": [
+          {
+            "type": "admin",
+            "value": "adminpass"
+          }
+        ]
+      }
+    ],
+    "clients": [
+        {
+            "clientId": "${CHAT_CLIENT_NAME}",
+            "enabled": true,
+            "publicClient": true,
+            "directAccessGrantsEnabled": true,
+            "standardFlowEnabled": true,
+            "redirectUris": [
+                "http://localhost:1337/*",
+                "http://12.0.0.1:1337/*"
+            ]
+        },
+        {
+          "clientId": "${WEB_CLIENT_NAME}",
+          "enabled": true,
+          "publicClient": true,
+          "directAccessGrantsEnabled": true,
+          "standardFlowEnabled": true,
+          "redirectUris": [
+            "https://localhost/success"
+          ],
+          "webOrigins": [
+            "https://localhost"
+          ]
+        }
+    ]
+  }
+  

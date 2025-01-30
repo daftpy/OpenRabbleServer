@@ -35,7 +35,9 @@ services:
       - app_network
     expose:
       - "8080"
-    env_file: ".env.dev"
+    env_file: 
+     - ".env.dev"
+     - "./keycloak/.env.dev"
       
   caddy:
     image: caddy:latest
