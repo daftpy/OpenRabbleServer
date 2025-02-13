@@ -1,0 +1,23 @@
+
+{
+    email email@example.com
+}
+
+chat.example.com {
+    reverse_proxy chatserver:8080 {
+        header_up {host}
+        header_up X-Forwarded-Proto [schema]
+    }
+    log {
+        output stdout
+        level debug
+    }
+}
+
+keycloak.example.com {
+    reverse_proxy keycloak:8080
+    log {
+        ouutput stdout
+        level debug
+    }
+}

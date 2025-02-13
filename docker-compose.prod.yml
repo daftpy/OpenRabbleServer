@@ -1,0 +1,61 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    env_file: "./postgres/.env.dev"
+    expose:
+    - "5432"
+    networks:
+      - app_network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    # Flags for reverse proxy
+    command:
+      - start-dev
+      - --proxy-headers=xforwarded
+      - --import-realm
+    env_file: "./keycloak/.env.prod"
+    volumes:
+      - ./keycloak/chat-realm.prod.json:/opt/keycloak/data/import/chat-realm.json
+    networks:
+      - app_network
+    expose:
+      - "8080"
+    depends_on:
+      - postgres
+
+  chatserver:
+    build:
+      context: ./chatserver
+      dockerfile: dockerfile
+    networks:
+      - app_network
+    expose:
+      - "8080"
+    env_file: 
+     - ".env.prod"
+     - "./keycloak/.env.prod"
+      
+  caddy:
+    image: caddy:latest
+    restart: unless-stopped
+    networks:
+      - app_network
+    depends_on:
+      - chatserver
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile.prod:/etc/caddy/Caddyfile:ro
+      - ./caddy/caddy_data:/data
+
+volumes:
+  postgres_data:
+
+networks:
+  app_network:
+    driver: bridge
