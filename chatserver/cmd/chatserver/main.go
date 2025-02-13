@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/MicahParks/keyfunc/v3"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/websocket"
 )
 
@@ -41,6 +43,13 @@ func main() {
 		json.NewEncoder(w).Encode(response)
 	})
 
+	jwksURL := "http://keycloak:8080/realms/Chatserver/protocol/openid-connect/certs"
+	// Create the JWK Keyfunc
+	k, err := keyfunc.NewDefault([]string{jwksURL})
+	if err != nil {
+		log.Printf("failed to create JWK Keyfunc: %v", err)
+	}
+
 	// WebSocket Handler
 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		// Check for a token
@@ -51,6 +60,11 @@ func main() {
 			return
 		}
 		log.Println("Token:", token)
+		parsedToken, err := jwt.Parse(token, k.Keyfunc)
+		if err != nil {
+			log.Println("Parsing token failed:", err)
+		}
+		log.Println("Parsed token:", parsedToken)
 
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
