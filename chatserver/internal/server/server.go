@@ -12,13 +12,6 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// Struct for WebSocket messages
-type ChatMessage struct {
-	Type    string `json:"type"`
-	Message string `json:"message"`
-	User    string `json:"user"`
-}
-
 type Server struct {
 	HttpServer *http.Server
 	jwkKeyFunc jwt.Keyfunc
@@ -60,6 +53,14 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 	defer conn.Close()
 
 	log.Println("New WebSocket connection established")
+
+	statusMsg := UserStatusMessage{
+		Type: "status_message",
+		Users: []UserStatus{
+			{Username: username, IsConnected: true},
+		},
+	}
+	conn.WriteJSON(statusMsg)
 
 	for {
 		// Read incoming message
