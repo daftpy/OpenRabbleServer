@@ -63,10 +63,11 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("New WebSocket connection established")
 
-	connectedMsg := messages.ConnectedUsersMessage{
-		Type:  "status_message",
-		Users: s.getConnectedUsers(),
-	}
+	// connectedMsg := messages.ConnectedUsersMessage{
+	// 	Type:  "status_message",
+	// 	Users: s.getConnectedUsers(),
+	// }
+	connectedMsg := messages.NewConnectedUsersMessage(s.getConnectedUsers())
 	conn.WriteJSON(connectedMsg)
 
 	for {
@@ -79,12 +80,13 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Received message: %s\n", msg)
 
 		// Create JSON response
-		readMessage := messages.ChatMessage{
-			Type:    "chat_message",
-			Message: string(msg),
-			User:    username, // Include sender info
-			Channel: "default",
-		}
+		// readMessage := messages.ChatMessage{
+		// 	Type:    "chat_message",
+		// 	Message: string(msg),
+		// 	User:    username, // Include sender info
+		// 	Channel: "default",
+		// }
+		readMessage := messages.NewChatMessage(string(msg), username, "default")
 
 		// Send the JSON message
 		if err := conn.WriteJSON(readMessage); err != nil {
