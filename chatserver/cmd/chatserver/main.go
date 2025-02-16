@@ -16,19 +16,19 @@ var upgrader = websocket.Upgrader{
 }
 
 func main() {
-	// ✅ Create a new Hub instance
+	// Create a new Hub instance
 	h := hub.NewHub()
 
-	// ✅ Start the Hub in a separate goroutine
+	// Start the Hub in a separate goroutine
 	go h.Run()
 
-	// ✅ Create the Server instance and pass the Hub
+	// Create the Server instance and pass the Hub
 	srv, err := server.New(":8080", h)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 
-	// ✅ Start the HTTP server
+	// Start the HTTP server
 	log.Println("Starting server on :8080")
 	if err := srv.HttpServer.ListenAndServe(); err != nil {
 		log.Fatalf("Server error: %v", err)

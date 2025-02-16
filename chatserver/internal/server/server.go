@@ -97,7 +97,7 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 	s.hub.RegisterClient(client) // Register Client with the Hub
 
 	// Send Connected Users List
-	connectedMsg := messages.NewConnectedUsersMessage(s.getConnectedUsers())
+	connectedMsg := messages.NewConnectedUsersMessage(s.hub.GetConnectedUsers())
 	client.SendMessage(connectedMsg)
 
 	// Start Read/Write Pumps

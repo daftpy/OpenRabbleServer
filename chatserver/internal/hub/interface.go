@@ -12,4 +12,5 @@ type HubInterface interface {
 	RegisterClient(ClientInterface)
 	UnregisterClient(ClientInterface)
 	SendMessage(messages.Messager)
+	GetConnectedUsers() []string
 }
