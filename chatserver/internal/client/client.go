@@ -29,30 +29,37 @@ func (c *Client) SendMessage(msg messages.Messager) {
 	c.Send <- msg
 }
 
+// Closes the send channel
+func (c *Client) CloseSendChannel() {
+	close(c.Send)
+}
+
 /*
 Listens for incoming messages from the websocket and processes the
 messages which are then sent to the hub for broadcast.
 */
 func (c *Client) ReadPump() {
-	// Close the connection when the function exits
 	defer func() {
 		c.Hub.UnregisterClient(c)
 		c.Conn.Close()
 	}()
 
 	for {
-		// Read the next message from the websocket
 		_, p, err := c.Conn.ReadMessage()
 		if err != nil {
-			log.Printf("Read error for %s: %v", c.Username, err)
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				log.Printf("Unexpected disconnect from %s: %v", c.Username, err)
+			} else {
+				log.Printf("Client %s disconnected: %v", c.Username, err)
+			}
+			break
 		}
 
-		// Use the raw text to create a new ChatMessage
+		// Process received message
 		msg := messages.NewChatMessage(string(p), c.Username, "default")
-
 		log.Printf("Message received from %s", c.Username)
 
-		// Send the chat message to the hub for broadcast
+		// Send the message to the hub
 		c.Hub.SendMessage(msg)
 	}
 }
@@ -62,19 +69,16 @@ Listens for messages in the send channel and writes them to the
 websocket. It ensures ouutgoing messages are sent asynchronously.
 */
 func (c *Client) WritePump() {
-	// Close the connection when the function exits
 	defer func() {
-		c.Hub.UnregisterClient(c)
 		c.Conn.Close()
+		log.Printf("WritePump exited for %s", c.Username)
 	}()
 
 	for msg := range c.Send {
-		// Coonvert the message to JSON and send it
 		err := c.Conn.WriteJSON(msg)
-
 		if err != nil {
 			log.Printf("Write error for %s: %v", c.Username, err)
-			break
+			break // Exit loop if there's an error
 		}
 		log.Printf("Message sent for %s: %v", c.Username, msg.MessageType())
 	}

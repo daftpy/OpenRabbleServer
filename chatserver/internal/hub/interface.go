@@ -5,6 +5,7 @@ import "chatserver/internal/messages"
 type ClientInterface interface {
 	GetUsername() string
 	SendMessage(messages.Messager)
+	CloseSendChannel()
 }
 
 type HubInterface interface {

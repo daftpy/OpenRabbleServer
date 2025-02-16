@@ -39,8 +39,22 @@ func (h *Hub) RegisterClient(client ClientInterface) {
 func (h *Hub) UnregisterClient(client ClientInterface) {
 	if _, ok := h.Connections[client.GetUsername()]; ok {
 		delete(h.Connections, client.GetUsername())
+
+		// Safely close the channel only if it's not already closed
+		closeClientSendChannel(client)
+
 		log.Printf("User unregistered: %s", client.GetUsername())
 	}
+}
+
+// Helper function to safely close the channel
+func closeClientSendChannel(client ClientInterface) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("Recovered from panic when closing channel: %v", r)
+		}
+	}()
+	client.CloseSendChannel()
 }
 
 // Sends a message to the hub Messages channel for processing and broadcasting.
