@@ -6,15 +6,22 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
 
 	"github.com/MicahParks/keyfunc/v3"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/websocket"
 )
 
+type ConnectedUsers struct {
+	users map[string]struct{}
+	mu    sync.Mutex
+}
+
 type Server struct {
-	HttpServer *http.Server
-	jwkKeyFunc jwt.Keyfunc
+	HttpServer     *http.Server
+	jwkKeyFunc     jwt.Keyfunc
+	connectedUsers ConnectedUsers
 }
 
 var upgrader = websocket.Upgrader{
@@ -44,6 +51,7 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 		username = claims["preferred_username"].(string)
 	}
 	log.Println("User connected: ", username)
+	s.addConnectedUser(username)
 
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -54,13 +62,11 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("New WebSocket connection established")
 
-	statusMsg := UserStatusMessage{
-		Type: "status_message",
-		Users: []UserStatus{
-			{Username: username, IsConnected: true},
-		},
+	connectedMsg := ConnectedUsersMessage{
+		Type:  "status_message",
+		Users: s.getConnectedUsers(),
 	}
-	conn.WriteJSON(statusMsg)
+	conn.WriteJSON(connectedMsg)
 
 	for {
 		// Read incoming message
@@ -76,6 +82,7 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 			Type:    "chat_message",
 			Message: string(msg),
 			User:    username, // Include sender info
+			Channel: "default",
 		}
 
 		// Send the JSON message
@@ -122,10 +129,38 @@ func New(addr string) (*Server, error) {
 	srv := &Server{
 		HttpServer: &http.Server{Addr: ":8080", Handler: mux},
 		jwkKeyFunc: k.Keyfunc,
+		connectedUsers: ConnectedUsers{
+			users: make(map[string]struct{}),
+		},
 	}
 
 	// WebSocket route handled by Server struct
 	mux.HandleFunc("/ws", srv.handleConnection)
 
 	return srv, nil
+}
+
+func (s *Server) addConnectedUser(username string) {
+	s.connectedUsers.mu.Lock()
+	defer s.connectedUsers.mu.Unlock()
+	s.connectedUsers.users[username] = struct{}{}
+	log.Printf("User added: %s", username)
+}
+
+func (s *Server) isConnected(username string) bool {
+	s.connectedUsers.mu.Lock()
+	defer s.connectedUsers.mu.Unlock()
+	_, exists := s.connectedUsers.users[username]
+	return exists
+}
+
+func (s *Server) getConnectedUsers() []string {
+	s.connectedUsers.mu.Lock()
+	defer s.connectedUsers.mu.Unlock()
+
+	usernames := make([]string, 0, len(s.connectedUsers.users))
+	for username := range s.connectedUsers.users {
+		usernames = append(usernames, username)
+	}
+	return usernames
 }
