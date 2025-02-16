@@ -36,6 +36,7 @@ messages which are then sent to the hub for broadcast.
 func (c *Client) ReadPump() {
 	// Close the connection when the function exits
 	defer func() {
+		c.Hub.UnregisterClient(c)
 		c.Conn.Close()
 	}()
 
@@ -63,6 +64,7 @@ websocket. It ensures ouutgoing messages are sent asynchronously.
 func (c *Client) WritePump() {
 	// Close the connection when the function exits
 	defer func() {
+		c.Hub.UnregisterClient(c)
 		c.Conn.Close()
 	}()
 
