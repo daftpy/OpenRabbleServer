@@ -1,6 +1,7 @@
 package server
 
 import (
+	"chatserver/internal/messages"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -62,7 +63,7 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("New WebSocket connection established")
 
-	connectedMsg := ConnectedUsersMessage{
+	connectedMsg := messages.ConnectedUsersMessage{
 		Type:  "status_message",
 		Users: s.getConnectedUsers(),
 	}
@@ -78,7 +79,7 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Received message: %s\n", msg)
 
 		// Create JSON response
-		readMessage := ChatMessage{
+		readMessage := messages.ChatMessage{
 			Type:    "chat_message",
 			Message: string(msg),
 			User:    username, // Include sender info

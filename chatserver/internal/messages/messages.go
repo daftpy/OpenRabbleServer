@@ -1,4 +1,4 @@
-package server
+package messages
 
 // UserStatus holds each user's name and whether they're connected.
 // type UserStatus struct {
