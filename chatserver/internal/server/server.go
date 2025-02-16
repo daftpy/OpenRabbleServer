@@ -94,9 +94,14 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 		Hub:      s.hub,
 	}
 
-	s.hub.RegisterClient(client) // Register Client with the Hub
+	// Notify the other clients that a new client has connected
+	newConnectionMessage := messages.NewUserStatusMessage(client.Username, true)
+	s.hub.SendMessage(newConnectionMessage)
 
-	// Send Connected Users List
+	// Register Client with the Hub
+	s.hub.RegisterClient(client)
+
+	// Send Connected Users List to the new client
 	connectedMsg := messages.NewConnectedUsersMessage(s.hub.GetConnectedUsers())
 	client.SendMessage(connectedMsg)
 

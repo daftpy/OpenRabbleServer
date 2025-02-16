@@ -67,6 +67,10 @@ func (h *Hub) handleMessage(msg messages.Messager) {
 		log.Printf("Handling chat message from: %s", msg.Username)
 		h.Broadcast(msg)
 
+	case messages.UserStatusMessage:
+		log.Printf("Handling user status message for: %s - %v", msg.Username, msg.IsConnected)
+		h.Broadcast(msg)
+
 	case messages.ConnectedUsersMessage:
 		log.Println("Sending connected users list")
 		h.Broadcast(msg)
