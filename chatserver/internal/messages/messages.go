@@ -92,3 +92,29 @@ func NewChatMessage(message string, username string, channel string) ChatMessage
 		Channel:  channel,
 	}
 }
+
+/*
+ActiveChannelsMessage provides each user a list of the active channels
+available for chat.
+*/
+type ActiveChannelsMessage struct {
+	Type     string   `json:"type"`
+	Channels []string `json:"channels"`
+}
+
+const ActiveChannelsMessageType = "active_channels"
+
+func (a ActiveChannelsMessage) MessageType() string {
+	return a.Type
+}
+
+func (a ActiveChannelsMessage) Send() string {
+	return "server"
+}
+
+func NewActiveChannelsMessage(channels []string) ActiveChannelsMessage {
+	return ActiveChannelsMessage{
+		Type:     ActiveChannelsMessageType,
+		Channels: channels,
+	}
+}

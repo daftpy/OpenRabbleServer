@@ -56,7 +56,8 @@ func (c *Client) ReadPump() {
 		}
 
 		// Process received message
-		msg := messages.NewChatMessage(string(p), c.Username, "default")
+		// TODO: update "general" to dynamic channel
+		msg := messages.NewChatMessage(string(p), c.Username, "general")
 		log.Printf("Message received from %s", c.Username)
 
 		// Send the message to the hub

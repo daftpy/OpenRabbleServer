@@ -43,6 +43,8 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+var ServerChannels = []string{"general", "gaming", "tech"}
+
 /*
 Handles websocket upgrade requests.
 It validates the JWT, registers the client with the hub, and starts read/write pumps.
@@ -104,6 +106,10 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 	// Send Connected Users List to the new client
 	connectedMsg := messages.NewConnectedUsersMessage(s.hub.GetConnectedUsers())
 	client.SendMessage(connectedMsg)
+
+	// Send active channels to the user
+	newActiveChannnelsMessage := messages.NewActiveChannelsMessage(ServerChannels)
+	conn.WriteJSON(newActiveChannnelsMessage)
 
 	// Start Read/Write Pumps
 	log.Println("Starting read/write pumps")
