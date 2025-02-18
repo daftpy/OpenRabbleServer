@@ -3,6 +3,7 @@ package client
 import (
 	"chatserver/internal/hub"
 	"chatserver/internal/messages"
+	"encoding/json"
 	"log"
 
 	"github.com/gorilla/websocket"
@@ -55,9 +56,23 @@ func (c *Client) ReadPump() {
 			break
 		}
 
+		// Unmarshal the JSON message into a struct
+		var receivedMessage struct {
+			Type    string `json:"type"`
+			Channel string `json:"channel"`
+			Message string `json:"message"`
+		}
+		if err := json.Unmarshal(p, &receivedMessage); err != nil {
+			log.Printf("Invalid message from %s: %v", c.Username, err)
+			continue
+		}
+		log.Printf("Received type: %s", receivedMessage.Type)
+		log.Printf("Received channel: %s", receivedMessage.Channel)
+		log.Printf("Receiived message: %s", receivedMessage.Message)
+
 		// Process received message
 		// TODO: update "general" to dynamic channel
-		msg := messages.NewChatMessage(string(p), c.Username, "general")
+		msg := messages.NewChatMessage(receivedMessage.Message, c.Username, receivedMessage.Channel)
 		log.Printf("Message received from %s", c.Username)
 
 		// Send the message to the hub
