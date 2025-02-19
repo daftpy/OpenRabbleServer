@@ -1,6 +1,28 @@
 import { Button, Flex, Heading, Text, TextField } from "@radix-ui/themes"
+import type { Route } from "../+types/root"
+import { useEffect } from "react"
+import Keycloak from "keycloak-js";
 
 export function Dash() {
+  useEffect(() => {
+    console.log("Initializing Keycloak...");
+    const keycloak = new Keycloak({
+      url: "https://keycloak.localhost",
+      realm: "Chatserver",
+      clientId: "WebClient",
+    });
+
+    keycloak.init({ onLoad: "check-sso", checkLoginIframe: false }).then((authenticated: boolean) => {
+      console.log("Keycloak initialized, authenticated:", authenticated);
+
+      if (!authenticated) {
+        console.log("User not authenticated, redirecting to login...");
+        keycloak.login(); // Redirect to Keycloak login
+      }
+    }).catch((err) => {
+      console.error("Keycloak initialization failed:", err);
+    });
+  }, []);
   return (
     <main className="p-4">
       <Flex direction="column" gap="3">
