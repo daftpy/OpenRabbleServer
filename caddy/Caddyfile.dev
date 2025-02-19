@@ -1,3 +1,7 @@
+localhost {
+    reverse_proxy web:3000
+}
+
 # Proxy to the chat service
 chat.localhost {
     reverse_proxy chatserver:8080 {
