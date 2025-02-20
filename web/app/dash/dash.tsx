@@ -105,7 +105,7 @@ export function Dash({ channels }: { channels: Channel[] }) {
               <Table.Row key={index}>
                 <Table.RowHeaderCell justify="start">{channel.name}</Table.RowHeaderCell>
                 <Table.Cell justify={"start"}>{ channel.description ? <>{channel.description}</> : <>...</>}</Table.Cell>
-                <Table.Cell justify="end"><Button color="red" size={"1"}  style={{ boxShadow: "var(--shadow-1)" }}>x</Button></Table.Cell>
+                <Table.Cell justify="end"><Button color="red" size={"1"} variant="soft" radius="full"  style={{ boxShadow: "var(--shadow-1)" }}>x</Button></Table.Cell>
               </Table.Row>
             ))}
           </Table.Body>
