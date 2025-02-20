@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router";
 import Keycloak from "keycloak-js";
 
+
 export function Dash({ channels }: { channels: string[] }) {
   const [channelList, setChannelList] = useState(channels); // Local state for channels
   const [newChannel, setNewChannel] = useState(""); // Input field state
@@ -58,20 +59,22 @@ export function Dash({ channels }: { channels: string[] }) {
     <main className="p-4">
       <Flex direction="column" gap="3">
         <div>
-          <Heading className="font-bold text-xl">Your OnRabble Server</Heading>
+          <Heading weight={"bold"} className="text-xl">Your OnRabble Server</Heading>
         </div>
         <Text>Welcome to your dashboard.</Text>
         <div>
-          <Heading className="font-bold" color="indigo" style={{ color: "var(--indigo-9)" }}>Channels</Heading>
+          <Heading weight={"bold"} style={{ color: "var(--indigo-9)" }}>Channels</Heading>
           <Text m="0">You can add a new channel or manage your channels below.</Text>
         </div>
         <Flex direction="row" gap="4">
           <TextField.Root 
-            placeholder="Add a new channel"
+            placeholder="Channel Name"
             value={newChannel}
             onChange={(e) => setNewChannel(e.target.value)}
           />
-          <Button onClick={addChannel}>Add</Button> {/* ✅ Calls addChannel */}
+          <TextField.Root placeholder="description" className="flex-grow">
+          </TextField.Root>
+          <Button onClick={addChannel} style={{ boxShadow: "var(--shadow-3)" }}>Add</Button> {/* ✅ Calls addChannel */}
         </Flex>
         <Table.Root>
           <Table.Header>
@@ -84,7 +87,7 @@ export function Dash({ channels }: { channels: string[] }) {
             {channelList.map((channel, index) => (
               <Table.Row key={index}>
                 <Table.RowHeaderCell justify="start">{channel}</Table.RowHeaderCell>
-                <Table.Cell justify="end"><Button color="red">remove</Button></Table.Cell>
+                <Table.Cell justify="end"><Button color="red" size={"1"}  style={{ boxShadow: "var(--shadow-1)" }}>remove</Button></Table.Cell>
               </Table.Row>
             ))}
           </Table.Body>
