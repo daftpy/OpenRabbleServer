@@ -1,3 +1,4 @@
+# Stage 1: Build the Go binary
 FROM golang:1.23.5 AS builder
 
 WORKDIR /app
@@ -7,13 +8,17 @@ RUN go mod download
 
 COPY . .
 
-
 RUN go build -o chatserver ./cmd/chatserver
 
+# Stage 2: Create a smaller final image
 FROM debian:bookworm-slim
 WORKDIR /app
 
+# Copy the built Go binary
 COPY --from=builder /app/chatserver /app/chatserver
+
+# Copy the schema file into the final container
+COPY internal/db/schema.sql /app/internal/db/schema.sql
 
 EXPOSE 8080
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"chatserver/internal/db"
 	"chatserver/internal/hub"
 	"chatserver/internal/server"
 	"log"
@@ -22,8 +23,14 @@ func main() {
 	// Start the Hub in a separate goroutine
 	go h.Run()
 
+	conn, err := db.Connect()
+
+	if err != nil {
+		log.Fatalf("Failed to connected to database")
+	}
+
 	// Create the Server instance and pass the Hub
-	srv, err := server.New(":8080", h)
+	srv, err := server.New("0.0.0.0:8080", h, conn)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}

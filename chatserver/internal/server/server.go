@@ -2,38 +2,31 @@ package server
 
 import (
 	"chatserver/internal/client"
+	database "chatserver/internal/db"
 	"chatserver/internal/hub"
 	"chatserver/internal/messages"
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"sync"
 
 	"github.com/MicahParks/keyfunc/v3"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/websocket"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
-
-/*
-ConnectedUsers manages a list of currently connected users.
-It provides thread-safe operations for adding and checking connections
-*/
-type ConnectedUsers struct {
-	users map[string]struct{}
-	mu    sync.Mutex
-}
 
 /*
 Server handles incoming websocket connections and authenticates them.
 It validates JWT tokens, registers clients with the hub, and manages connections.
 */
 type Server struct {
-	HttpServer     *http.Server
-	jwkKeyFunc     jwt.Keyfunc
-	connectedUsers ConnectedUsers
-	hub            hub.HubInterface
+	HttpServer *http.Server
+	jwkKeyFunc jwt.Keyfunc
+	hub        hub.HubInterface
+	db         *pgxpool.Pool
 }
 
 // Upgrades HTTP requests to websocket connections
@@ -79,7 +72,6 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Println("User connected:", username)
-	s.addConnectedUser(username)
 
 	// Upgrade to WebSocket Connection
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -107,8 +99,16 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 	connectedMsg := messages.NewConnectedUsersMessage(s.hub.GetConnectedUsers())
 	client.SendMessage(connectedMsg)
 
+	// Fetch channels from the database
+	channels, err := s.getChannels()
+	if err != nil {
+		log.Println("Failed to load channels from database:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
 	// Send active channels to the user
-	newActiveChannnelsMessage := messages.NewActiveChannelsMessage(ServerChannels)
+	newActiveChannnelsMessage := messages.NewActiveChannelsMessage(channels)
 	conn.WriteJSON(newActiveChannnelsMessage)
 
 	// Start Read/Write Pumps
@@ -117,12 +117,30 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 	go client.WritePump()
 }
 
+func enableCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*") // Allow all origins, or specify allowed origins
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 /*
 New initializes and returns a new Server instance.
 It sets up the WebSocket handler and configures JWT authentication.
 */
-func New(addr string, h hub.HubInterface) (*Server, error) {
+func New(addr string, h hub.HubInterface, db *pgxpool.Pool) (*Server, error) {
 	mux := http.NewServeMux()
+
+	// Apply CORS Middleware to Allow Cross-Origin Requests
+	handler := enableCORS(mux)
 
 	// Discovery Handler
 	mux.HandleFunc("/discovery", func(w http.ResponseWriter, r *http.Request) {
@@ -147,6 +165,54 @@ func New(addr string, h hub.HubInterface) (*Server, error) {
 		json.NewEncoder(w).Encode(response)
 	})
 
+	// Channels Handler
+	mux.HandleFunc("/channels", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			// Handle GET: Fetch channels
+			channels, err := database.FetchChannels(db)
+			if err != nil {
+				log.Println("Failed to load channels from database:", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string][]string{"channels": channels})
+
+		case http.MethodPost:
+			// Handle POST: Create a new channel
+			var request struct {
+				Name string `json:"name"`
+			}
+
+			if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+				http.Error(w, "Invalid JSON request body", http.StatusBadRequest)
+				return
+			}
+
+			if request.Name == "" {
+				http.Error(w, "Channel name is required", http.StatusBadRequest)
+				return
+			}
+
+			// Insert into the database
+			err := createChannel(db, request.Name)
+			if err != nil {
+				log.Println("Failed to create channel:", err)
+				http.Error(w, "Failed to create channel", http.StatusInternalServerError)
+				return
+			}
+
+			log.Printf("Channel '%s' created successfully", request.Name)
+			w.WriteHeader(http.StatusCreated)
+			json.NewEncoder(w).Encode(map[string]string{"message": "Channel created", "name": request.Name})
+
+		default:
+			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		}
+	})
+
 	// Load JWKS URL for JWT verification
 	jwksURL := "http://keycloak:8080/realms/Chatserver/protocol/openid-connect/certs"
 	k, err := keyfunc.NewDefault([]string{jwksURL})
@@ -156,12 +222,10 @@ func New(addr string, h hub.HubInterface) (*Server, error) {
 
 	// Initialize the server with HubInterface
 	srv := &Server{
-		HttpServer: &http.Server{Addr: addr, Handler: mux},
+		HttpServer: &http.Server{Addr: addr, Handler: handler},
 		jwkKeyFunc: k.Keyfunc,
-		connectedUsers: ConnectedUsers{
-			users: make(map[string]struct{}),
-		},
-		hub: h, // ✅ Use provided HubInterface implementation
+		hub:        h,
+		db:         db,
 	}
 
 	// WebSocket route handled by Server struct
@@ -170,30 +234,37 @@ func New(addr string, h hub.HubInterface) (*Server, error) {
 	return srv, nil
 }
 
-// Adds a new user to connectedUsers
-func (s *Server) addConnectedUser(username string) {
-	s.connectedUsers.mu.Lock()
-	defer s.connectedUsers.mu.Unlock()
-	s.connectedUsers.users[username] = struct{}{}
-	log.Printf("User added: %s", username)
-}
-
-// Returns if a particular user is connected
-func (s *Server) isConnected(username string) bool {
-	s.connectedUsers.mu.Lock()
-	defer s.connectedUsers.mu.Unlock()
-	_, exists := s.connectedUsers.users[username]
-	return exists
-}
-
-// Returns a list of connected users
-func (s *Server) getConnectedUsers() []string {
-	s.connectedUsers.mu.Lock()
-	defer s.connectedUsers.mu.Unlock()
-
-	usernames := make([]string, 0, len(s.connectedUsers.users))
-	for username := range s.connectedUsers.users {
-		usernames = append(usernames, username)
+func (s *Server) getChannels() ([]string, error) {
+	rows, err := s.db.Query(context.Background(), "SELECT name FROM chatserver.channels")
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch channels: %w", err)
 	}
-	return usernames
+	defer rows.Close()
+
+	var channels []string
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, fmt.Errorf("failed to scan channel name: %w", err)
+		}
+		channels = append(channels, name)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error after iterating rows: %w", err)
+	}
+
+	log.Printf("Loaded %d channels from database", len(channels))
+	return channels, nil
+}
+
+func createChannel(db *pgxpool.Pool, name string) error {
+	placeholderOwner := "00000000-0000-0000-0000-000000000000"
+	query := `
+        INSERT INTO chatserver.channels (name, owner_id)
+        VALUES ($1, $2)
+        ON CONFLICT (name) DO NOTHING
+    `
+	_, err := db.Exec(context.Background(), query, name, placeholderOwner)
+	return err
 }
