@@ -1,5 +1,7 @@
 package messages
 
+import "chatserver/internal/models"
+
 /*
 Messager is an interface that represents all message types in the system.
 Each message type must implement the MessageType() and Sender() methods.
@@ -98,8 +100,8 @@ ActiveChannelsMessage provides each user a list of the active channels
 available for chat.
 */
 type ActiveChannelsMessage struct {
-	Type     string   `json:"type"`
-	Channels []string `json:"channels"`
+	Type     string           `json:"type"`
+	Channels []models.Channel `json:"channels"`
 }
 
 const ActiveChannelsMessageType = "active_channels"
@@ -112,7 +114,7 @@ func (a ActiveChannelsMessage) Send() string {
 	return "server"
 }
 
-func NewActiveChannelsMessage(channels []string) ActiveChannelsMessage {
+func NewActiveChannelsMessage(channels []models.Channel) ActiveChannelsMessage {
 	return ActiveChannelsMessage{
 		Type:     ActiveChannelsMessageType,
 		Channels: channels,

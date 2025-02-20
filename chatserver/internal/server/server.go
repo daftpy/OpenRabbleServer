@@ -2,15 +2,13 @@ package server
 
 import (
 	"chatserver/internal/client"
-	database "chatserver/internal/db"
 	"chatserver/internal/hub"
 	"chatserver/internal/messages"
+	"chatserver/internal/models"
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/MicahParks/keyfunc/v3"
 	"github.com/golang-jwt/jwt/v5"
@@ -142,77 +140,6 @@ func New(addr string, h hub.HubInterface, db *pgxpool.Pool) (*Server, error) {
 	// Apply CORS Middleware to Allow Cross-Origin Requests
 	handler := enableCORS(mux)
 
-	// Discovery Handler
-	mux.HandleFunc("/discovery", func(w http.ResponseWriter, r *http.Request) {
-		KChostname := os.Getenv("KC_HOSTNAME")
-		chatClientName := os.Getenv("CHAT_CLIENT_NAME")
-		realmName := os.Getenv("REALM_NAME")
-
-		log.Printf("KC_HOSTNAME: %s", KChostname)
-		log.Printf("REALM_NAME: %s", realmName)
-
-		url := fmt.Sprintf("%s/realms/%s/protocol/openid-connect", KChostname, realmName)
-		response := map[string]string{
-			"auth_url":    url + "/auth",
-			"chat_client": chatClientName,
-			"chat_url":    "wss://chat.localhost/ws",
-			"token_url":   url + "/token",
-			"server_name": "OnRabble",
-			"server_id":   "Placeholder",
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(response)
-	})
-
-	// Channels Handler
-	mux.HandleFunc("/channels", func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodGet:
-			// Handle GET: Fetch channels
-			channels, err := database.FetchChannels(db)
-			if err != nil {
-				log.Println("Failed to load channels from database:", err)
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-				return
-			}
-
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string][]string{"channels": channels})
-
-		case http.MethodPost:
-			// Handle POST: Create a new channel
-			var request struct {
-				Name string `json:"name"`
-			}
-
-			if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-				http.Error(w, "Invalid JSON request body", http.StatusBadRequest)
-				return
-			}
-
-			if request.Name == "" {
-				http.Error(w, "Channel name is required", http.StatusBadRequest)
-				return
-			}
-
-			// Insert into the database
-			err := createChannel(db, request.Name)
-			if err != nil {
-				log.Println("Failed to create channel:", err)
-				http.Error(w, "Failed to create channel", http.StatusInternalServerError)
-				return
-			}
-
-			log.Printf("Channel '%s' created successfully", request.Name)
-			w.WriteHeader(http.StatusCreated)
-			json.NewEncoder(w).Encode(map[string]string{"message": "Channel created", "name": request.Name})
-
-		default:
-			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-		}
-	})
-
 	// Load JWKS URL for JWT verification
 	jwksURL := "http://keycloak:8080/realms/Chatserver/protocol/openid-connect/certs"
 	k, err := keyfunc.NewDefault([]string{jwksURL})
@@ -231,23 +158,28 @@ func New(addr string, h hub.HubInterface, db *pgxpool.Pool) (*Server, error) {
 	// WebSocket route handled by Server struct
 	mux.HandleFunc("/ws", srv.handleConnection)
 
+	// Register handlers
+	mux.HandleFunc("/discovery", HandleDiscovery())
+	mux.HandleFunc("/channels", HandleChannels(db, srv))
+
 	return srv, nil
 }
 
-func (s *Server) getChannels() ([]string, error) {
-	rows, err := s.db.Query(context.Background(), "SELECT name FROM chatserver.channels")
+func (s *Server) getChannels() ([]models.Channel, error) {
+	// Update query to select both name and description
+	rows, err := s.db.Query(context.Background(), "SELECT name, description FROM chatserver.channels")
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch channels: %w", err)
 	}
 	defer rows.Close()
 
-	var channels []string
+	var channels []models.Channel
 	for rows.Next() {
-		var name string
-		if err := rows.Scan(&name); err != nil {
-			return nil, fmt.Errorf("failed to scan channel name: %w", err)
+		var channel models.Channel
+		if err := rows.Scan(&channel.Name, &channel.Description); err != nil {
+			return nil, fmt.Errorf("failed to scan channel row: %w", err)
 		}
-		channels = append(channels, name)
+		channels = append(channels, channel)
 	}
 
 	if err := rows.Err(); err != nil {
@@ -258,13 +190,13 @@ func (s *Server) getChannels() ([]string, error) {
 	return channels, nil
 }
 
-func createChannel(db *pgxpool.Pool, name string) error {
+func createChannel(db *pgxpool.Pool, name string, description string) error {
 	placeholderOwner := "00000000-0000-0000-0000-000000000000"
 	query := `
-        INSERT INTO chatserver.channels (name, owner_id)
-        VALUES ($1, $2)
+        INSERT INTO chatserver.channels (name, description, owner_id)
+        VALUES ($1, $2, $3)
         ON CONFLICT (name) DO NOTHING
     `
-	_, err := db.Exec(context.Background(), query, name, placeholderOwner)
+	_, err := db.Exec(context.Background(), query, name, description, placeholderOwner)
 	return err
 }

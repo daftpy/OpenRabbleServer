@@ -1,6 +1,7 @@
 package db
 
 import (
+	"chatserver/internal/models"
 	"context"
 	"fmt"
 	"log"
@@ -90,26 +91,27 @@ func testQuery(db *pgxpool.Pool) error {
 	return nil
 }
 
-func FetchChannels(db *pgxpool.Pool) ([]string, error) {
-	rows, err := db.Query(context.Background(), "SELECT name FROM chatserver.channels")
+func FetchChannels(db *pgxpool.Pool) ([]models.Channel, error) {
+	// Update query to select both name and description
+	rows, err := db.Query(context.Background(), "SELECT name, description FROM chatserver.channels")
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch channels: %w", err)
 	}
 	defer rows.Close()
 
-	var channels []string
+	var channels []models.Channel
 	for rows.Next() {
-		var name string
-		if err := rows.Scan(&name); err != nil {
-			return nil, fmt.Errorf("failed to scan channel name: %w", err)
+		var channel models.Channel
+		if err := rows.Scan(&channel.Name, &channel.Description); err != nil {
+			return nil, fmt.Errorf("failed to scan channel row: %w", err)
 		}
-		channels = append(channels, name)
+		channels = append(channels, channel)
 	}
 
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("error after iterating rows: %w", err)
 	}
 
-	log.Printf("✅ Loaded %d channels from database", len(channels))
+	log.Printf("Loaded %d channels from database", len(channels))
 	return channels, nil
 }
