@@ -1,6 +1,8 @@
-import type { Route } from "./+types/home";
-import { Dash } from "../dash/dash"
+import type { Route } from "./+types/index";
 import { useLoaderData } from "react-router";
+import { useEffect } from "react";
+import RouteProtector from "~/components/route_protector";
+import { Home } from "~/pages/home";
 
 export async function loader({ params }: Route.LoaderArgs) {
   const response = await fetch("https://chat.localhost/channels"); // ✅ Update to use the correct service name
@@ -21,8 +23,17 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export default function Home({loaderData,}: Route.ComponentProps) {
+export default function Index({loaderData,}: Route.ComponentProps) {
   const channels = useLoaderData();
+  useEffect(() => {
+    console.log("Test home");
+  }, []);
 
-  return <Dash channels={channels} />;
+  return (
+    <>
+      <RouteProtector>
+        <Home channels={channels} />
+      </RouteProtector>
+    </>
+  );
 }
