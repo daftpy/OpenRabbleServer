@@ -29,8 +29,21 @@ export function Dash({ channels }: { channels: Channel[] }) {
         console.log("User not authenticated, redirecting to login...");
         keycloak.login(); // Redirect to Keycloak login
       } else if (roles.find((role) => role == "admin") == undefined) {
+        console.log(keycloak.tokenParsed);
         navigate("/unauthorized");
       }
+      // Establish a websocket connection
+      const ws = new WebSocket('wss://chat.localhost/ws?token=' + keycloak.token);
+      ws.onopen = () => {
+        console.log('WebSocket connection established');
+      };
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        // Process incoming messages
+        console.log(data);
+      };
+      ws.onerror = (error) => console.error('WebSocket error:', error);
+      ws.onclose = () => console.log('WebSocket connection closed');
     }).catch((err) => {
       console.error("Keycloak initialization failed:", err);
     });
@@ -101,7 +114,7 @@ export function Dash({ channels }: { channels: Channel[] }) {
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {channelList.map((channel, index) => (
+            {channelList && channelList.map((channel, index) => (
               <Table.Row key={index}>
                 <Table.RowHeaderCell justify="start">{channel.name}</Table.RowHeaderCell>
                 <Table.Cell justify={"start"}>{ channel.description ? <>{channel.description}</> : <>...</>}</Table.Cell>

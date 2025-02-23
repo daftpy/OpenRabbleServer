@@ -24,6 +24,7 @@ services:
     env_file: "./keycloak/.env.dev"
     volumes:
       - ./keycloak/chat-realm.dev.json:/opt/keycloak/data/import/chat-realm.json
+      - ./keycloak/exported-realms:/opt/keycloak/export # for exporting realm configs
     networks:
       - app_network
     expose:
