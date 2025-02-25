@@ -18,6 +18,8 @@ type Client struct {
 	Conn     *websocket.Conn
 	Send     chan messages.Messager
 	Hub      hub.HubInterface
+	Sub      string // Keycloak stable user ID
+	ClientID string
 }
 
 // Returns the clients username.
@@ -35,13 +37,21 @@ func (c *Client) CloseSendChannel() {
 	close(c.Send)
 }
 
+func (c *Client) GetID() string {
+	return c.Sub
+}
+
+func (c *Client) GetClientID() string {
+	return c.ClientID
+}
+
 /*
 Listens for incoming messages from the websocket and processes the
 messages which are then sent to the hub for broadcast.
 */
 func (c *Client) ReadPump() {
 	defer func() {
-		c.Hub.UnregisterClient(c)
+		c.Hub.UnregisterClient(c, c.ClientID)
 		c.Conn.Close()
 	}()
 

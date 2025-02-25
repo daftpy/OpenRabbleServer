@@ -6,12 +6,14 @@ type ClientInterface interface {
 	GetUsername() string
 	SendMessage(messages.Messager)
 	CloseSendChannel()
+	GetID() string
+	GetClientID() string
 }
 
 type HubInterface interface {
 	Broadcast(messages.Messager)
-	RegisterClient(ClientInterface)
-	UnregisterClient(ClientInterface)
+	RegisterClient(ClientInterface, string)
+	UnregisterClient(ClientInterface, string)
 	SendMessage(messages.Messager)
 	GetConnectedUsers() []string
 }

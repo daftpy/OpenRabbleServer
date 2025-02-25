@@ -2,6 +2,7 @@ package hub
 
 import (
 	"chatserver/internal/messages"
+	"fmt"
 	"log"
 )
 
@@ -30,15 +31,18 @@ func NewHub() *Hub {
 }
 
 // Registers a new client with the hub, allowing them to send and receive messages.
-func (h *Hub) RegisterClient(client ClientInterface) {
-	h.Connections[client.GetUsername()] = client
+func (h *Hub) RegisterClient(client ClientInterface, clientID string) {
+	key := fmt.Sprintf("%s:%s", client.GetID(), clientID)
+	log.Println("Hub Registered:", key)
+	h.Connections[key] = client
 	log.Printf("User registered: %s", client.GetUsername())
 }
 
 // Unregisters a client from the hub, stopping them from sending and receiving messages.
-func (h *Hub) UnregisterClient(client ClientInterface) {
-	if _, ok := h.Connections[client.GetUsername()]; ok {
-		delete(h.Connections, client.GetUsername())
+func (h *Hub) UnregisterClient(client ClientInterface, clientID string) {
+	key := fmt.Sprintf("%s:%s", client.GetID(), clientID)
+	if _, ok := h.Connections[key]; ok {
+		delete(h.Connections, key)
 
 		// Safely close the channel only if it's not already closed
 		closeClientSendChannel(client)
@@ -114,10 +118,10 @@ func (h *Hub) Run() {
 	for {
 		select {
 		case client := <-h.Register:
-			h.RegisterClient(client)
+			h.RegisterClient(client, client.GetClientID())
 
 		case client := <-h.Unregister:
-			h.UnregisterClient(client)
+			h.UnregisterClient(client, client.GetClientID())
 
 		case message := <-h.Messages:
 			h.handleMessage(message)

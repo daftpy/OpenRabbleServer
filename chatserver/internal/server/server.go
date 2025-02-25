@@ -59,12 +59,33 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 
 	// Extract Username from Claims
 	var username string
+	var userSub string
+	var clientID string
 	if claims, ok := parsedToken.Claims.(jwt.MapClaims); ok {
 		if u, ok := claims["preferred_username"].(string); ok {
 			username = u
 		} else {
 			log.Println("No username found in token claims")
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		// sub (User ID)
+		if s, ok := claims["sub"].(string); ok {
+			userSub = s
+			log.Println("Sub found", userSub)
+		} else {
+			log.Println("No sub found in token claims.")
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		if c, ok := claims["azp"].(string); ok {
+			clientID = c
+			log.Printf("%s connected through %s", username, clientID)
+		} else {
+			log.Println("No keycloak client found.")
+			http.Error(w, "Bad Request", http.StatusBadRequest)
 			return
 		}
 	}
@@ -84,6 +105,8 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 		Conn:     conn,
 		Send:     make(chan messages.Messager, 256),
 		Hub:      s.hub,
+		Sub:      userSub,
+		ClientID: clientID,
 	}
 
 	// Notify the other clients that a new client has connected
@@ -91,7 +114,7 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 	s.hub.SendMessage(newConnectionMessage)
 
 	// Register Client with the Hub
-	s.hub.RegisterClient(client)
+	s.hub.RegisterClient(client, client.ClientID)
 
 	// Send Connected Users List to the new client
 	connectedMsg := messages.NewConnectedUsersMessage(s.hub.GetConnectedUsers())
