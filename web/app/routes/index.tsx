@@ -13,6 +13,9 @@ export async function loader({ params }: Route.LoaderArgs) {
 
   const data = await response.json();
   console.log(data);
+  if (data.channels == null) {
+    return [];
+  }
   return data.channels;
 }
 
