@@ -3,6 +3,10 @@
     email email@example.com
 }
 
+example.com {
+    reverse_proxy web:3000
+}
+
 chat.example.com {
     reverse_proxy chatserver:8080 {
         header_up {host}

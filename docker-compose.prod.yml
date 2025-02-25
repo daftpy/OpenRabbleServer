@@ -58,6 +58,24 @@ services:
       - ./caddy/Caddyfile.prod:/etc/caddy/Caddyfile:ro
       - ./caddy/caddy_data:/data
 
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    networks:
+      - app_network
+    ports:
+      - "3000:3000"
+    depends_on:
+      - caddy
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+    extra_hosts:
+      - "chat.example.com:172.17.0.1" 
+
 volumes:
   postgres_data:
 
