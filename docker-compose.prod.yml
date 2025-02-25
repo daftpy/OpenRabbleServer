@@ -9,6 +9,10 @@ services:
       - app_network
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak"]
+      interval: 5s
+      retries: 5
   
   keycloak:
     image: quay.io/keycloak/keycloak:latest
@@ -38,14 +42,15 @@ services:
     env_file: 
      - ".env.prod"
      - "./keycloak/.env.prod"
+    depends_on:
+      postgres:
+        condition: service_healthy
       
   caddy:
     image: caddy:latest
     restart: unless-stopped
     networks:
       - app_network
-    depends_on:
-      - chatserver
     ports:
       - "80:80"
       - "443:443"
