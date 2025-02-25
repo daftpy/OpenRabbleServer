@@ -35,7 +35,7 @@ export function HomePage({ channels }: { channels: Channel[] }) {
               <Text m="0">You can add a new channel or manage your channels below.</Text>
             </div>
             <ChannelInput channelList={channelList} setChannelList={setChannelList} />
-            <Flex gap={"0"}>
+            <Flex gap={"6"}>
               <ChannelList channels={channelList} />
               <UserList />
             </Flex>

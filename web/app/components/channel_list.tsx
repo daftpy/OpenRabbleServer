@@ -1,4 +1,4 @@
-import { Flex, Button, Table } from "@radix-ui/themes";
+import { Flex, Button, Table, Text } from "@radix-ui/themes";
 
 export interface Channel {
   name: string;
@@ -13,15 +13,18 @@ export default function ChannelList({ channels }  : { channels: Channel[] }) {
           <Table.Row>
             <Table.ColumnHeaderCell width="125px">Channel</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell width={"auto"}>Description</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
         { channels && channels.map((channel, index) => (
           <Table.Row key={index}>
             <Table.RowHeaderCell justify="start">{channel.name}</Table.RowHeaderCell>
-            <Table.Cell justify={"start"}>{ channel.description ? <>{channel.description}</> : <>...</>}</Table.Cell>
-            <Table.Cell justify="end"><Button color="red" size={"1"} radius="full"  style={{ boxShadow: "var(--shadow-1)" }}>x</Button></Table.Cell>
+            <Table.Cell justify={"start"}>
+              <Flex align={"center"}>
+                <Text className="grow" truncate>{ channel.description ? <>{channel.description}</> : <>...</>}</Text>
+                <Button color="red" size={"1"} radius="full" style={{ boxShadow: "var(--shadow-1)" }}>x</Button>
+              </Flex>
+            </Table.Cell>
           </Table.Row>
         ))}
         </Table.Body>
