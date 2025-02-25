@@ -69,8 +69,10 @@ func (h *Hub) SendMessage(msg messages.Messager) {
 // Returns a list of the currently connected users.
 func (h *Hub) GetConnectedUsers() []string {
 	var users []string
-	for k := range h.Connections {
-		users = append(users, k)
+	for _, v := range h.Connections {
+		if v.GetClientID() != "WebClient" {
+			users = append(users, v.GetUsername())
+		}
 	}
 	return users
 }
