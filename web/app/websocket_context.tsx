@@ -10,13 +10,14 @@ const WebSocketContext = createContext<WebSocketContextType>({
 
 export const WebSocketProvider = ({ token, children } : { token: string | undefined, children: React.ReactNode }) => {
   const [socket, setSocket] = useState<WebSocket | null>(null);
+  const hostname = import.meta.env.VITE_HOSTNAME;
 
   useEffect(() => {
     if (token == undefined) {
       return;
     }
 
-    const ws = new WebSocket(`wss://chat.localhost/ws?token=${token}`);
+    const ws = new WebSocket(`wss://chat.${hostname}/ws?token=${token}`);
 
     ws.onopen = () => {
         console.log("WebSocket connection established");

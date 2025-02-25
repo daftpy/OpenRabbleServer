@@ -1,4 +1,4 @@
-import { Box, Container, Flex, Text } from "@radix-ui/themes";
+import { Flex, Text } from "@radix-ui/themes";
 
 export function Restricted() {
   return (

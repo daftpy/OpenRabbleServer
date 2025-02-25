@@ -11,12 +11,14 @@ export default function ChannelInput({ channelList, setChannelList } : props) {
   const [newChannel, setNewChannel] = useState(""); // Input field state
   const [newDescription, setNewDescription] = useState("");
 
+  const hostname = import.meta.env.VITE_HOSTNAME;
+
   // Function to handle adding a new channel
   const addChannel = async () => {
     if (!newChannel.trim()) return; 
 
     try {
-      const response = await fetch("https://chat.localhost/channels", {
+      const response = await fetch(`https://chat.${hostname}/channels`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: newChannel.trim(), description: newDescription.trim() }),

@@ -17,10 +17,11 @@ export const AuthProvider = ({ children } : { children: React.ReactNode }) => {
     const [keycloak, setKeycloak] = useState<Keycloak | null>(null);
     const [authenticated, setAuthenticated] = useState(false);
     const navigate = useNavigate();
+    const hostname = import.meta.env.VITE_HOSTNAME;
 
     useEffect(() => {
       const kc = new Keycloak({
-        url: "https://keycloak.localhost",
+        url: `https://keycloak.${hostname}`,
         realm: "Chatserver",
         clientId: "WebClient",
       });
