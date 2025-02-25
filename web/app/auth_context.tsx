@@ -1,6 +1,7 @@
 import React, { createContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import Keycloak from "keycloak-js";
+import { WebSocketProvider } from "./websocket_context";
 
 interface AuthContextType {
     keycloak: Keycloak | null;
@@ -21,7 +22,7 @@ export const AuthProvider = ({ children } : { children: React.ReactNode }) => {
       const kc = new Keycloak({
         url: "https://keycloak.localhost",
         realm: "Chatserver",
-        clientId: "WebClient", // Change if needed for different clients
+        clientId: "WebClient",
       });
       console.log("Hello from auth provider");
       kc.init({ onLoad: "check-sso", checkLoginIframe: false })
@@ -41,26 +42,15 @@ export const AuthProvider = ({ children } : { children: React.ReactNode }) => {
               navigate("/unauthorized");
             }
             console.log("You have the right roles. Welcome")
-            // Create websocket connection
-            // Establish a websocket connection
-            // const ws = new WebSocket('wss://chat.localhost/ws?token=' + keycloak.token);
-            // ws.onopen = () => {
-            //   console.log('WebSocket connection established');
-            // };
-            // ws.onmessage = (event) => {
-            //   const data = JSON.parse(event.data);
-            //   // Process incoming messages
-            //   console.log(data);
-            // };
-            // ws.onerror = (error) => console.error('WebSocket error:', error);
-            // ws.onclose = () => console.log('WebSocket connection closed');
           }
         })
         .catch((err) => console.error("Keycloak initialization failed:", err));
     }, [navigate]);
     return (
       <AuthContext.Provider value={{ keycloak: keycloak, authenticated: authenticated }}>
-        {children}
+        <WebSocketProvider token={keycloak?.token}>
+          {children}
+        </WebSocketProvider>
       </AuthContext.Provider>
     );
 }
