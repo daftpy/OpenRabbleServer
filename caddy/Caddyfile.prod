@@ -17,7 +17,7 @@ chat.example.com {
 keycloak.example.com {
     reverse_proxy keycloak:8080
     log {
-        ouutput stdout
+        output stdout
         level debug
     }
 }
