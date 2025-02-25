@@ -34,3 +34,10 @@ export type ServerMessage =
   | UserStatusMessage
   | ChatMessage
   | ActiveChannelsMessage;
+
+  export type EmitterEvents = {
+    connected_users: ServerMessage;
+    user_status: ServerMessage;
+    active_channels: ServerMessage;
+    chat_message: ServerMessage;
+  };

@@ -1,24 +1,36 @@
 import React, { createContext, useEffect, useState } from "react";
-import type { ServerMessage } from "./types";
+import type { ServerMessage } from "./messages";
+import { emitter } from "./root";
 
 interface WebSocketContextType {
   socket: WebSocket | null;
+  messages: ServerMessage[];
+  systemMessages: ServerMessage[];
 }
 
-const WebSocketContext = createContext<WebSocketContextType>({
-  socket: null
+export const WebSocketContext = createContext<WebSocketContextType>({
+  socket: null,
+  messages: [],
+  systemMessages: [],
 });
 
 export const WebSocketProvider = ({ token, children } : { token: string | undefined, children: React.ReactNode }) => {
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const hostname = import.meta.env.VITE_HOSTNAME;
   const [messages, setMessages] = useState<ServerMessage[]>([]);
+  const [systemMessages, setSystemMessages] = useState<ServerMessage[]>([]);
 
   const handleMessage = (message: ServerMessage) => {
     // add the new message to our state:
-    setMessages((prevMessages) => [...prevMessages, message]);
+    if (message.type === "connected_users" || message.type === "user_status" || message.type === "active_channels") {
+      setSystemMessages((prevMessages) => [...prevMessages, message]);
+      console.log("System message added:", message.type);
+    } else {
+      setMessages((prevMessages) => [...prevMessages, message]);
+      console.log("Message added");
+    }
     // additional logic for system messages, etc.
-    console.log("Message added");
+
   };
 
   useEffect(() => {
@@ -40,7 +52,8 @@ export const WebSocketProvider = ({ token, children } : { token: string | undefi
       console.log("Message Received:", ev.data);
       try {
         const parsedMessage = JSON.parse(ev.data) as ServerMessage;
-        handleMessage(parsedMessage);
+        // handleMessage(parsedMessage);
+        emitter.emit(parsedMessage.type, parsedMessage);
       } catch (err) {
         console.error("Error parsing message:", err);
       }
@@ -55,7 +68,7 @@ export const WebSocketProvider = ({ token, children } : { token: string | undefi
   }, [token]);
 
   return (
-    <WebSocketContext.Provider value={{socket}}>
+    <WebSocketContext.Provider value={{socket: socket, messages: messages, systemMessages: systemMessages}}>
       { children }
     </WebSocketContext.Provider>
   )

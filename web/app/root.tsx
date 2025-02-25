@@ -12,6 +12,10 @@ import "./app.css";
 import "@radix-ui/themes/styles.css";
 import { Theme, ThemePanel } from "@radix-ui/themes";
 import { AuthProvider } from "./auth_context";
+import mitt from "mitt";
+import type { EmitterEvents } from "./messages";
+
+export const emitter = mitt<EmitterEvents>();
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },

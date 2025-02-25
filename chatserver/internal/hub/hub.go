@@ -47,6 +47,10 @@ func (h *Hub) UnregisterClient(client ClientInterface, clientID string) {
 		// Safely close the channel only if it's not already closed
 		closeClientSendChannel(client)
 
+		// Broadcast the disconnected message
+		msg := messages.NewUserStatusMessage(client.GetUsername(), false)
+		h.Broadcast(msg)
+
 		log.Printf("User unregistered: %s", client.GetUsername())
 	}
 }

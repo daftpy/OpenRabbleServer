@@ -1,4 +1,4 @@
-import { Button, Table } from "@radix-ui/themes";
+import { Flex, Button, Table } from "@radix-ui/themes";
 
 export interface Channel {
   name: string;
@@ -7,8 +7,8 @@ export interface Channel {
 
 export default function ChannelList({ channels }  : { channels: Channel[] }) {
   return (
-    <>
-      <Table.Root>
+    <Flex flexGrow={"1"}>
+      <Table.Root layout={"fixed"}>
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell width="125px">Channel</Table.ColumnHeaderCell>
@@ -26,6 +26,6 @@ export default function ChannelList({ channels }  : { channels: Channel[] }) {
         ))}
         </Table.Body>
         </Table.Root>
-    </>
+    </Flex>
   )
 }

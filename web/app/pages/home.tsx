@@ -9,6 +9,7 @@ import ChannelList from "~/components/channel_list";
 
 import { Button, Container, Flex, Heading, Text } from "@radix-ui/themes";
 import type { Channel } from "~/components/channel_list";
+import UserList from "~/components/user_list";
 
 
 /*
@@ -34,7 +35,10 @@ export function HomePage({ channels }: { channels: Channel[] }) {
               <Text m="0">You can add a new channel or manage your channels below.</Text>
             </div>
             <ChannelInput channelList={channelList} setChannelList={setChannelList} />
-            <ChannelList channels={channelList} />
+            <Flex gap={"0"}>
+              <ChannelList channels={channelList} />
+              <UserList />
+            </Flex>
           </Flex>
         </Container>
       </main>   
