@@ -95,6 +95,20 @@ func NewChatMessage(message string, username string, channel string) ChatMessage
 	}
 }
 
+// BulkChatMessages is used to send a batch of chat messages to the client
+type BulkChatMessages struct {
+	Type     string        `json:"type"`
+	Messages []ChatMessage `json:"messages"`
+}
+
+// NewBulkChatMessages creates a new BulkChatMessages instance
+func NewBulkChatMessages(messages []ChatMessage) BulkChatMessages {
+	return BulkChatMessages{
+		Type:     "bulk_chat_messages",
+		Messages: messages,
+	}
+}
+
 /*
 ActiveChannelsMessage provides each user a list of the active channels
 available for chat.

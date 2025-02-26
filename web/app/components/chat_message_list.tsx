@@ -4,10 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import type { ServerMessage } from "~/messages";
 import { emitter } from "~/root";
 
-interface ChatMessageType {
+export interface ChatMessageType {
   username: string;
   channel: string;
-  content: string;
+  message: string;
 }
 
 const Message = ({ username, channel, content, isLast }: { username: string, channel: string, content: string, isLast: boolean }) => {
@@ -22,8 +22,8 @@ const Message = ({ username, channel, content, isLast }: { username: string, cha
     <Flex direction="column" gap="1" style={{borderBottom: borderStyle}} p={"1"} pb={"2"}>
       
       <Flex gap={"1"} align={"center"}>
-        <Flex gap={"1"} align={"center"}><PersonIcon /><Heading size="1">{username}</Heading></Flex>
         <Text size="1" weight={"bold"} color="indigo">{ channel } #</Text>
+        <Flex gap={"1"} align={"center"}><PersonIcon /><Heading size="1">{username}</Heading></Flex>
       </Flex>
       <Text size="1" wrap={"wrap"}>{content}</Text>
     </Flex>
@@ -35,17 +35,25 @@ export default function ChatMessageList() {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    console.log("loaded");
     const handler = (message: ServerMessage) => {
       if (message.type === "chat_message") {
         console.log("channel", message.channel);
         setMessages((prev) => [
           ...prev,
-          { username: message.username, channel: message.channel, content: message.message },
+          { username: message.username, channel: message.channel, message: message.message },
         ]);
+      } else if (message.type === "bulk_chat_messages") {
+        setMessages((prev) => [
+          ...prev,
+          ...message.messages // Spread the array correctly here
+        ]);
+        console.log("messages added");
       }
     };
 
     emitter.on("chat_message", handler);
+    emitter.on("bulk_chat_messages", handler);
     return () => {
       emitter.off("chat_message", handler);
     };
@@ -73,7 +81,7 @@ export default function ChatMessageList() {
               key={index}
               username={message.username}
               channel={message.channel}
-              content={message.content}
+              content={message.message}
               isLast={index == messages.length - 1 ? true : false}
             />
           ))}

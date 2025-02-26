@@ -16,4 +16,5 @@ type HubInterface interface {
 	UnregisterClient(ClientInterface, string)
 	SendMessage(messages.Messager)
 	GetConnectedUsers() []string
+	GetCachedChatMessages() []messages.ChatMessage
 }

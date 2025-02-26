@@ -1,4 +1,5 @@
 import type { Channel } from "./components/channel_list";
+import type { ChatMessageType } from "./components/chat_message_list";
 
 // Base message interface
 export interface Message {
@@ -27,12 +28,19 @@ export interface ActiveChannelsMessage extends Message {
   type: "active_channels";
   channels: Channel[]; 
 }
+
+export interface BulkChatMessages extends Message {
+  type: "bulk_chat_messages";
+  // Use the meessage type for react state
+  messages: ChatMessageType[];
+}
   
   // Create a union type for all server messages
 export type ServerMessage =
   | ConnectedUsersMessage
   | UserStatusMessage
   | ChatMessage
+  | BulkChatMessages
   | ActiveChannelsMessage;
 
   export type EmitterEvents = {
@@ -40,4 +48,5 @@ export type ServerMessage =
     user_status: ServerMessage;
     active_channels: ServerMessage;
     chat_message: ServerMessage;
+    bulk_chat_messages: ServerMessage;
   };

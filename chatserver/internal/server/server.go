@@ -122,6 +122,17 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 	connectedMsg := messages.NewConnectedUsersMessage(s.hub.GetConnectedUsers())
 	client.SendMessage(connectedMsg)
 
+	// Bulk send chat history to the new client
+	cachedMessages := s.hub.GetCachedChatMessages()
+	if len(cachedMessages) > 0 {
+		bulkMessage := messages.NewBulkChatMessages(cachedMessages)
+		if err := conn.WriteJSON(bulkMessage); err != nil {
+			log.Printf("Failed to send bulk chat messages: %v", err)
+		} else {
+			log.Printf("Sent %d cached messages to client", len(cachedMessages))
+		}
+	}
+
 	// Fetch channels from the database
 	channels, err := s.getChannels()
 	if err != nil {
