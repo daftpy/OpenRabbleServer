@@ -32,7 +32,7 @@ export default function ChannelList({ channels }  : { channels: Channel[] }) {
       <Heading>Channels</Heading>
       <Grid columns="1fr 3fr" width={"100%"} gapY={"2"} pt={"2"}>
       { channels && channels.map((channel, index) => (
-        <ChannelRow channel={channel} isLast={index == channels.length -1} />
+        <ChannelRow key={index} channel={channel} isLast={index == channels.length -1} />
       ))}
       </Grid>
     </Box>

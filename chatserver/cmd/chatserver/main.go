@@ -1,6 +1,7 @@
 package main
 
 import (
+	"chatserver/internal/cache"
 	"chatserver/internal/db"
 	"chatserver/internal/hub"
 	"chatserver/internal/server"
@@ -8,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
+	"github.com/valkey-io/valkey-go"
 )
 
 var upgrader = websocket.Upgrader{
@@ -20,8 +22,23 @@ func main() {
 	// Connect to the database
 	conn, err := db.Connect()
 
+	// Initialize Valkey client
+	client, err := valkey.NewClient(valkey.ClientOption{
+		InitAddress: []string{"valkey:6379"},
+	})
+	if err != nil {
+		log.Fatalf("Failed to connect to Valkey: %v", err)
+	}
+
+	// Initialize the message cache
+	messageCache := &cache.MessageCache{
+		ValkeyClient: client,
+		DB:           conn,
+	}
+	messageCache.StartPeriodicFlush()
+
 	// Create a new Hub instance
-	h := hub.NewHub(conn)
+	h := hub.NewHub(conn, messageCache)
 
 	// Start the Hub in a separate goroutine
 	go h.Run()

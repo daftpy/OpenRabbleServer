@@ -56,6 +56,7 @@ export default function ChatMessageList() {
     emitter.on("bulk_chat_messages", handler);
     return () => {
       emitter.off("chat_message", handler);
+      emitter.off("bulk_chat_messages", handler);
     };
   }, []);
 

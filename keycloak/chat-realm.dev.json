@@ -33,7 +33,7 @@
           "directAccessGrantsEnabled": true,
           "standardFlowEnabled": true,
           "redirectUris": [
-            "https://localhost/success"
+            "https://localhost/*"
           ],
           "webOrigins": [
             "https://localhost"

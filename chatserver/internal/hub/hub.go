@@ -7,7 +7,6 @@ import (
 	"log"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/valkey-io/valkey-go"
 )
 
 /*
@@ -20,31 +19,18 @@ type Hub struct {
 	Messages     chan messages.Messager
 	Register     chan ClientInterface
 	Unregister   chan ClientInterface
-	MessageCache cache.MessageCache
+	MessageCache *cache.MessageCache
 }
 
 // Creates a new Hub instance
-func NewHub(db *pgxpool.Pool) *Hub {
-	// Initialize Valkey client
-	client, err := valkey.NewClient(valkey.ClientOption{
-		InitAddress: []string{"valkey:6379"},
-	})
-	if err != nil {
-		log.Fatalf("Failed to connect to Valkey: %v", err)
-	}
-
-	// Initialize the message cache
-	messageCache := cache.MessageCache{
-		ValkeyClient: client,
-		DB:           db,
-	}
+func NewHub(db *pgxpool.Pool, cache *cache.MessageCache) *Hub {
 
 	return &Hub{
 		Connections:  make(map[string]ClientInterface),
 		Messages:     make(chan messages.Messager),
 		Register:     make(chan ClientInterface),
 		Unregister:   make(chan ClientInterface),
-		MessageCache: messageCache,
+		MessageCache: cache,
 	}
 }
 
