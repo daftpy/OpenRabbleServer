@@ -17,13 +17,14 @@ var upgrader = websocket.Upgrader{
 }
 
 func main() {
+	// Connect to the database
+	conn, err := db.Connect()
+
 	// Create a new Hub instance
-	h := hub.NewHub()
+	h := hub.NewHub(conn)
 
 	// Start the Hub in a separate goroutine
 	go h.Run()
-
-	conn, err := db.Connect()
 
 	if err != nil {
 		log.Fatalf("Failed to connected to database")

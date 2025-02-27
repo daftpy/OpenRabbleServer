@@ -1,13 +1,12 @@
 package hub
 
 import (
+	"chatserver/internal/cache"
 	"chatserver/internal/messages"
-	"context"
-	"encoding/json"
 	"fmt"
 	"log"
-	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/valkey-io/valkey-go"
 )
 
@@ -17,16 +16,15 @@ It recceives incoming messages, handles client registration/unregistration,
 and broadcasts messages to clients.
 */
 type Hub struct {
-	Connections     map[string]ClientInterface
-	Messages        chan messages.Messager
-	Register        chan ClientInterface
-	Unregister      chan ClientInterface
-	MessageLogCount int
-	cachClient      valkey.Client
+	Connections  map[string]ClientInterface
+	Messages     chan messages.Messager
+	Register     chan ClientInterface
+	Unregister   chan ClientInterface
+	MessageCache cache.MessageCache
 }
 
 // Creates a new Hub instance
-func NewHub() *Hub {
+func NewHub(db *pgxpool.Pool) *Hub {
 	// Initialize Valkey client
 	client, err := valkey.NewClient(valkey.ClientOption{
 		InitAddress: []string{"valkey:6379"},
@@ -34,13 +32,19 @@ func NewHub() *Hub {
 	if err != nil {
 		log.Fatalf("Failed to connect to Valkey: %v", err)
 	}
+
+	// Initialize the message cache
+	messageCache := cache.MessageCache{
+		ValkeyClient: client,
+		DB:           db,
+	}
+
 	return &Hub{
-		Connections:     make(map[string]ClientInterface),
-		Messages:        make(chan messages.Messager),
-		Register:        make(chan ClientInterface),
-		Unregister:      make(chan ClientInterface),
-		MessageLogCount: 0,
-		cachClient:      client,
+		Connections:  make(map[string]ClientInterface),
+		Messages:     make(chan messages.Messager),
+		Register:     make(chan ClientInterface),
+		Unregister:   make(chan ClientInterface),
+		MessageCache: messageCache,
 	}
 }
 
@@ -103,7 +107,7 @@ func (h *Hub) handleMessage(msg messages.Messager) {
 	switch msg := msg.(type) {
 	case messages.ChatMessage:
 		log.Printf("Handling chat message from: %s", msg.Username)
-		h.cacheChatMessage(msg)
+		h.MessageCache.CacheChatMessage(msg)
 		h.Broadcast(msg)
 
 	case messages.UserStatusMessage:
@@ -119,74 +123,9 @@ func (h *Hub) handleMessage(msg messages.Messager) {
 	}
 }
 
-// Caches a chat message in Valkey
-func (h *Hub) cacheChatMessage(msg messages.ChatMessage) {
-	// Serialize the chat message to JSON
-	jsonData, err := json.Marshal(msg)
-	if err != nil {
-		log.Printf("Failed to serialize chat message: %v", err)
-		return
-	}
-
-	// Create a cache key using the channel and timestamp
-	cacheKey := "messages"
-
-	// Initialize the context
-	ctx := context.Background()
-
-	// Push the message to a list in Valkey
-	err = h.cachClient.Do(
-		ctx,
-		h.cachClient.B().Rpush().Key(cacheKey).Element(string(jsonData)).Build(),
-	).Error()
-
-	if err != nil {
-		log.Printf("Failed to cache chat message in Valkey: %v", err)
-	} else {
-		log.Printf("Cached chat message in Valkey: %s", msg.Message)
-	}
-
-	// Optional: Set a time-based expiration. Messages older than 24 hours are removed
-	ttl := 24 * time.Hour
-	err = h.cachClient.Do(
-		ctx,
-		h.cachClient.B().Expire().Key(cacheKey).Seconds(int64(ttl.Seconds())).Build(),
-	).Error()
-
-	if err != nil {
-		log.Printf("Failed to set expiration for chat message cache: %v", err)
-	}
-}
-
-// Retrieves chat messages from Valkey and returns them as a slice of ChatMessage
+// Retrieves chat messages from the MessageCache and returns them as a slice of ChatMessage
 func (h *Hub) GetCachedChatMessages() []messages.ChatMessage {
-	cacheKey := "messages" // Using a general key for all messages for now
-	ctx := context.Background()
-
-	// Retrieve all cached messages from Valkey
-	cachedMessages, err := h.cachClient.Do(
-		ctx,
-		h.cachClient.B().Lrange().Key(cacheKey).Start(0).Stop(-1).Build(),
-	).AsStrSlice()
-
-	if err != nil {
-		log.Printf("Failed to retrieve cached messages from Valkey: %v", err)
-		return nil
-	}
-
-	var chatMessages []messages.ChatMessage
-
-	// Deserialize each cached message back into a ChatMessage object
-	for _, jsonData := range cachedMessages {
-		var msg messages.ChatMessage
-		if err := json.Unmarshal([]byte(jsonData), &msg); err != nil {
-			log.Printf("Failed to deserialize chat message: %v", err)
-			continue
-		}
-		chatMessages = append(chatMessages, msg)
-	}
-
-	log.Printf("Retrieved %d messages from cache", len(chatMessages))
+	chatMessages := h.MessageCache.GetCachedChatMessages()
 	return chatMessages
 }
 
