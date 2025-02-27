@@ -1,34 +1,40 @@
-import { Flex, Button, Table, Text } from "@radix-ui/themes";
+import { Cross2Icon, GearIcon } from "@radix-ui/react-icons";
+import { Flex, Button, Table, Text, Box, Heading, Grid } from "@radix-ui/themes";
+import React from "react";
 
 export interface Channel {
   name: string;
   description: string | null;
 }
 
+const ChannelRow = ({ channel, isLast } : { channel : Channel, isLast: boolean }) => {
+  const noLine = "none";
+  const line = "1px solid var(--indigo-4)";
+  return (
+    <React.Fragment>
+      <Box style={{borderBottom: isLast ? noLine : line}} pr={"2"} py={"2"}>
+        <Text>{ channel.name }</Text>
+      </Box>
+      <Flex flexGrow={"1"} gap={"4"} overflow={"hidden"} style={{borderBottom: isLast ? noLine : line}}  py={"2"}> 
+        <Text truncate>{ channel.description }</Text>
+        <Flex gap={"2"} flexGrow={"1"} justify={"end"}>
+          <Button color="blue" size={"1"} radius="full" style={{ boxShadow: "var(--shadow-1)", height: "20px", width: "20px" }}><Box><GearIcon /></Box></Button>
+          <Button color="red" size={"1"} radius="full" style={{ boxShadow: "var(--shadow-1)", height: "20px", width: "20px" }}><Box><Cross2Icon /></Box></Button>
+        </Flex>
+      </Flex>
+    </React.Fragment>
+  )
+}
+
 export default function ChannelList({ channels }  : { channels: Channel[] }) {
   return (
-    <Flex flexGrow={"1"}>
-      <Table.Root layout={"fixed"}>
-        <Table.Header>
-          <Table.Row>
-            <Table.ColumnHeaderCell width="125px">Channel</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell width={"auto"}>Description</Table.ColumnHeaderCell>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-        { channels && channels.map((channel, index) => (
-          <Table.Row key={index}>
-            <Table.RowHeaderCell justify="start">{channel.name}</Table.RowHeaderCell>
-            <Table.Cell justify={"start"}>
-              <Flex align={"center"}>
-                <Text className="grow" truncate>{ channel.description ? <>{channel.description}</> : <>...</>}</Text>
-                <Button color="red" size={"1"} radius="full" style={{ boxShadow: "var(--shadow-1)" }}>x</Button>
-              </Flex>
-            </Table.Cell>
-          </Table.Row>
-        ))}
-        </Table.Body>
-        </Table.Root>
-    </Flex>
+    <Box flexGrow={"1"} width={"100%"}>
+      <Heading>Channels</Heading>
+      <Grid columns="1fr 3fr" width={"100%"} gapY={"2"} pt={"2"}>
+      { channels && channels.map((channel, index) => (
+        <ChannelRow channel={channel} isLast={index == channels.length -1} />
+      ))}
+      </Grid>
+    </Box>
   )
 }

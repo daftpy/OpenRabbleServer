@@ -11,7 +11,7 @@ import { Button, Container, Flex, Heading, Link, Text } from "@radix-ui/themes";
 import type { Channel } from "~/components/channel_list";
 import UserList from "~/components/user_list";
 import ChatMessageList from "~/components/chat_message_list";
-import { GearIcon } from "@radix-ui/react-icons";
+import { GearIcon, LockClosedIcon, MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons";
 
 
 /*
@@ -33,15 +33,18 @@ export function HomePage({ channels }: { channels: Channel[] }) {
               <Link href="#">Hide Live Chat</Link>
             </Flex>
             <ChatMessageList />
-            <Flex>
-              <Button onClick={() => navigate("/about")}><GearIcon /> Settings</Button>
+            <Flex gap={"3"} direction={{initial: "column", sm: "row"}}>
+             <Button onClick={() => navigate("/about")}><PersonIcon /> User Management</Button>
+             <Button onClick={() => navigate("/about")}><MagnifyingGlassIcon /> Messages</Button>
+             <Button onClick={() => navigate("/about")}><GearIcon /> Settings</Button>
+             <Button onClick={() => navigate("/about")}><LockClosedIcon /> Keycloak</Button>
             </Flex>
             <div>
               <Heading weight={"bold"} style={{ color: "var(--indigo-9)" }}>Channels</Heading>
               <Text m="0">You can add a new channel or manage your channels below.</Text>
             </div>
             <ChannelInput channelList={channelList} setChannelList={setChannelList} />
-            <Flex gap={"6"}>
+            <Flex gap={"4"} direction={{initial: "column", sm: "row"}} align={{initial: "center", sm: "start"}}>
               <ChannelList channels={channelList} />
               <UserList />
             </Flex>

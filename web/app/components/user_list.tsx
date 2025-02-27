@@ -1,13 +1,12 @@
-import { Flex, Heading, Text } from "@radix-ui/themes"
-import { useContext, useEffect, useState, type JSX } from "react"
+import { Box, Flex, Heading, Text } from "@radix-ui/themes"
+import { useEffect, useState } from "react"
 import type { ServerMessage } from "~/messages";
 import { emitter } from "~/root";
-import { WebSocketContext } from "~/websocket_context"
 import { PersonIcon } from "@radix-ui/react-icons";
 
 const User = ({ username } : { username: string }) => (
-  <Flex justify={"center"} align={"center"} gap={"2"}>
-    <PersonIcon /><Text>{ username }</Text>
+  <Flex justify={"center"} align={"center"} gap={"2"}  maxWidth={"225px"} minWidth={"175px"} overflow={"hidden"}>
+    <Box><PersonIcon/></Box><Text truncate>{ username }</Text>
   </Flex>
 );
 
@@ -43,8 +42,8 @@ export default function UserList() {
   }, []);
 
   return (
-      <Flex direction={"column"} minWidth={"150px"} pl={"4"} pt={"4"} align={"center"} gap={"2"}>
-        <Heading size={"2"}>Connected Users</Heading>
+      <Flex direction={"column"} minHeight={"fit-content"}  pl={"4"} pt={"3"} align={"center"} gap={"2"}>
+        <Heading size={"2"} wrap={"nowrap"} style={{padding: "0 10px"}}>Connected Users</Heading>
         {usernames.map((username) => (
           <User key={username} username={username} />
         ))}
