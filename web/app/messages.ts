@@ -34,6 +34,16 @@ export interface BulkChatMessages extends Message {
   // Use the meessage type for react state
   messages: ChatMessageType[];
 }
+
+export type ChannelMessageCount = {
+  channel: string;
+  message_count: number;
+}
+
+export interface MessageCountByChannelMessage extends Message {
+  type: "message_count_by_channel";
+  channels: ChannelMessageCount[]
+}
   
   // Create a union type for all server messages
 export type ServerMessage =
@@ -41,6 +51,7 @@ export type ServerMessage =
   | UserStatusMessage
   | ChatMessage
   | BulkChatMessages
+  | MessageCountByChannelMessage
   | ActiveChannelsMessage;
 
   export type EmitterEvents = {
@@ -49,4 +60,5 @@ export type ServerMessage =
     active_channels: ServerMessage;
     chat_message: ServerMessage;
     bulk_chat_messages: ServerMessage;
+    message_count_by_channel: ServerMessage
   };

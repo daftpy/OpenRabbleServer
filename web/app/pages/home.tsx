@@ -2,16 +2,20 @@
     The home page of the admin dashboard. Landing here will display the current channels
     of the chatserver as well as connected users.
 */
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router";
 import ChannelInput from "~/components/channel_input";
 import ChannelList from "~/components/channel_list";
+import { Bar } from "react-chartjs-2";
 
 import { Button, Container, Flex, Heading, Link, Text } from "@radix-ui/themes";
 import type { Channel } from "~/components/channel_list";
 import UserList from "~/components/user_list";
 import ChatMessageList from "~/components/chat_message_list";
 import { GearIcon, LockClosedIcon, MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons";
+import { emitter } from "~/root";
+import type { ChannelMessageCount, ServerMessage } from "~/messages";
+import "chart.js/auto"
 
 
 /*
@@ -23,33 +27,80 @@ export function HomePage({ channels }: { channels: Channel[] }) {
   const [channelList, setChannelList] = useState<Channel[]>(channels);
   const navigate = useNavigate();
 
-    return (
-      <main className="p-4">
-        <Container>
-          <Flex direction="column" gap="4">
-            <Flex direction={"column"}>
-              <Heading weight={"bold"} className="text-xl">Your OnRabble Server</Heading>
-              <Text m="0">Welcome to your dashboard.</Text>
-              <Link href="#">Hide Live Chat</Link>
-            </Flex>
-            <ChatMessageList />
-            <Flex gap={"3"} direction={{initial: "column", sm: "row"}}>
-             <Button onClick={() => navigate("/about")}><PersonIcon /> User Management</Button>
-             <Button onClick={() => navigate("/about")}><MagnifyingGlassIcon /> Messages</Button>
-             <Button onClick={() => navigate("/about")}><GearIcon /> Settings</Button>
-             <Button onClick={() => navigate("/about")}><LockClosedIcon /> Keycloak</Button>
-            </Flex>
+  // State for the bar chart
+  const [barData, setBarData] = useState({
+    labels: [] as string[],
+    datasets: [
+      {
+        label: "Messages per Channel",
+        data: [] as number[],
+        backgroundColor: "rgba(54, 162, 235, 0.6)",
+        borderColor: "rgba(54, 162, 235, 1)",
+        borderWidth: 1,
+      },
+    ],
+  });
+  
+
+  useEffect(() => {
+    console.log("loaded");
+    const handler = (message: ServerMessage) => {
+      if (message.type === "message_count_by_channel") {
+        const channels: ChannelMessageCount[] = message.channels;
+        console.log("Updating analytics");
+        setBarData({
+          labels: channels.map((c) => c.channel),
+          datasets: [
+            {
+              label: "Messages per Channel",
+              data: channels.map((c) => c.message_count),
+              backgroundColor: "rgba(54, 162, 235, 0.6)",
+              borderColor: "rgba(54, 162, 235, 1)",
+              borderWidth: 1,
+            },
+          ],
+        });
+      }
+    };
+  
+    emitter.on("message_count_by_channel", handler);
+    return () => {
+      emitter.off("message_count_by_channel", handler);
+    };
+  }, []);
+  return (
+    <main className="p-4">
+      <Container>
+        <Flex direction="column" gap="6">
+          <Flex direction={"column"}>
+            <Heading weight={"bold"} className="text-xl pb-1">Your OnRabble Server</Heading>
+            <Text>Welcome to your dashboard.</Text>
+            <Link href="#">Hide Live Chat</Link>
+          </Flex>
+          <ChatMessageList />
+          <Flex gap={"3"} direction={{initial: "column", sm: "row"}}>
+            <Button onClick={() => navigate("/about")}><PersonIcon /> User Management</Button>
+            <Button onClick={() => navigate("/about")}><MagnifyingGlassIcon /> Messages</Button>
+            <Button onClick={() => navigate("/about")}><GearIcon /> Settings</Button>
+            <Button onClick={() => navigate("/about")}><LockClosedIcon /> Keycloak</Button>
+          </Flex>
+          <Flex direction={"column"} gap={"2"}>
             <div>
               <Heading weight={"bold"} style={{ color: "var(--indigo-9)" }}>Channels</Heading>
-              <Text m="0">You can add a new channel or manage your channels below.</Text>
+              <Text>You can add a new channel or manage your channels below.</Text>
             </div>
             <ChannelInput channelList={channelList} setChannelList={setChannelList} />
-            <Flex gap={"4"} direction={{initial: "column", sm: "row"}} align={{initial: "center", sm: "start"}}>
-              <ChannelList channels={channelList} />
-              <UserList />
-            </Flex>
           </Flex>
-        </Container>
-      </main>   
-    )
+          <Flex gap={"2"} direction={{initial: "column", sm: "row"}} align={{initial: "center", sm: "start"}}>
+            <ChannelList channels={channelList} />
+            <UserList />
+          </Flex>
+          <Heading color="indigo">Analytics</Heading>
+          <div className="px-2">
+            <Bar data={barData} />
+          </div>
+        </Flex>
+      </Container>
+    </main>   
+  )
 }

@@ -29,8 +29,8 @@ const ChannelRow = ({ channel, isLast } : { channel : Channel, isLast: boolean }
 export default function ChannelList({ channels }  : { channels: Channel[] }) {
   return (
     <Box flexGrow={"1"} width={"100%"}>
-      <Heading>Channels</Heading>
       <Grid columns="1fr 3fr" width={"100%"} gapY={"2"} pt={"2"}>
+      <Heading size={"3"}>Channels</Heading><Heading size={"3"}>Description</Heading>
       { channels && channels.map((channel, index) => (
         <ChannelRow key={index} channel={channel} isLast={index == channels.length -1} />
       ))}

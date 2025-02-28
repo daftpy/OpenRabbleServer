@@ -54,6 +54,7 @@ export const WebSocketProvider = ({ token, children } : { token: string | undefi
         const parsedMessage = JSON.parse(ev.data) as ServerMessage;
         // handleMessage(parsedMessage);
         emitter.emit(parsedMessage.type, parsedMessage);
+        console.log("Emitted:", parsedMessage.type);
       } catch (err) {
         console.error("Error parsing message:", err);
       }

@@ -14,7 +14,7 @@ export default function UserList() {
   const [usernames, setUsernames] = useState<string[]>([]);
 
   useEffect(() => {
-    const handler = (message: ServerMessage) => {
+    const handler = (message: ServerMessage ) => {
       if (message.type === "connected_users" && message.users) {
         // Replace the whole list of connected users.
         setUsernames(message.users);
@@ -42,8 +42,8 @@ export default function UserList() {
   }, []);
 
   return (
-      <Flex direction={"column"} minHeight={"fit-content"}  pl={"4"} pt={"3"} align={"center"} gap={"2"}>
-        <Heading size={"2"} wrap={"nowrap"} style={{padding: "0 10px"}}>Connected Users</Heading>
+      <Flex direction={"column"} minHeight={"fit-content"}  pl={"4"} pt={"2"} align={"center"} gap={"2"}>
+        <Heading size={"3"} wrap={"nowrap"} style={{padding: "0 10px"}}>Connected Users</Heading>
         {usernames.map((username) => (
           <User key={username} username={username} />
         ))}
