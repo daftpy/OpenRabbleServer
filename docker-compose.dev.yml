@@ -55,7 +55,9 @@ services:
       - "6380:6379"
     networks:
       - app_network
-    command: ["valkey-server", "--loglevel", "warning"] # TODO: Persistance?
+    volumes:
+      - valkey_data:/data
+    command: ["valkey-server", "--loglevel", "warning"]
 
       
   caddy:
@@ -93,6 +95,7 @@ services:
 
 volumes:
   postgres_data:
+  valkey_data:
 
 networks:
   app_network:

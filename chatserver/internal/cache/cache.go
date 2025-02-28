@@ -25,16 +25,13 @@ var cacheMessageScript = valkey.NewLuaScript(`
     local flushKey = KEYS[2]       -- Flush cache for database persistence
     local message = ARGV[1]
     local maxSize = tonumber(ARGV[2])
-    local ttl = tonumber(ARGV[3])
 
     -- Add to the recent circular cache
     redis.call("RPUSH", recentKey, message)
     redis.call("LTRIM", recentKey, -maxSize, -1)
-    redis.call("EXPIRE", recentKey, ttl)
 
     -- Add to the flush cache (no trimming)
     redis.call("RPUSH", flushKey, message)
-    redis.call("EXPIRE", flushKey, ttl)
 
     return redis.call("LLEN", flushKey)  -- Return the size of the flush cache
 `)
@@ -60,7 +57,7 @@ func (m *MessageCache) CacheChatMessage(msg messages.ChatMessage) {
 		ctx,
 		m.ValkeyClient,
 		[]string{recentCacheKey, flushCacheKey},
-		[]string{string(jsonData), fmt.Sprintf("%d", maxCacheSize), fmt.Sprintf("%d", cacheTTL)},
+		[]string{string(jsonData), fmt.Sprintf("%d", maxCacheSize)},
 	).AsInt64()
 
 	if err != nil {
