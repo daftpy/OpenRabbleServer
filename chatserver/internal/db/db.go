@@ -115,3 +115,36 @@ func FetchChannels(db *pgxpool.Pool) ([]models.Channel, error) {
 	log.Printf("Loaded %d channels from database", len(channels))
 	return channels, nil
 }
+
+type ChannelMessageCount struct {
+	Channel      string `json:"channel"`
+	MessageCount int    `json:"message_count"`
+}
+
+func FetchMessageCountByChannel(db *pgxpool.Pool) ([]ChannelMessageCount, error) {
+	rows, err := db.Query(context.Background(), `
+		SELECT channel, COUNT(*) AS message_count
+		FROM chatserver.chat_messages
+		GROUP BY channel
+	`)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch message counts: %w", err)
+	}
+	defer rows.Close()
+
+	var counts []ChannelMessageCount
+	for rows.Next() {
+		var count ChannelMessageCount
+		if err := rows.Scan(&count.Channel, &count.MessageCount); err != nil {
+			return nil, fmt.Errorf("failed to scan message count row: %w", err)
+		}
+		counts = append(counts, count)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error after iterating rows: %w", err)
+	}
+
+	log.Println("Loaded message counts")
+	return counts, nil
+}

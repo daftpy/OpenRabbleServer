@@ -1,6 +1,9 @@
 package messages
 
-import "chatserver/internal/models"
+import (
+	"chatserver/internal/db"
+	"chatserver/internal/models"
+)
 
 /*
 Messager is an interface that represents all message types in the system.
@@ -132,5 +135,30 @@ func NewActiveChannelsMessage(channels []models.Channel) ActiveChannelsMessage {
 	return ActiveChannelsMessage{
 		Type:     ActiveChannelsMessageType,
 		Channels: channels,
+	}
+}
+
+/*
+Provides message counts by channel. Serves as basic analytics for the dashboard.
+*/
+type MessageCountByChannelMessage struct {
+	Type     string                   `json:"type"`
+	Channels []db.ChannelMessageCount `json:"channels"`
+}
+
+const MessageCountByChannelMessageType = "message_count_by_channel"
+
+func (m MessageCountByChannelMessage) MessageType() string {
+	return m.Type
+}
+
+func (m MessageCountByChannelMessage) Sender() string {
+	return "server"
+}
+
+func NewMessageCountByChannelMessage(channelCounts []db.ChannelMessageCount) MessageCountByChannelMessage {
+	return MessageCountByChannelMessage{
+		Type:     MessageCountByChannelMessageType,
+		Channels: channelCounts,
 	}
 }

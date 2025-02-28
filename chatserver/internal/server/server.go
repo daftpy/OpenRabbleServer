@@ -2,6 +2,7 @@ package server
 
 import (
 	"chatserver/internal/client"
+	"chatserver/internal/db"
 	"chatserver/internal/hub"
 	"chatserver/internal/messages"
 	"chatserver/internal/models"
@@ -121,6 +122,16 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 	// Send Connected Users List to the new client
 	connectedMsg := messages.NewConnectedUsersMessage(s.hub.GetConnectedUsers())
 	client.SendMessage(connectedMsg)
+
+	// If webclient (admin dash), send analytics
+	if clientID == "WebClient" {
+		counts, err := db.FetchMessageCountByChannel(s.db)
+		if err != nil {
+			log.Printf("Failed to get channel message counts")
+		}
+		analyticsMsg := messages.NewMessageCountByChannelMessage(counts)
+		client.SendMessage(analyticsMsg)
+	}
 
 	// Bulk send chat history to the new client
 	cachedMessages := s.hub.GetCachedChatMessages()
