@@ -3,6 +3,7 @@ package messages
 import (
 	"chatserver/internal/db"
 	"chatserver/internal/models"
+	"time"
 )
 
 /*
@@ -73,10 +74,11 @@ ChatMessage represents a chat message sent by a user.
 This message is broadcasted to all clients in the specified channel.
 */
 type ChatMessage struct {
-	Type     string `json:"type"`
-	Message  string `json:"message"`
-	Username string `json:"username"`
-	Channel  string `json:"channel"`
+	Type     string    `json:"type"`
+	Message  string    `json:"message"`
+	Username string    `json:"username"`
+	Channel  string    `json:"channel"`
+	Sent     time.Time `json:"sent_at"`
 }
 
 const ChatMessageType = "chat_message"
@@ -95,6 +97,7 @@ func NewChatMessage(message string, username string, channel string) ChatMessage
 		Message:  message,
 		Username: username,
 		Channel:  channel,
+		Sent:     time.Now(),
 	}
 }
 

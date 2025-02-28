@@ -41,7 +41,7 @@ var cacheMessageScript = valkey.NewLuaScript(`
 
 const maxCacheSize = 500
 const cacheTTL = 24 * 60 * 60 // 24 hours in seconds
-const flushInterval = 5 * time.Minute
+const flushInterval = 2 * time.Minute
 
 // Caches a chat message in Valkey and triggers a DB flush if max cache size is reached
 func (m *MessageCache) CacheChatMessage(msg messages.ChatMessage) {
@@ -139,7 +139,6 @@ func (m *MessageCache) FlushCacheToDB() {
 	defer tx.Rollback(ctx)
 
 	const tempOwnerID = "0f5e28a8-4f8e-49be-b56d-83419ab92a36"
-	timestamp := time.Now()
 
 	for _, jsonData := range cachedMessages {
 		var msg messages.ChatMessage
@@ -153,7 +152,7 @@ func (m *MessageCache) FlushCacheToDB() {
 			`INSERT INTO chatserver.chat_messages (owner_id, channel, message, authored_at)
 			 VALUES ($1, $2, $3, $4)
 			`,
-			tempOwnerID, msg.Channel, msg.Message, timestamp,
+			tempOwnerID, msg.Channel, msg.Message, msg.Sent,
 		)
 
 		if err != nil {
