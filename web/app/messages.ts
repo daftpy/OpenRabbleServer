@@ -1,4 +1,4 @@
-import type { Channel } from "./components/channel_list";
+import type { Channel } from "./components/channel/channel_list";
 import type { ChatMessageType } from "./components/chat_message_list";
 
 // Base message interface

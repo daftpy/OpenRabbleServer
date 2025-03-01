@@ -1,6 +1,6 @@
 import type React from "react"
 import { useContext } from "react";
-import AuthContext from "~/auth_context";
+import AuthContext from "~/contexts/auth_context";
 
 interface props {
   children: React.ReactNode;

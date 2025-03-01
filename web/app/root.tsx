@@ -11,7 +11,7 @@ import type { Route } from "./+types/root";
 import "./app.css";
 import "@radix-ui/themes/styles.css";
 import { Theme, ThemePanel } from "@radix-ui/themes";
-import { AuthProvider } from "./auth_context";
+import { AuthProvider } from "./contexts/auth_context";
 import mitt from "mitt";
 import type { EmitterEvents } from "./messages";
 

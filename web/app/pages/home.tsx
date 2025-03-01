@@ -4,12 +4,12 @@
 */
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router";
-import ChannelInput from "~/components/channel_input";
-import ChannelList from "~/components/channel_list";
+import ChannelInput from "~/components/channel/channel_input";
+import ChannelList from "~/components/channel/channel_list";
 import { Bar } from "react-chartjs-2";
 
 import { Box, Button, Flex, Heading, Link, Text } from "@radix-ui/themes";
-import type { Channel } from "~/components/channel_list";
+import type { Channel } from "~/components/channel/channel_list";
 import UserList from "~/components/user_list";
 import ChatMessageList from "~/components/chat_message_list";
 import { GearIcon, LockClosedIcon, MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons";
