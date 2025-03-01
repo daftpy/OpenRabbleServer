@@ -16,6 +16,7 @@ import { GearIcon, LockClosedIcon, MagnifyingGlassIcon, PersonIcon } from "@radi
 import { emitter } from "~/root";
 import type { ChannelMessageCount, ServerMessage } from "~/messages";
 import "chart.js/auto"
+import { MessagesPerChannel } from "~/components/analysis/messages_per_channel";
 
 /*
   TODO: Added a test navigate button here to move between pages. It works properly
@@ -24,50 +25,7 @@ import "chart.js/auto"
 export function HomePage({ channels }: { channels: Channel[] }) {
   const [channelList, setChannelList] = useState<Channel[]>(channels);
   const navigate = useNavigate();
-
-  // State for the bar chart
-  const [barData, setBarData] = useState({
-    labels: [] as string[],
-    datasets: [
-      {
-        label: "Messages per Channel",
-        data: [] as number[],
-        backgroundColor: "rgba(54, 162, 235, 0.6)",
-        borderColor: "rgba(54, 162, 235, 1)",
-        borderWidth: 1,
-        borderRadius: 3
-      },
-    ],
-  });
   
-
-  useEffect(() => {
-    console.log("loaded");
-    const handler = (message: ServerMessage) => {
-      if (message.type === "message_count_by_channel") {
-        const channels: ChannelMessageCount[] = message.channels;
-        console.log("Updating analytics");
-        setBarData({
-          labels: channels.map((c) => c.channel),
-          datasets: [
-            {
-              label: "Messages per Channel",
-              data: channels.map((c) => c.message_count),
-              backgroundColor: "rgba(62, 99, 221, 1)",
-              borderColor: "rgb(50, 54, 176)",
-              borderWidth: 1,
-              borderRadius: 3
-            },
-          ],
-        });
-      }
-    };
-  
-    emitter.on("message_count_by_channel", handler);
-    return () => {
-      emitter.off("message_count_by_channel", handler);
-    };
-  }, []);
   return (
     <main>
       <Flex direction="column" gap={"6"} height={"100%"} maxWidth={"900px"} m={"auto"} flexGrow={"1"} px={"4"} py={"6"}>
@@ -98,11 +56,7 @@ export function HomePage({ channels }: { channels: Channel[] }) {
           <Heading color="indigo">Activity</Heading>
           <Text>Essential server analytics are available. Track basic metrics like how many messages you serve, user statistics, and other activity.</Text>
         </Box>
-        <Box style={{ border: "2px solid var(--indigo-3)", borderRadius: 4 }} p={"2"}>
-          <Box px={"6"} py={"2"} style={{aspectRatio: "4 / 2", backgroundColor: "var(--indigo-2)"}} className="rounded">
-            <Bar data={barData} options={{ maintainAspectRatio: true, responsive: true }} />
-          </Box>
-        </Box>
+        <MessagesPerChannel />
       </Flex>
     </main>   
   )

@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState } from "react";
-import type { ServerMessage } from "./messages";
-import { emitter } from "./root";
+import type { ServerMessage } from "../messages";
+import { emitter } from "~/root";
 
 interface WebSocketContextType {
   socket: WebSocket | null;
