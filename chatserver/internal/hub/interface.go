@@ -1,6 +1,9 @@
 package hub
 
-import "chatserver/internal/messages"
+import (
+	"chatserver/internal/messages"
+	"time"
+)
 
 type ClientInterface interface {
 	GetUsername() string
@@ -8,6 +11,8 @@ type ClientInterface interface {
 	CloseSendChannel()
 	GetID() string
 	GetClientID() string
+	StartConnectionTimer()
+	GetConnectedAt() time.Time
 }
 
 type HubInterface interface {

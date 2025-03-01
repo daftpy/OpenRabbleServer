@@ -148,3 +148,9 @@ func FetchMessageCountByChannel(db *pgxpool.Pool) ([]ChannelMessageCount, error)
 	log.Println("Loaded message counts")
 	return counts, nil
 }
+
+func RecordUserSession(db *pgxpool.Pool, userID string, start, end time.Time) error {
+	query := `INSERT INTO chatserver.chat_sessions (owner_id, start_time, end_time) VALUES ($1, $2, $3)`
+	_, err := db.Exec(context.Background(), query, userID, start, end)
+	return err
+}

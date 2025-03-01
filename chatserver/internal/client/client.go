@@ -5,6 +5,7 @@ import (
 	"chatserver/internal/messages"
 	"encoding/json"
 	"log"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -14,12 +15,13 @@ Represents a single websocket connection from a user.
 Manages receiving and sending messages to/from the server.
 */
 type Client struct {
-	Username string
-	Conn     *websocket.Conn
-	Send     chan messages.Messager
-	Hub      hub.HubInterface
-	Sub      string // Keycloak stable user ID
-	ClientID string
+	Username    string
+	Conn        *websocket.Conn
+	Send        chan messages.Messager
+	Hub         hub.HubInterface
+	Sub         string // Keycloak stable user ID
+	ClientID    string
+	ConnectedAt time.Time
 }
 
 // Returns the clients username.
@@ -43,6 +45,14 @@ func (c *Client) GetID() string {
 
 func (c *Client) GetClientID() string {
 	return c.ClientID
+}
+
+func (c *Client) StartConnectionTimer() {
+	c.ConnectedAt = time.Now()
+}
+
+func (c *Client) GetConnectedAt() time.Time {
+	return c.ConnectedAt
 }
 
 /*

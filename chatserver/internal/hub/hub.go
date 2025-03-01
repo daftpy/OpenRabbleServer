@@ -2,9 +2,11 @@ package hub
 
 import (
 	"chatserver/internal/cache"
+	"chatserver/internal/db"
 	"chatserver/internal/messages"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -20,6 +22,7 @@ type Hub struct {
 	Register     chan ClientInterface
 	Unregister   chan ClientInterface
 	MessageCache *cache.MessageCache
+	db           *pgxpool.Pool
 }
 
 // Creates a new Hub instance
@@ -31,6 +34,7 @@ func NewHub(db *pgxpool.Pool, cache *cache.MessageCache) *Hub {
 		Register:     make(chan ClientInterface),
 		Unregister:   make(chan ClientInterface),
 		MessageCache: cache,
+		db:           db,
 	}
 }
 
@@ -39,6 +43,7 @@ func (h *Hub) RegisterClient(client ClientInterface, clientID string) {
 	key := fmt.Sprintf("%s:%s", client.GetID(), clientID)
 	log.Println("Hub Registered:", key)
 	h.Connections[key] = client
+	client.StartConnectionTimer()
 	log.Printf("User registered: %s", client.GetUsername())
 }
 
@@ -47,6 +52,16 @@ func (h *Hub) UnregisterClient(client ClientInterface, clientID string) {
 	key := fmt.Sprintf("%s:%s", client.GetID(), clientID)
 	if _, ok := h.Connections[key]; ok {
 		delete(h.Connections, key)
+
+		sessionStart := client.GetConnectedAt()
+		sessionEnd := time.Now()
+
+		err := db.RecordUserSession(h.db, client.GetID(), sessionStart, sessionEnd)
+		if err != nil {
+			log.Printf("Failed to record session for %s: %v", client.GetUsername(), err)
+		} else {
+			log.Printf("Session recorded for %s (duration: %v)", client.GetUsername(), (sessionEnd.Sub(sessionStart)))
+		}
 
 		// Safely close the channel only if it's not already closed
 		closeClientSendChannel(client)

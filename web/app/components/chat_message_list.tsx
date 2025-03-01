@@ -33,6 +33,7 @@ const Message = ({ username, channel, content, isLast }: { username: string, cha
 export default function ChatMessageList() {
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const topRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     console.log("loaded");
@@ -66,6 +67,24 @@ export default function ChatMessageList() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Observe topRef visibility
+  useEffect(() => {
+    if (!topRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          console.log("Top of the message list is now visible!");
+        }
+      },
+      { root: null, threshold: 0.1 } // Adjust threshold as needed
+    );
+
+    observer.observe(topRef.current);
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <Box className="rounded-sm border-solid border-2 border-gray-100 p-2">
       <ScrollArea
@@ -77,6 +96,7 @@ export default function ChatMessageList() {
         }}
       >
         <Flex direction="column" gap="2">
+          <div ref={topRef} />
           {messages.map((message, index) => (
             <Message
               key={index}
