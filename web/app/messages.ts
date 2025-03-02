@@ -1,3 +1,4 @@
+import type { SessionActivity } from "./components/analysis/recent_activity";
 import type { Channel } from "./components/channel/channel_list";
 import type { ChatMessageType } from "./components/chat_message_list";
 
@@ -44,6 +45,11 @@ export interface MessageCountByChannelMessage extends Message {
   type: "message_count_by_channel";
   channels: ChannelMessageCount[]
 }
+
+export interface RecentActivityMessage extends Message {
+  type: "session_activity";
+  session_activity: SessionActivity[];
+}
   
   // Create a union type for all server messages
 export type ServerMessage =
@@ -52,7 +58,8 @@ export type ServerMessage =
   | ChatMessage
   | BulkChatMessages
   | MessageCountByChannelMessage
-  | ActiveChannelsMessage;
+  | ActiveChannelsMessage
+  | RecentActivityMessage;
 
   export type EmitterEvents = {
     connected_users: ServerMessage;
@@ -60,5 +67,6 @@ export type ServerMessage =
     active_channels: ServerMessage;
     chat_message: ServerMessage;
     bulk_chat_messages: ServerMessage;
-    message_count_by_channel: ServerMessage
+    message_count_by_channel: ServerMessage;
+    session_activity: ServerMessage;
   };

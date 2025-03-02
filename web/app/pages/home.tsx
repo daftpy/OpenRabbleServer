@@ -17,6 +17,7 @@ import { emitter } from "~/root";
 import type { ChannelMessageCount, ServerMessage } from "~/messages";
 import "chart.js/auto"
 import { MessagesPerChannel } from "~/components/analysis/messages_per_channel";
+import { RecentActivity } from "~/components/analysis/recent_activity";
 
 /*
   TODO: Added a test navigate button here to move between pages. It works properly
@@ -56,7 +57,8 @@ export function HomePage({ channels }: { channels: Channel[] }) {
           <Heading color="indigo">Activity</Heading>
           <Text>Essential server analytics are available. Track basic metrics like how many messages you serve, user statistics, and other activity.</Text>
         </Box>
-        <MessagesPerChannel />
+        {/* <MessagesPerChannel /> */}
+        <RecentActivity />
       </Flex>
     </main>   
   )
