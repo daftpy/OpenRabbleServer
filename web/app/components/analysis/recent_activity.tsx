@@ -1,8 +1,10 @@
-import { Box, Button, Flex } from "@radix-ui/themes"
+import { Box, Button, Dialog, Flex, Heading } from "@radix-ui/themes"
 import { LineChart } from "../charts/line_chart"
 import { emitter } from "~/root";
 import { useEffect, useState } from "react";
 import type { RecentActivityMessage, ServerMessage } from "~/messages";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/style.css";
 
 export type SessionActivity = {
   session_date: string; // e.g., "2025-02-23"
@@ -12,6 +14,7 @@ export type SessionActivity = {
 
 
 export function RecentActivity() {
+  const [selected, setSelected] = useState<Date>();
   const [lineData, setLineData] = useState<any>({
     labels: ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6", "Day 7"],
     datasets: [
@@ -40,7 +43,7 @@ export function RecentActivity() {
               label: "Chat Sessions",
               data,
               borderColor: "rgb(62, 99, 221)",
-              backgroundColor: "rgb(41, 78, 200, 0.4)",
+              backgroundColor: "rgb(98, 132, 244)",
               fill: true,
             }
           ]
@@ -64,20 +67,47 @@ export function RecentActivity() {
   }
   const aspectRatio = 2;
   return (
-    <Box style={{ border: "2px solid var(--indigo-3)", borderRadius: 4 }} p={"2"}>
-      <Flex justify={"between"} pb={"2"} px={"1"}>
-        <Box>
-          Date Picker
-        </Box>
-        <Flex gap={"2"}>
-          <Button size={"1"}>Day</Button>
-          <Button size={"1"}>Week</Button>
-          <Button size={"1"}>Month</Button>
-          <Button size={"1"}>Year</Button>
+    <Box>
+      <Flex justify={"between"} pb={"2"}>
+        <Heading style={{color: "#415187"}}>Recent Activity</Heading>
+        <Flex  gap={"2"}>
+          <Button size="2">Sessions</Button>
+          <Button size="2" color="gray">Messages</Button>
         </Flex>
       </Flex>
-      <Box px={"6"} py={"2"} style={{aspectRatio: aspectRatio ? aspectRatio : "auto", backgroundColor: "var(--indigo-2)"}} className="rounded">
-        <LineChart data={lineData} options={{ maintainAspectRatio: true, responsive: true, scales: {y: {beginAtZero: true}} }} />
+      <Box style={{ border: "2px solid var(--indigo-3)", borderRadius: 4 }} p={"2"}>
+        <Flex justify={"between"} pb={"2"} px={"1"}>
+          <Dialog.Root>
+            <Dialog.Trigger>
+              <Button size={"1"} color={"gray"}>Select Range</Button>
+            </Dialog.Trigger>
+
+            <Dialog.Content maxWidth={"350px"}>
+              <Box className="size-fit m-auto">
+                <DayPicker
+                  mode="single"
+                  selected={selected}
+                  onSelect={setSelected}
+                  footer={
+                    selected ? `Selected: ${selected.toLocaleDateString()}` : "Pick a day."
+                  }
+                />
+                <Flex justify={"end"}>
+                  <Button>Select</Button>
+                </Flex>
+              </Box>
+            </Dialog.Content>
+          </Dialog.Root>
+          <Flex gap={"2"}>
+            <Button size={"1"} color={"gray"}>Day</Button>
+            <Button size={"1"} color={"indigo"}>Week</Button>
+            <Button size={"1"} color={"gray"}>Month</Button>
+            <Button size={"1"} color={"gray"}>Year</Button>
+          </Flex>
+        </Flex>
+        <Box px={"4"} py={"2"} style={{aspectRatio: aspectRatio ? aspectRatio : "auto", backgroundColor: "var(--indigo-2)"}} className="rounded">
+          <LineChart data={lineData} options={{ maintainAspectRatio: true, responsive: true, scales: {y: {beginAtZero: true}} }} />
+        </Box>
       </Box>
     </Box>
   )

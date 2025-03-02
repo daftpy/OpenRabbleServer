@@ -1,4 +1,4 @@
-import { Box } from "@radix-ui/themes";
+import { Box, Heading } from "@radix-ui/themes";
 import { useEffect, useState, useMemo } from "react";
 import type { ChannelMessageCount, ServerMessage } from "~/messages";
 import { emitter } from "~/root";
@@ -38,7 +38,7 @@ export function MessagesPerChannel() {
         {
           label: "Messages Per Channel",
           data,
-          backgroundColor: "rgba(62, 99, 221, 1)",
+          backgroundColor: "#3e63dd",
           borderColor: "rgb(50, 54, 176)",
           borderWidth: 1,
           borderRadius: 3,
@@ -52,9 +52,14 @@ export function MessagesPerChannel() {
   const aspectRatio = 2;
 
   return (
-    <Box style={{ border: "2px solid var(--indigo-3)", borderRadius: 4 }} p={"2"}>
-      <Box px={"6"} py={"2"} style={{aspectRatio: aspectRatio ? aspectRatio : "auto", backgroundColor: "var(--indigo-2)"}} className="rounded">
-        <BarChart data={barData} options={{ maintainAspectRatio: true, responsive: true }} />
+    <Box>
+      <Box pb={"2"}>
+        <Heading style={{color: "#415187"}}>Messages By Channel</Heading>
+      </Box>
+      <Box style={{ border: "2px solid var(--indigo-3)", borderRadius: 4 }} p={"2"}>
+        <Box px={"6"} py={"2"} style={{aspectRatio: aspectRatio ? aspectRatio : "auto", backgroundColor: "var(--indigo-2)"}} className="rounded">
+          <BarChart data={barData} options={{ maintainAspectRatio: true, responsive: true }} />
+        </Box>
       </Box>
     </Box>
   )

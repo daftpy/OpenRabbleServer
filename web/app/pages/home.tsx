@@ -31,7 +31,7 @@ export function HomePage({ channels }: { channels: Channel[] }) {
     <main>
       <Flex direction="column" gap={"6"} height={"100%"} maxWidth={"900px"} m={"auto"} flexGrow={"1"} px={"4"} py={"6"}>
         <Flex direction={"column"}>
-          <Heading weight={"bold"} className="text-xl pb-1">Your OnRabble Server</Heading>
+          <Heading size={"8"} weight={"bold"} color="indigo" className="text-xl pb-1">Your OnRabble Server</Heading>
           <Text>Welcome to your dashboard.</Text>
           <Link href="#">Hide Live Chat</Link>
         </Flex>
@@ -44,7 +44,7 @@ export function HomePage({ channels }: { channels: Channel[] }) {
         </Flex>
         <Flex direction={"column"} gap={"2"}>
           <div>
-            <Heading weight={"bold"} style={{ color: "var(--indigo-9)" }}>Channels</Heading>
+            <Heading size={"7"} weight={"bold"} style={{ color: "var(--indigo-9)" }}>Channels</Heading>
             <Text>You can add a new channel or manage your channels below.</Text>
           </div>
           <ChannelInput channelList={channelList} setChannelList={setChannelList} />
@@ -54,11 +54,11 @@ export function HomePage({ channels }: { channels: Channel[] }) {
           <UserList />
         </Flex>
         <Box>
-          <Heading color="indigo">Activity</Heading>
+          <Heading size={"7"} color="indigo">Analytics</Heading>
           <Text>Essential server analytics are available. Track basic metrics like how many messages you serve, user statistics, and other activity.</Text>
         </Box>
-        {/* <MessagesPerChannel /> */}
         <RecentActivity />
+        <MessagesPerChannel />
       </Flex>
     </main>   
   )
