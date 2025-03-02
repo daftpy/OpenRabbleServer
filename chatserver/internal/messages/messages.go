@@ -165,3 +165,29 @@ func NewMessageCountByChannelMessage(channelCounts []db.ChannelMessageCount) Mes
 		Channels: channelCounts,
 	}
 }
+
+/*
+Provides the last x days of chat session activity
+*/
+
+type SessionActivityMessage struct {
+	Type     string                   `json:"type"`
+	Activity []models.SessionActivity `json:"session_activity"`
+}
+
+const SessionActivityMessageType = "session_activity"
+
+func (s SessionActivityMessage) MessageType() string {
+	return s.Type
+}
+
+func (s SessionActivityMessage) Sender() string {
+	return "server"
+}
+
+func NewSessionActivityMessage(activity []models.SessionActivity) SessionActivityMessage {
+	return SessionActivityMessage{
+		Type:     SessionActivityMessageType,
+		Activity: activity,
+	}
+}

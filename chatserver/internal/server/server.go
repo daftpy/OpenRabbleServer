@@ -125,12 +125,21 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 
 	// If webclient (admin dash), send analytics
 	if clientID == "WebClient" {
+		// Send the channel message count analytics
 		counts, err := db.FetchMessageCountByChannel(s.db)
 		if err != nil {
 			log.Printf("Failed to get channel message counts")
 		}
 		analyticsMsg := messages.NewMessageCountByChannelMessage(counts)
 		client.SendMessage(analyticsMsg)
+
+		// Send the activity analytics
+		activity, err := db.FetchSessionActivity(s.db)
+		if err != nil {
+			log.Printf("Failed to get recent activity: %v", err)
+		}
+		activityMsg := messages.NewSessionActivityMessage(activity)
+		client.SendMessage(activityMsg)
 	}
 
 	// Bulk send chat history to the new client
