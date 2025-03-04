@@ -43,7 +43,7 @@ export default function UserList() {
 
   return (
       <Flex direction={"column"} minHeight={"fit-content"}  px={"4"} pt={"2"} align={"center"} gap={"2"}>
-        <Heading size={"3"} wrap={"nowrap"} style={{padding: "0 10px"}}>Connected Users</Heading>
+        <Heading size={"3"} wrap={"nowrap"} style={{padding: "0 10px", color: "var(--subheading-color)"}}>Connected Users</Heading>
         {usernames.length != 0 ? (
           usernames.map((username) => (
             <User key={username} username={username} />

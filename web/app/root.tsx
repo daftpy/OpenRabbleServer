@@ -40,11 +40,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <Theme>
+        <Theme appearance="dark">
           {children}
           <ScrollRestoration />
           <Scripts />
-          {/* <ThemePanel /> */}
+          <ThemePanel />
         </Theme>
       </body>
     </html>
@@ -53,11 +53,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <>
       <AuthProvider>
         <Outlet />
       </AuthProvider>
-    </>
   );
 }
 

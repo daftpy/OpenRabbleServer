@@ -1,10 +1,11 @@
-import { Box, Button, Dialog, Flex, Heading } from "@radix-ui/themes"
+import { Box, Button, Dialog, Flex, Heading, useThemeContext } from "@radix-ui/themes"
 import { LineChart } from "../charts/line_chart"
 import { emitter } from "~/root";
 import { useEffect, useState } from "react";
 import type { RecentActivityMessage, ServerMessage } from "~/messages";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
+import { ChatBubbleIcon, LapTimerIcon } from "@radix-ui/react-icons";
 
 export type SessionActivity = {
   session_date: string; // e.g., "2025-02-23"
@@ -66,20 +67,27 @@ export function RecentActivity() {
     ]
   }
   const aspectRatio = 2;
+
+  // Colors for buttons
+  const {appearance} = useThemeContext();
+  let buttonStyle = {backgroundColor: "var(--secondary-button-color)", border: ""};
+  if (appearance === "dark") {
+    buttonStyle.border = "1px solid var(--indigo-4)";
+  }
   return (
     <Box>
       <Flex justify={"between"} pb={"2"}>
-        <Heading style={{color: "#415187"}}>Recent Activity</Heading>
+        <Heading style={{color: "var(--subheading-color)"}}>Recent Activity</Heading>
         <Flex  gap={"2"}>
-          <Button size="2">Sessions</Button>
-          <Button size="2" color="gray">Messages</Button>
+          <Button size="2"><LapTimerIcon /> Sessions</Button>
+          <Button size="2" color="gray" style={buttonStyle}><ChatBubbleIcon /> Messages</Button>
         </Flex>
       </Flex>
       <Box style={{ border: "2px solid var(--indigo-3)", borderRadius: 4 }} p={"2"}>
         <Flex justify={"between"} pb={"2"} px={"1"}>
           <Dialog.Root>
             <Dialog.Trigger>
-              <Button size={"1"} color={"gray"}>Select Range</Button>
+              <Button size={"1"} color={"gray"} style={buttonStyle}>Select Range</Button>
             </Dialog.Trigger>
 
             <Dialog.Content maxWidth={"350px"}>
@@ -99,10 +107,10 @@ export function RecentActivity() {
             </Dialog.Content>
           </Dialog.Root>
           <Flex gap={"2"}>
-            <Button size={"1"} color={"gray"}>Day</Button>
-            <Button size={"1"} color={"indigo"}>Week</Button>
-            <Button size={"1"} color={"gray"}>Month</Button>
-            <Button size={"1"} color={"gray"}>Year</Button>
+            <Button size={"1"} color={"gray"} style={buttonStyle}>Day</Button>
+            <Button size={"1"} color={"indigo"} >Week</Button>
+            <Button size={"1"} color={"gray"} style={buttonStyle}>Month</Button>
+            <Button size={"1"} color={"gray"} style={buttonStyle}>Year</Button>
           </Flex>
         </Flex>
         <Box px={"4"} py={"2"} style={{aspectRatio: aspectRatio ? aspectRatio : "auto", backgroundColor: "var(--indigo-2)"}} className="rounded">

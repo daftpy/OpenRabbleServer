@@ -54,7 +54,7 @@ export function MessagesPerChannel() {
   return (
     <Box>
       <Box pb={"2"}>
-        <Heading style={{color: "#415187"}}>Messages By Channel</Heading>
+        <Heading style={{color: "var(--subheading-color)"}}>Messages By Channel</Heading>
       </Box>
       <Box style={{ border: "2px solid var(--indigo-3)", borderRadius: 4 }} p={"2"}>
         <Box px={"6"} py={"2"} style={{aspectRatio: aspectRatio ? aspectRatio : "auto", backgroundColor: "var(--indigo-2)"}} className="rounded">

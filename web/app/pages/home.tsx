@@ -28,12 +28,12 @@ export function HomePage({ channels }: { channels: Channel[] }) {
   const navigate = useNavigate();
   
   return (
-    <main>
+    <main style={{color: "var(--primary-text-color)"}}>
       <Flex direction="column" gap={"6"} height={"100%"} maxWidth={"900px"} m={"auto"} flexGrow={"1"} px={"4"} py={"6"}>
         <Flex direction={"column"}>
-          <Heading size={"8"} weight={"bold"} color="indigo" className="text-xl pb-1">Your OnRabble Server</Heading>
+          <Heading size={"8"} weight={"bold"} className="text-xl pb-1" style={{color: "var(--indigo-9)"}}>Your OnRabble Server</Heading>
           <Text>Welcome to your dashboard.</Text>
-          <Link href="#">Hide Live Chat</Link>
+          <Link href="#" style={{color: "var(--link-color)"}}>Hide Live Chat</Link>
         </Flex>
         <ChatMessageList />
         <Flex gap={"3"} direction={{initial: "column", sm: "row"}}>
@@ -54,7 +54,7 @@ export function HomePage({ channels }: { channels: Channel[] }) {
           <UserList />
         </Flex>
         <Box>
-          <Heading size={"7"} color="indigo">Analytics</Heading>
+          <Heading size={"7"} style={{ color: "var(--indigo-9)" }}>Analytics</Heading>
           <Text>Essential server analytics are available. Track basic metrics like how many messages you serve, user statistics, and other activity.</Text>
         </Box>
         <RecentActivity />

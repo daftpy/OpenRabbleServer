@@ -1,5 +1,5 @@
 import { Cross2Icon, GearIcon } from "@radix-ui/react-icons";
-import { Flex, Button, Table, Text, Box, Heading, Grid } from "@radix-ui/themes";
+import { Flex, Button, Text, Box, Heading, Grid } from "@radix-ui/themes";
 import React from "react";
 
 export interface Channel {
@@ -18,8 +18,8 @@ const ChannelRow = ({ channel, isLast } : { channel : Channel, isLast: boolean }
       <Flex flexGrow={"1"} gap={"4"} overflow={"hidden"} style={{borderBottom: isLast ? noLine : line}}  py={"2"}> 
         <Text truncate>{ channel.description }</Text>
         <Flex gap={"2"} flexGrow={"1"} justify={"end"}>
-          <Button color="blue" size={"1"} radius="full" style={{ boxShadow: "var(--shadow-1)", height: "20px", width: "20px" }}><Box><GearIcon /></Box></Button>
-          <Button color="red" size={"1"} radius="full" style={{ boxShadow: "var(--shadow-1)", height: "20px", width: "20px" }}><Box><Cross2Icon /></Box></Button>
+          <Button color="blue" size={"1"} radius="full" style={{ boxShadow: "var(--shadow-1)", height: "20px", width: "20px", border: "1px solid var(--sky-9)" }}><Box><GearIcon style={{width: "14px", height: "14px"}} /></Box></Button>
+          <Button color="red" size={"1"} radius="full" style={{ boxShadow: "var(--shadow-1)", height: "20px", width: "20px", border: "1px solid red" }}><Box><Cross2Icon style={{width: "14px", height: "14px"}} /></Box></Button>
         </Flex>
       </Flex>
     </React.Fragment>
@@ -30,8 +30,8 @@ export default function ChannelList({ channels }  : { channels: Channel[] }) {
   return (
     <Box flexGrow={"1"} width={"100%"}>
       <Grid columns="1fr 3fr" width={"100%"} gapY={"2"} pt={"2"}>
-        <Heading size={"3"} style={{color: "#415187"}}>Channels</Heading>
-        <Heading size={"3"} style={{color: "#415187"}}>Description</Heading>
+        <Heading size={"3"} style={{color: "var(--subheading-color)"}}>Channels</Heading>
+        <Heading size={"3"} style={{color: "var(--subheading-color)"}}>Description</Heading>
         { channels && channels.map((channel, index) => (
           <ChannelRow key={index} channel={channel} isLast={index == channels.length -1} />
         ))}

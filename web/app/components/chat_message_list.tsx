@@ -86,7 +86,7 @@ export default function ChatMessageList() {
   }, []);
 
   return (
-    <Box className="rounded-sm border-solid border-2 border-gray-100 p-2">
+    <Box className="rounded-sm p-2" style={{border: "2px solid var(--indigo-3)"}}>
       <ScrollArea
         className="bg-blue-50 p-2"
         style={{

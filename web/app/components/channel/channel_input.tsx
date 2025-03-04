@@ -1,6 +1,7 @@
 import { Button, Flex, TextField } from "@radix-ui/themes"
 import React, { useState } from "react"
 import type { Channel } from "./channel_list";
+import { PlusIcon } from "@radix-ui/react-icons";
 
 interface props {
   channelList: Channel[];
@@ -56,7 +57,7 @@ export default function ChannelInput({ channelList, setChannelList } : props) {
             className="flex-grow"
           >
           </TextField.Root>
-          <Button onClick={addChannel} style={{ boxShadow: "var(--shadow-3)" }}>Add</Button> {/* ✅ Calls addChannel */}
+          <Button onClick={addChannel} style={{ boxShadow: "var(--shadow-3)" }}><PlusIcon/>Add</Button> {/* ✅ Calls addChannel */}
         </Flex>
     </>
   )
