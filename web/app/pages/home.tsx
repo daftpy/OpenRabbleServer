@@ -38,7 +38,7 @@ export function HomePage({ channels }: { channels: Channel[] }) {
         <ChatMessageList />
         <Flex gap={"3"} direction={{initial: "column", sm: "row"}}>
           <Button onClick={() => navigate("/about")}><PersonIcon /> User Management</Button>
-          <Button onClick={() => navigate("/about")}><MagnifyingGlassIcon /> Messages</Button>
+          <Button onClick={() => navigate("/messages")}><MagnifyingGlassIcon /> Messages</Button>
           <Button onClick={() => navigate("/about")}><GearIcon /> Settings</Button>
           <Button onClick={() => navigate("/about")}><LockClosedIcon /> Keycloak</Button>
         </Flex>
