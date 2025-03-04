@@ -21,6 +21,10 @@ var upgrader = websocket.Upgrader{
 func main() {
 	// Connect to the database
 	conn, err := db.Connect()
+	if err != nil {
+		log.Fatalf("Failed to connect to the database: %v", err)
+	}
+	log.Println("Database connection established.")
 
 	// Initialize Valkey client
 	client, err := valkey.NewClient(valkey.ClientOption{

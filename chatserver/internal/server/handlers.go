@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -83,6 +84,54 @@ func HandleChannels(db *pgxpool.Pool, s *Server) http.HandlerFunc {
 			// broadcast new channel message s.hub.Broadcast()
 			w.WriteHeader(http.StatusCreated)
 			json.NewEncoder(w).Encode(map[string]string{"message": "Channel created", "name": request.Name})
+
+		default:
+			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		}
+	}
+}
+
+func HandleMessages(db *pgxpool.Pool) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			// Extract query parameters
+			channel := r.URL.Query().Get("channel")
+			keyword := r.URL.Query().Get("keyword") // Optional search keyword
+			limitStr := r.URL.Query().Get("limit")
+			offsetStr := r.URL.Query().Get("offset")
+
+			limit := 50 // Default: 50 messages per request
+			offset := 0 // Default: No offset (start from latest messages)
+
+			if limitStr != "" {
+				parsedLimit, err := strconv.Atoi(limitStr)
+				if err != nil || parsedLimit <= 0 {
+					http.Error(w, "Invalid 'limit' query parameter", http.StatusBadRequest)
+					return
+				}
+				limit = parsedLimit
+			}
+
+			if offsetStr != "" {
+				parsedOffset, err := strconv.Atoi(offsetStr)
+				if err != nil || parsedOffset < 0 {
+					http.Error(w, "Invalid 'offset' query parameter", http.StatusBadRequest)
+					return
+				}
+				offset = parsedOffset
+			}
+
+			// Fetch messages from the database
+			messages, err := database.FetchMessages(db, channel, keyword, limit, offset)
+			if err != nil {
+				log.Printf("Failed to fetch messages for channel '%s': %v", channel, err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string][]models.ChatMessage{"messages": messages})
 
 		default:
 			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)

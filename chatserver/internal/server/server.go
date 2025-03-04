@@ -217,6 +217,7 @@ func New(addr string, h hub.HubInterface, db *pgxpool.Pool) (*Server, error) {
 	// Register handlers
 	mux.HandleFunc("/discovery", HandleDiscovery())
 	mux.HandleFunc("/channels", HandleChannels(db, srv))
+	mux.HandleFunc("/messages", HandleMessages(db))
 
 	return srv, nil
 }

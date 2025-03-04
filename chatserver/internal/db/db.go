@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -197,4 +198,62 @@ func FetchSessionActivity(db *pgxpool.Pool) ([]models.SessionActivity, error) {
 
 	log.Printf("Loaded %d session activity records", len(activity))
 	return activity, nil
+}
+
+func FetchMessages(db *pgxpool.Pool, channel, keyword string, limit, offset int) ([]models.ChatMessage, error) {
+	var query string
+	var args []interface{}
+	var conditions []string
+
+	query = `
+		SELECT id, owner_id, channel, message, authored_at
+		FROM chatserver.chat_messages
+	`
+
+	// Add conditions dynamically
+	if channel != "" {
+		conditions = append(conditions, fmt.Sprintf("channel = $%d", len(args)+1))
+		args = append(args, channel)
+	}
+
+	if keyword != "" {
+		conditions = append(conditions, fmt.Sprintf("search_vector @@ plainto_tsquery('english', $%d)", len(args)+1))
+		args = append(args, keyword)
+	}
+
+	// Only add WHERE if there are conditions
+	if len(conditions) > 0 {
+		query += " WHERE " + strings.Join(conditions, " AND ")
+	}
+
+	// Add ordering and pagination
+	query += fmt.Sprintf(`
+		ORDER BY authored_at DESC
+		LIMIT $%d OFFSET $%d;
+	`, len(args)+1, len(args)+2)
+
+	args = append(args, limit, offset)
+
+	rows, err := db.Query(context.Background(), query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch chat messages: %w", err)
+	}
+	defer rows.Close()
+
+	// Parse results
+	var messages []models.ChatMessage
+	for rows.Next() {
+		var msg models.ChatMessage
+		if err := rows.Scan(&msg.ID, &msg.OwnerID, &msg.Channel, &msg.Message, &msg.AuthoredAt); err != nil {
+			return nil, fmt.Errorf("failed to scan chat message row: %w", err)
+		}
+		messages = append(messages, msg)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error after iterating chat message rows: %w", err)
+	}
+
+	log.Printf("Fetched %d messages from database (channel: %s, keyword: %s)", len(messages), channel, keyword)
+	return messages, nil
 }

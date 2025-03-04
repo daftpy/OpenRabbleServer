@@ -15,8 +15,11 @@ CREATE TABLE IF NOT EXISTS chatserver.chat_messages (
     owner_id UUID NOT NULL,
     channel VARCHAR(24) NOT NULL,  -- Stores the channel name directly
     message TEXT NOT NULL,
-    authored_at TIMESTAMP NOT NULL
+    authored_at TIMESTAMP NOT NULL,
+    search_vector TSVECTOR GENERATED ALWAYS AS (to_tsvector('english', message)) STORED
 );
+
+CREATE INDEX IF NOT EXISTS chat_messages_search_idx ON chatserver.chat_messages USING GIN(search_vector);
 
 CREATE TABLE IF NOT EXISTS chatserver.chat_sessions (
     id SERIAL PRIMARY KEY,
@@ -25,6 +28,3 @@ CREATE TABLE IF NOT EXISTS chatserver.chat_sessions (
     end_time TIMESTAMP NOT NULL,
     duration INTERVAL GENERATED ALWAYS AS (end_time - start_time) STORED
 );
-
-ALTER TABLE chatserver.channels 
-ALTER COLUMN updated_at SET DEFAULT now();
