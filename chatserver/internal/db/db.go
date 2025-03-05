@@ -200,7 +200,7 @@ func FetchSessionActivity(db *pgxpool.Pool) ([]models.SessionActivity, error) {
 	return activity, nil
 }
 
-func FetchMessages(db *pgxpool.Pool, channel, keyword string, limit, offset int) ([]models.ChatMessage, error) {
+func FetchMessages(db *pgxpool.Pool, channels []string, keyword string, limit, offset int) ([]models.ChatMessage, error) {
 	var query string
 	var args []interface{}
 	var conditions []string
@@ -211,14 +211,22 @@ func FetchMessages(db *pgxpool.Pool, channel, keyword string, limit, offset int)
 	`
 
 	// Add conditions dynamically
-	if channel != "" {
-		conditions = append(conditions, fmt.Sprintf("channel = $%d", len(args)+1))
-		args = append(args, channel)
+	argIndex := 1
+
+	if len(channels) > 0 {
+		placeholders := []string{}
+		for _, channel := range channels {
+			placeholders = append(placeholders, fmt.Sprintf("$%d", argIndex))
+			args = append(args, channel)
+			argIndex++
+		}
+		conditions = append(conditions, fmt.Sprintf("channel IN (%s)", strings.Join(placeholders, ", ")))
 	}
 
 	if keyword != "" {
-		conditions = append(conditions, fmt.Sprintf("search_vector @@ plainto_tsquery('english', $%d)", len(args)+1))
+		conditions = append(conditions, fmt.Sprintf("search_vector @@ plainto_tsquery('english', $%d)", argIndex))
 		args = append(args, keyword)
+		argIndex++
 	}
 
 	// Only add WHERE if there are conditions
@@ -230,7 +238,7 @@ func FetchMessages(db *pgxpool.Pool, channel, keyword string, limit, offset int)
 	query += fmt.Sprintf(`
 		ORDER BY authored_at DESC
 		LIMIT $%d OFFSET $%d;
-	`, len(args)+1, len(args)+2)
+	`, argIndex, argIndex+1)
 
 	args = append(args, limit, offset)
 
@@ -254,6 +262,6 @@ func FetchMessages(db *pgxpool.Pool, channel, keyword string, limit, offset int)
 		return nil, fmt.Errorf("error after iterating chat message rows: %w", err)
 	}
 
-	log.Printf("Fetched %d messages from database (channel: %s, keyword: %s)", len(messages), channel, keyword)
+	log.Printf("Fetched %d messages from database (channels: %v, keyword: %s)", len(messages), channels, keyword)
 	return messages, nil
 }

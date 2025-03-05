@@ -96,8 +96,8 @@ func HandleMessages(db *pgxpool.Pool) http.HandlerFunc {
 		switch r.Method {
 		case http.MethodGet:
 			// Extract query parameters
-			channel := r.URL.Query().Get("channel")
-			keyword := r.URL.Query().Get("keyword") // Optional search keyword
+			channels := r.URL.Query()["channel"]
+			keyword := r.URL.Query().Get("keyword") // Optional
 			limitStr := r.URL.Query().Get("limit")
 			offsetStr := r.URL.Query().Get("offset")
 
@@ -123,9 +123,9 @@ func HandleMessages(db *pgxpool.Pool) http.HandlerFunc {
 			}
 
 			// Fetch messages from the database
-			messages, err := database.FetchMessages(db, channel, keyword, limit, offset)
+			messages, err := database.FetchMessages(db, channels, keyword, limit, offset)
 			if err != nil {
-				log.Printf("Failed to fetch messages for channel '%s': %v", channel, err)
+				log.Printf("Failed to fetch messages for channels '%v': %v", channels, err)
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
 			}
