@@ -1,6 +1,7 @@
 import { Button, DropdownMenu, Flex, Heading, Text, TextField } from "@radix-ui/themes";
+import { MessageList } from "~/components/message/message_list";
 
-export function SearchMessagesPage() {
+export function SearchMessagesPage({ messages } : any) {
     return (
         <Flex direction={"column"} maxWidth={"990px"} m={"auto"} px={"4"} py={"6"}>
             <Heading size={"8"} weight={"bold"} className="text-xl pb-1" style={{color: "var(--indigo-9)"}}>Your OnRabble Server</Heading>
@@ -24,6 +25,7 @@ export function SearchMessagesPage() {
             </DropdownMenu.Root>
             <Button color="grass">Search</Button>
             </Flex>
+            <MessageList messages={messages} />
         </Flex>
     )
 }
