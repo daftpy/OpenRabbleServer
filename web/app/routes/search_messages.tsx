@@ -26,6 +26,26 @@ export async function loader({ params }: Route.LoaderArgs) {
   };
 }
 
+export async function clientAction({ request }: Route.ActionArgs) {
+  let formData = await request.formData();
+  let keyword = formData.get("keyword") || "";
+  let channels = formData.getAll("channel"); // Support multiple selected channels
+
+  const queryParams = new URLSearchParams();
+  if (keyword) queryParams.append("keyword", keyword.toString());
+  channels.forEach((channel) => queryParams.append("channel", channel.toString()));
+
+  const response = await fetch(`https://chat.localhost/messages?${queryParams.toString()}`);
+  
+  if (!response.ok) {
+    throw new Response("Failed to fetch messages", { status: response.status });
+  }
+
+  const messageData = await response.json();
+  return { messages: messageData.messages ?? [] };
+}
+
+
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "New React Router App" },
