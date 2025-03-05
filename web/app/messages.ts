@@ -1,6 +1,6 @@
 import type { SessionActivity } from "./components/analysis/recent_activity";
 import type { Channel } from "./components/channel/channel_list";
-import type { ChatMessageType } from "./components/chat_message_list";
+import type { ChatMessageType } from "./components/message/live_view";
 
 // Base message interface
 export interface Message {

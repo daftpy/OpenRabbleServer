@@ -2,22 +2,19 @@
     The home page of the admin dashboard. Landing here will display the current channels
     of the chatserver as well as connected users.
 */
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useNavigate } from "react-router";
 import ChannelInput from "~/components/channel/channel_input";
 import ChannelList from "~/components/channel/channel_list";
-import { Bar } from "react-chartjs-2";
 
 import { Box, Button, Flex, Heading, Link, Text } from "@radix-ui/themes";
 import type { Channel } from "~/components/channel/channel_list";
 import UserList from "~/components/user_list";
-import ChatMessageList from "~/components/chat_message_list";
 import { GearIcon, LockClosedIcon, MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons";
-import { emitter } from "~/root";
-import type { ChannelMessageCount, ServerMessage } from "~/messages";
 import "chart.js/auto"
 import { MessagesPerChannel } from "~/components/analysis/messages_per_channel";
 import { RecentActivity } from "~/components/analysis/recent_activity";
+import { LiveView } from "~/components/message/live_view";
 
 /*
   TODO: Added a test navigate button here to move between pages. It works properly
@@ -35,7 +32,7 @@ export function HomePage({ channels }: { channels: Channel[] }) {
           <Text>Welcome to your dashboard.</Text>
           <Link href="#" style={{color: "var(--link-color)"}}>Hide Live Chat</Link>
         </Flex>
-        <ChatMessageList />
+        <LiveView />
         <Flex gap={"3"} direction={{initial: "column", sm: "row"}}>
           <Button onClick={() => navigate("/about")}><PersonIcon /> User Management</Button>
           <Button onClick={() => navigate("/messages")}><MagnifyingGlassIcon /> Messages</Button>
