@@ -17,7 +17,7 @@ Manages receiving and sending messages to/from the server.
 type Client struct {
 	Username    string
 	Conn        *websocket.Conn
-	Send        chan messages.Messager
+	Send        chan messages.BaseMessage
 	Hub         hub.HubInterface
 	Sub         string // Keycloak stable user ID
 	ClientID    string
@@ -30,7 +30,7 @@ func (c *Client) GetUsername() string {
 }
 
 // Places messages into the send channel to be picked up by WritePump().
-func (c *Client) SendMessage(msg messages.Messager) {
+func (c *Client) SendMessage(msg messages.BaseMessage) {
 	c.Send <- msg
 }
 
@@ -91,8 +91,7 @@ func (c *Client) ReadPump() {
 		log.Printf("Receiived message: %s", receivedMessage.Message)
 
 		// Process received message
-		// TODO: update "general" to dynamic channel
-		msg := messages.NewChatMessage(receivedMessage.Message, c.Username, receivedMessage.Channel)
+		msg := messages.NewChatMessage(c.Username, receivedMessage.Channel, receivedMessage.Message, time.Now())
 		log.Printf("Message received from %s", c.Username)
 
 		// Send the message to the hub
@@ -116,6 +115,6 @@ func (c *Client) WritePump() {
 			log.Printf("Write error for %s: %v", c.Username, err)
 			break // Exit loop if there's an error
 		}
-		log.Printf("Message sent for %s: %v", c.Username, msg.MessageType())
+		log.Printf("Message sent for %s: %v", c.Username, msg.Type)
 	}
 }

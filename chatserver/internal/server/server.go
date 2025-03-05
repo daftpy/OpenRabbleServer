@@ -104,7 +104,7 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 	client := &client.Client{
 		Username: username,
 		Conn:     conn,
-		Send:     make(chan messages.Messager, 256),
+		Send:     make(chan messages.BaseMessage, 256),
 		Hub:      s.hub,
 		Sub:      userSub,
 		ClientID: clientID,

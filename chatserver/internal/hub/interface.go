@@ -7,7 +7,7 @@ import (
 
 type ClientInterface interface {
 	GetUsername() string
-	SendMessage(messages.Messager)
+	SendMessage(messages.BaseMessage)
 	CloseSendChannel()
 	GetID() string
 	GetClientID() string
@@ -16,10 +16,10 @@ type ClientInterface interface {
 }
 
 type HubInterface interface {
-	Broadcast(messages.Messager)
+	Broadcast(messages.BaseMessage)
 	RegisterClient(ClientInterface, string)
 	UnregisterClient(ClientInterface, string)
-	SendMessage(messages.Messager)
+	SendMessage(messages.BaseMessage)
 	GetConnectedUsers() []string
-	GetCachedChatMessages() []messages.ChatMessage
+	GetCachedChatMessages() []messages.ChatMessagePayload
 }

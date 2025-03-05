@@ -41,7 +41,7 @@ const cacheTTL = 24 * 60 * 60 // 24 hours in seconds
 const flushInterval = 2 * time.Minute
 
 // Caches a chat message in Valkey and triggers a DB flush if max cache size is reached
-func (m *MessageCache) CacheChatMessage(msg messages.ChatMessage) {
+func (m *MessageCache) CacheChatMessage(msg messages.ChatMessagePayload) {
 	jsonData, err := json.Marshal(msg)
 	if err != nil {
 		log.Printf("Failed to serialize chat message: %v", err)
@@ -75,7 +75,7 @@ func (m *MessageCache) CacheChatMessage(msg messages.ChatMessage) {
 }
 
 // Retrieves chat messages from the circular cache
-func (m *MessageCache) GetCachedChatMessages() []messages.ChatMessage {
+func (m *MessageCache) GetCachedChatMessages() []messages.ChatMessagePayload {
 	recentCacheKey := "recent_messages"
 	ctx := context.Background()
 
@@ -89,9 +89,9 @@ func (m *MessageCache) GetCachedChatMessages() []messages.ChatMessage {
 		return nil
 	}
 
-	var chatMessages []messages.ChatMessage
+	var chatMessages []messages.ChatMessagePayload
 	for _, jsonData := range cachedMessages {
-		var msg messages.ChatMessage
+		var msg messages.ChatMessagePayload
 		if err := json.Unmarshal([]byte(jsonData), &msg); err != nil {
 			log.Printf("Failed to deserialize chat message: %v", err)
 			continue
@@ -138,7 +138,7 @@ func (m *MessageCache) FlushCacheToDB() {
 	const tempOwnerID = "0f5e28a8-4f8e-49be-b56d-83419ab92a36"
 
 	for _, jsonData := range cachedMessages {
-		var msg messages.ChatMessage
+		var msg messages.ChatMessagePayload
 		if err := json.Unmarshal([]byte(jsonData), &msg); err != nil {
 			log.Printf("Failed to deserialize chat message: %v", err)
 			continue

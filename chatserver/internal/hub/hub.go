@@ -18,7 +18,7 @@ and broadcasts messages to clients.
 */
 type Hub struct {
 	Connections  map[string]ClientInterface
-	Messages     chan messages.Messager
+	Messages     chan messages.BaseMessage
 	Register     chan ClientInterface
 	Unregister   chan ClientInterface
 	MessageCache *cache.MessageCache
@@ -30,7 +30,7 @@ func NewHub(db *pgxpool.Pool, cache *cache.MessageCache) *Hub {
 
 	return &Hub{
 		Connections:  make(map[string]ClientInterface),
-		Messages:     make(chan messages.Messager),
+		Messages:     make(chan messages.BaseMessage),
 		Register:     make(chan ClientInterface),
 		Unregister:   make(chan ClientInterface),
 		MessageCache: cache,
@@ -85,7 +85,7 @@ func closeClientSendChannel(client ClientInterface) {
 }
 
 // Sends a message to the hub Messages channel for processing and broadcasting.
-func (h *Hub) SendMessage(msg messages.Messager) {
+func (h *Hub) SendMessage(msg messages.BaseMessage) {
 	h.Messages <- msg
 }
 
@@ -104,28 +104,33 @@ func (h *Hub) GetConnectedUsers() []string {
 Processes incoming messages based on their type.
 It currently supports chat messages and user connection updates.
 */
-func (h *Hub) handleMessage(msg messages.Messager) {
-	switch msg := msg.(type) {
-	case messages.ChatMessage:
-		log.Printf("Handling chat message from: %s", msg.Username)
-		h.MessageCache.CacheChatMessage(msg)
+func (h *Hub) handleMessage(msg messages.BaseMessage) {
+	switch msg.Type {
+	case messages.ChatMessageType:
+		log.Printf("Handling chat message from: %s", msg.Sender)
+		payload, ok := msg.Payload.(messages.ChatMessagePayload)
+		if !ok {
+			log.Println("invalid chat message payload")
+			return
+		}
+		h.MessageCache.CacheChatMessage(payload)
 		h.Broadcast(msg)
 
-	case messages.UserStatusMessage:
-		log.Printf("Handling user status message for: %s - %v", msg.Username, msg.IsConnected)
+	case messages.UserStatusMessageType:
+		log.Printf("Handling user status message for: %s - %v", msg.Sender, msg.Payload)
 		h.Broadcast(msg)
 
-	case messages.ConnectedUsersMessage:
+	case messages.ConnectedUsersMessageType:
 		log.Println("Sending connected users list")
 		h.Broadcast(msg)
 
 	default:
-		log.Printf("Unhandled message type: %s", msg.MessageType())
+		log.Printf("Unhandled message type: %s", msg.Type)
 	}
 }
 
 // Retrieves chat messages from the MessageCache and returns them as a slice of ChatMessage
-func (h *Hub) GetCachedChatMessages() []messages.ChatMessage {
+func (h *Hub) GetCachedChatMessages() []messages.ChatMessagePayload {
 	chatMessages := h.MessageCache.GetCachedChatMessages()
 	return chatMessages
 }
@@ -134,8 +139,8 @@ func (h *Hub) GetCachedChatMessages() []messages.ChatMessage {
 Broadcasts a message to all connected clients.
 Every client in the hub receives the message.
 */
-func (h *Hub) Broadcast(msg messages.Messager) {
-	log.Printf("Broadcasting message of type: %s", msg.MessageType())
+func (h *Hub) Broadcast(msg messages.BaseMessage) {
+	log.Printf("Broadcasting message of type: %s", msg.Type)
 	for _, client := range h.Connections {
 		log.Printf("Sending message to: %s", client.GetUsername())
 		client.SendMessage(msg)
