@@ -5,8 +5,7 @@ import RouteProtector from "~/components/route_protector";
 import { HomePage } from "~/pages/home";
 
 export async function loader({ params }: Route.LoaderArgs) {
-  const response = await fetch("https://chat.localhost/channels"); // ✅ Update to use the correct service name
-  
+  const response = await fetch("https://chat.localhost/channels");
   if (!response.ok) {
     throw new Response("Failed to load channels", { status: response.status });
   }

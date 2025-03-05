@@ -4,18 +4,26 @@ import { SearchMessagesPage } from "~/pages/search_messages"
 import { useLoaderData } from "react-router";
 
 export async function loader({ params }: Route.LoaderArgs) {
-  const response = await fetch("https://chat.localhost/messages?channel=General&limit=10&offset=0");
+  const messageResponse = await fetch("https://chat.localhost/messages?channel=General&limit=20&offset=0");
+  const channelResponse  = await fetch("https://chat.localhost/channels");
+
   
-  if (!response.ok) {
-    throw new Response("Failed to load channels", { status: response.status });
+  if (!messageResponse.ok) {
+    throw new Response("Failed to load messages", { status: messageResponse.status });
+  }
+  if (!channelResponse.ok) {
+    throw new Response("Failed to load channels", { status: channelResponse.status });
   }
 
-  const data = await response.json();
-  console.log(data);
-  if (data.messages == null) {
-    return [];
-  }
-  return data.messages;
+  const messageData = await messageResponse.json();
+  const channelData = await channelResponse.json();
+  console.log(messageData);
+  console.log(channelData);
+  
+  return {
+    messages: messageData.messages ?? [],
+    channels: channelData.channels ?? [],
+  };
 }
 
 export function meta({}: Route.MetaArgs) {
@@ -26,11 +34,11 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function About({loaderData,}: Route.ComponentProps) {
-  const messages = useLoaderData();
+  const { messages, channels } = useLoaderData() as { messages: any[], channels: any[] };
   useEffect(() => {
     console.log("Test search page");
   }, []);
   return (
-    <SearchMessagesPage messages={messages} />
+    <SearchMessagesPage messages={messages} channels={channels} />
   )
 }

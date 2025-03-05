@@ -24,7 +24,7 @@ body {
 .dark {
   --primary-text-color: #c8cee3; 
   --secondary-button-color: var(--indigo-2);
-  --subheading-color: var(--indigo-7);
+  --subheading-color: var(--indigo-8);
 }
 
 .light {
