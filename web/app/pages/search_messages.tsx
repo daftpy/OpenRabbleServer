@@ -38,12 +38,12 @@ export function SearchMessagesPage({ messages, channels } : any) {
           ))}
         </DropdownMenu.Content>
       </DropdownMenu.Root>
-      <Button color="grass">Search</Button>
+      <Button color="jade">Search</Button>
       </Flex>
       <Flex pb={"2"} gap={"2"} align={"center"}>
         <Text weight={"bold"} style={{color: "var(--subheading-color)"}}>Filters: </Text>
         {filters && filters.map((filter : any) => (
-          <Badge size={"2"} color="ruby" onClick={() => removeFilter(filter)}>{ filter }<Cross1Icon /></Badge>
+          <Badge size={"2"} color="amber" onClick={() => removeFilter(filter)}>{ filter }<Cross1Icon /></Badge>
         ))}
       </Flex>
       <MessageList messages={messages} />

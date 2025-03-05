@@ -57,7 +57,7 @@ export default function ChannelInput({ channelList, setChannelList } : props) {
             className="flex-grow"
           >
           </TextField.Root>
-          <Button onClick={addChannel} style={{ boxShadow: "var(--shadow-3)" }}><PlusIcon/>Add</Button> {/* ✅ Calls addChannel */}
+          <Button onClick={addChannel} style={{ boxShadow: "var(--shadow-3)" }} color="jade"><PlusIcon/>Add</Button> {/* ✅ Calls addChannel */}
         </Flex>
     </>
   )

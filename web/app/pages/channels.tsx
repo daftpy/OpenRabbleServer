@@ -13,10 +13,10 @@ export function ChannelPage({ channels }: { channels: Channel[] }) {
     <Container className="min-h-full" p={"6"}>
       <Flex direction={"column"} gap={"6"}>
         <Heading size={"8"} weight={"bold"} className="text-xl pb-1" style={{color: "var(--indigo-9)"}}>Your OnRabble Server</Heading>
-        <Box>
+        <Flex direction={"column"} gap={"2"}>
           <ChannelInput channelList={channelList} setChannelList={setChannelList} />
           <ChannelList channels={channelList} />
-        </Box>
+        </Flex>
         <MessagesPerChannel />
       </Flex>
   </Container>

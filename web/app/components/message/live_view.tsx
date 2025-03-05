@@ -59,10 +59,10 @@ export function LiveView() {
     console.log("loaded");
     const handler = (message: ServerMessage) => {
       if (message.type === "chat_message") {
-        console.log("channel", message.channel);
+        console.log("channel", message.payload.channel);
         setMessages((prev) => [
           ...prev,
-          { username: message.username, channel: message.channel, message: message.message },
+          { username: message.payload.username, channel: message.payload.channel, message: message.payload.message },
         ]);
       } else if (message.type === "bulk_chat_messages") {
         setMessages((prev) => [

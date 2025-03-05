@@ -1,4 +1,4 @@
-import { Cross2Icon, GearIcon } from "@radix-ui/react-icons";
+import { CaretSortIcon, Cross2Icon, GearIcon } from "@radix-ui/react-icons";
 import { Flex, Button, Text, Box, Heading, Grid } from "@radix-ui/themes";
 import React from "react";
 
@@ -19,8 +19,9 @@ const ChannelRow = ({ channel, isLast } : { channel : Channel, isLast: boolean }
       <Flex flexGrow={"1"} gap={"4"} overflow={"hidden"} style={{borderBottom: isLast ? noLine : line}}  py={"2"}> 
         <Text truncate>{ channel.description }</Text>
         <Flex gap={"2"} flexGrow={"1"} justify={"end"}>
-          <Button color="blue" size={"1"} radius="full" style={{ boxShadow: "var(--shadow-1)", height: "20px", width: "20px", border: "1px solid var(--sky-9)" }}><Box><GearIcon style={{width: "14px", height: "14px"}} /></Box></Button>
-          <Button color="red" size={"1"} radius="full" style={{ boxShadow: "var(--shadow-1)", height: "20px", width: "20px", border: "1px solid red" }}><Box><Cross2Icon style={{width: "14px", height: "14px"}} /></Box></Button>
+          <Button color="iris" size={"1"} radius="full" style={{ boxShadow: "var(--shadow-1)", height: "20px", width: "20px"}}><Box><CaretSortIcon style={{width: "14px", height: "14px"}} /></Box></Button>
+          <Button color="blue" size={"1"} radius="full" style={{ boxShadow: "var(--shadow-1)", height: "20px", width: "20px"}}><Box><GearIcon style={{width: "14px", height: "14px"}} /></Box></Button>
+          <Button color="red" size={"1"} radius="full" style={{ boxShadow: "var(--shadow-1)", height: "20px", width: "20px"}}><Box><Cross2Icon style={{width: "14px", height: "14px"}} /></Box></Button>
         </Flex>
       </Flex>
     </React.Fragment>

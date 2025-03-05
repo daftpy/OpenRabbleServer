@@ -20,12 +20,12 @@ export default function UserList() {
         setUsernames(message.users);
       } else if (message.type === "user_status") {
         // If user_status indicates the user went offline, remove them.
-        if (!message.status) {
-          setUsernames((prev) => prev.filter((u) => u !== message.username));
+        if (!message.payload.status) {
+          setUsernames((prev) => prev.filter((u) => u !== message.payload.username));
         } else {
           // Optionally, add the user if they're online and not already in the list.
           setUsernames((prev) =>
-            prev.includes(message.username) ? prev : [...prev, message.username]
+            prev.includes(message.payload.username) ? prev : [...prev, message.payload.username]
           );
         }
       }

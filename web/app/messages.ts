@@ -14,15 +14,19 @@ export interface ConnectedUsersMessage extends Message {
 
 export interface UserStatusMessage extends Message {
   type: "user_status";
-  username: string;
-  status: boolean;
+  payload: {
+    username: string;
+    status: boolean;
+  }
 }
 
 export interface ChatMessage extends Message {
   type: "chat_message";
-  message: string;
-  username: string;
-  channel: string;
+  payload: {
+    message: string;
+    username: string;
+    channel: string;
+  }
 }
 
 export interface ActiveChannelsMessage extends Message {
