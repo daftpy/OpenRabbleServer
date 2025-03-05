@@ -30,11 +30,11 @@ export function RecentActivity() {
     const handler = (message: ServerMessage) => {
       if (message.type === "session_activity") {
         const recentActivity = message as RecentActivityMessage;
-        console.log("Recent activity data:", recentActivity.session_activity);
+        console.log("Recent activity data:", recentActivity.payload.session_activity);
 
         // Transform session activity into chart data format
-        const labels = recentActivity.session_activity.map((entry) => entry.session_date);
-        const data = recentActivity.session_activity.map((entry) => entry.session_count);
+        const labels = recentActivity.payload.session_activity.map((entry) => entry.session_date);
+        const data = recentActivity.payload.session_activity.map((entry) => entry.session_count);
 
         // Update the chart data
         setLineData({

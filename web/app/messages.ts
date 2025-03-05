@@ -33,7 +33,9 @@ export interface ActiveChannelsMessage extends Message {
 export interface BulkChatMessages extends Message {
   type: "bulk_chat_messages";
   // Use the meessage type for react state
-  messages: ChatMessageType[];
+  payload: {
+    messages: ChatMessageType[];
+  }
 }
 
 export type ChannelMessageCount = {
@@ -43,12 +45,16 @@ export type ChannelMessageCount = {
 
 export interface MessageCountByChannelMessage extends Message {
   type: "message_count_by_channel";
-  channels: ChannelMessageCount[]
+  payload: {
+    channels: ChannelMessageCount[]
+  }
 }
 
 export interface RecentActivityMessage extends Message {
   type: "session_activity";
-  session_activity: SessionActivity[];
+  payload: {
+    session_activity: SessionActivity[];
+  }
 }
   
   // Create a union type for all server messages

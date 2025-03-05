@@ -67,7 +67,7 @@ export function LiveView() {
       } else if (message.type === "bulk_chat_messages") {
         setMessages((prev) => [
           ...prev,
-          ...message.messages // Spread the array correctly here
+          ...message.payload.messages // Spread the array correctly here
         ]);
         console.log("messages added");
       }

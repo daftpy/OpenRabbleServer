@@ -11,8 +11,8 @@ export function MessagesPerChannel() {
   useEffect(() => {
     const handler = (message: ServerMessage) => {
       if (message.type == "message_count_by_channel") {
-        console.log("Got analysis data", message.channels);
-        setChannelData(message.channels);
+        console.log("Got analysis data", message.payload.channels);
+        setChannelData(message.payload.channels);
       }
     }
 
