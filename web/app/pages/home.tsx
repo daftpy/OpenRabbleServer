@@ -3,11 +3,11 @@
     of the chatserver as well as connected users.
 */
 import { useState } from "react"
-import { useNavigate } from "react-router";
+import { Link, NavLink, useNavigate } from "react-router";
 import ChannelInput from "~/components/channel/channel_input";
 import ChannelList from "~/components/channel/channel_list";
 
-import { Box, Button, Flex, Heading, Link, Text } from "@radix-ui/themes";
+import { Box, Button, Flex, Heading, Text } from "@radix-ui/themes";
 import type { Channel } from "~/components/channel/channel_list";
 import UserList from "~/components/user_list";
 import { GearIcon, LockClosedIcon, MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons";
@@ -30,7 +30,7 @@ export function HomePage({ channels }: { channels: Channel[] }) {
         <Flex direction={"column"}>
           <Heading size={"8"} weight={"bold"} className="text-xl pb-1" style={{color: "var(--indigo-9)"}}>Your OnRabble Server</Heading>
           <Text>Welcome to your dashboard.</Text>
-          <Link href="#" style={{color: "var(--link-color)"}}>Hide Live Chat</Link>
+          <NavLink to="#" style={{color: "var(--link-color)"}}>Hide Live Chat</NavLink>
         </Flex>
         <LiveView />
         <Flex gap={"3"} direction={{initial: "column", sm: "row"}}>
@@ -41,7 +41,9 @@ export function HomePage({ channels }: { channels: Channel[] }) {
         </Flex>
         <Flex direction={"column"} gap={"2"}>
           <div>
-            <Heading size={"7"} weight={"bold"} style={{ color: "var(--indigo-9)" }}>Channels</Heading>
+            <Heading size={"7"} weight={"bold"} style={{ color: "var(--indigo-9)" }}>
+              <Link to="/channels">Channels</Link>
+            </Heading>
             <Text>You can add a new channel or manage your channels below.</Text>
           </div>
           <ChannelInput channelList={channelList} setChannelList={setChannelList} />

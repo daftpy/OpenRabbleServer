@@ -10,6 +10,7 @@ export interface Channel {
 const ChannelRow = ({ channel, isLast } : { channel : Channel, isLast: boolean }) => {
   const noLine = "none";
   const line = "1px solid var(--indigo-4)";
+  
   return (
     <React.Fragment>
       <Box style={{borderBottom: isLast ? noLine : line}} pr={"2"} py={"2"}>
@@ -27,6 +28,7 @@ const ChannelRow = ({ channel, isLast } : { channel : Channel, isLast: boolean }
 }
 
 export default function ChannelList({ channels }  : { channels: Channel[] }) {
+  console.log("LOOK HERE THRICE", channels);
   return (
     <Box flexGrow={"1"} width={"100%"}>
       <Grid columns="1fr 3fr" width={"100%"} gapY={"2"} pt={"2"}>

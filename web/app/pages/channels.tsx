@@ -4,20 +4,20 @@ import ChannelInput from "~/components/channel/channel_input";
 import type { Channel } from "~/components/channel/channel_list";
 import ChannelList from "~/components/channel/channel_list";
 import "chart.js/auto"
-import { Box, Container, Flex } from "@radix-ui/themes";
+import { Box, Container, Flex, Heading } from "@radix-ui/themes";
 
 export function ChannelPage({ channels }: { channels: Channel[] }) {
   const [channelList, setChannelList] = useState<Channel[]>(channels);
+
   return (
-    <Container className="min-h-full bg-red-100">
+    <Container className="min-h-full" p={"6"}>
       <Flex direction={"column"} gap={"6"}>
-
-          <Box>
-            <ChannelInput channelList={channelList} setChannelList={setChannelList} />
-            <ChannelList channels={channelList} />
-          </Box>
-          <MessagesPerChannel />
-
+        <Heading size={"8"} weight={"bold"} className="text-xl pb-1" style={{color: "var(--indigo-9)"}}>Your OnRabble Server</Heading>
+        <Box>
+          <ChannelInput channelList={channelList} setChannelList={setChannelList} />
+          <ChannelList channels={channelList} />
+        </Box>
+        <MessagesPerChannel />
       </Flex>
   </Container>
   )
