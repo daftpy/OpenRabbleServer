@@ -38,7 +38,7 @@ export function Message(props : props) {
           </Flex>
         </Flex>
         <Text size="2" wrap={"wrap"} className="py-1">{ props.meessage.message }</Text>
-        <Flex align={"center"} gap={"1"}><TimerIcon style={{color: "var(--blue-8)", fontWeight: "bold"}} /><Text size={"1"} style={{color: "var(--blue-9)"}}>{sent}</Text></Flex>
+        <Flex align={"center"} gap={"1"}><TimerIcon style={{color: "var(--highlighted-color)", fontWeight: "bold", width: "13px", height: "13px"}} /><Text size={"1"} style={{color: "var(--highlighted-color)"}}>{sent}</Text></Flex>
       </Flex>
     </Flex>
   )

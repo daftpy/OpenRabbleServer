@@ -1,5 +1,5 @@
 import { Cross1Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
-import { Badge, Button, DropdownMenu, Flex, Heading, Text, TextField } from "@radix-ui/themes";
+import { Badge, Box, Button, DropdownMenu, Flex, Heading, Text, TextField } from "@radix-ui/themes";
 import { useState } from "react";
 import { Link, useFetcher } from "react-router";
 import { MessageList } from "~/components/message/message_list";
@@ -29,10 +29,12 @@ export function SearchMessagesPage({ messages, channels }: any) {
       <Heading size={"8"} weight={"bold"} className="text-xl pb-1" style={{ color: "var(--indigo-9)" }}>
         <Link to="/">Your OnRabble Server</Link>
       </Heading>
-      <Text>Search messages stored in your cache or database. Filter by <strong style={{ color: "var(--link-color)" }}>channel </strong>or <strong style={{ color: "var(--link-color)" }}>keyword</strong>.</Text>
-
+      <Box pt={"4"}>
+        <Heading style={{color: "var(--subheading-color)"}}>Search</Heading>
+        <Text>Search messages stored in your cache or database. Filter by <strong style={{ color: "var(--link-color)" }}>channel </strong>or <strong style={{ color: "var(--link-color)" }}>keyword</strong>.</Text>
+      </Box>
       {/* Search Input & Filters */}
-      <Flex py={"4"} gap={"4"}>
+      <Flex gap={"4"} py={"2"}>
         <TextField.Root
           placeholder="keyword"
           className="grow"
@@ -55,7 +57,7 @@ export function SearchMessagesPage({ messages, channels }: any) {
       </Flex>
 
       {/* Active Filters */}
-      <Flex pb={"2"} gap={"2"} align={"center"}>
+      <Flex gap={"2"} align={"center"} pb={"4"}>
         <Text weight={"bold"} style={{ color: "var(--indigo-12)" }}>Filters: </Text>
         {filters.map((filter) => (
           <Badge key={filter} size={"2"} color="tomato" onClick={() => removeFilter(filter)}>

@@ -1,15 +1,5 @@
 @import "tailwindcss";
 
-/* @theme light {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --primary-color:rgb(22, 49, 218);
-} */
-
-/* @theme dark {
-  --primary-color:rgb(216, 23, 120); 
-} */
-
 html,
 body {
   /* @apply bg-white dark:bg-black; */
@@ -18,28 +8,21 @@ body {
 }
 
 :root { /* Default to dark mode */
-  --link-color: rgb(216, 23, 120);
+  --link-color: rgb(197, 49, 123);
 }
 
 .dark {
   --primary-text-color: #c8cee3; 
   --secondary-button-color: var(--indigo-2);
   --subheading-color: var(--indigo-11);
+  --subheading2-color: var(--indigo-8);
+  --highlighted-color: var(--blue-9);
 }
 
 .light {
   --primary-text-color: #0a0d33;
   --secondary-button-color: #42467a;
   --subheading-color:rgb(60, 65, 165);
+  --subheading2-color: rgb(20, 25, 121);
+  --highlighted-color: var(--crimson-9);
 }
-
-
-/* :root {
-  --primary-color:rgb(216, 23, 120); 
-  --secondary-color: #222;
-} */
-
-/* [data-theme='light'] {
-  --primary-color:rgb(22, 49, 218);
-  --secondary-color: #ddd;
-} */
