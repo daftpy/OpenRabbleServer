@@ -39,7 +39,7 @@ type ChatMessagePayload struct {
 	Username string    `json:"username"`
 	Channel  string    `json:"channel"`
 	Message  string    `json:"message"`
-	Sent     time.Time `json:"sent_at"`
+	Sent     time.Time `json:"authored_at"`
 }
 
 func NewChatMessage(ID, username, channel, message string, authoredAt time.Time) BaseMessage {

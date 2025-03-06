@@ -26,6 +26,7 @@ export interface ChatMessage extends Message {
     message: string;
     username: string;
     channel: string;
+    authored_at: string;
   }
 }
 

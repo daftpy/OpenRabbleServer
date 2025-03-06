@@ -9,6 +9,7 @@ export interface ChatMessageType {
   username: string;
   channel: string;
   message: string;
+  authored_at: string;
 }
 
 export function LiveView() {
@@ -62,7 +63,7 @@ export function LiveView() {
         console.log("channel", message.payload.channel);
         setMessages((prev) => [
           ...prev,
-          { username: message.payload.username, channel: message.payload.channel, message: message.payload.message },
+          { username: message.payload.username, channel: message.payload.channel, message: message.payload.message, authored_at: message.payload.authored_at },
         ]);
       } else if (message.type === "bulk_chat_messages") {
         setMessages((prev) => [

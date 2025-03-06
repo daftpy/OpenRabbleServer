@@ -16,6 +16,7 @@ export function MessageList({ messages }: Props) {
           username={message.username}
           channel={message.channel}
           message={message.message}
+          authored_at={message.authored_at}
           isLast={index === messages.length - 1}
         />
       ))}
