@@ -37,7 +37,7 @@ export function HomePage({ channels }: { channels: Channel[] }) {
         <LiveView />
 
         <Flex gap={"3"} direction={{initial: "column", sm: "row"}}>
-          <Button onClick={() => navigate("/about")}><PersonIcon /> User Management</Button>
+          <Button onClick={() => navigate("/users")}><PersonIcon /> User Management</Button>
           <Button onClick={() => navigate("/messages")}><MagnifyingGlassIcon /> Messages</Button>
           <Button onClick={() => navigate("/about")}><GearIcon /> Settings</Button>
           <Button onClick={() => navigate("/about")}><LockClosedIcon /> Keycloak</Button>
@@ -45,7 +45,7 @@ export function HomePage({ channels }: { channels: Channel[] }) {
 
         <Flex direction={"column"} gap={"2"}>
           <div>
-            <Heading size={"7"} weight={"bold"} style={{ color: "var(--indigo-9)" }}>
+            <Heading size={"7"} weight={"bold"} style={{ color: "var(--indigo-10)" }}>
               <Link to="/channels">Channels</Link>
             </Heading>
             <Text>You can add a new channel or manage your channels below.</Text>
@@ -58,7 +58,7 @@ export function HomePage({ channels }: { channels: Channel[] }) {
         </Flex>
         
         <Box>
-          <Heading size={"7"} style={{ color: "var(--indigo-9)" }}>Analytics</Heading>
+          <Heading size={"7"} style={{ color: "var(--indigo-10)" }}>Analytics</Heading>
           <Text>Essential server analytics are available. Track basic metrics like how many messages you serve, user statistics, and other activity.</Text>
         </Box>
 

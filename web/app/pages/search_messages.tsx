@@ -1,4 +1,4 @@
-import { Cross1Icon } from "@radix-ui/react-icons";
+import { Cross1Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { Badge, Button, DropdownMenu, Flex, Heading, Text, TextField } from "@radix-ui/themes";
 import { useState } from "react";
 import { Link, useFetcher } from "react-router";
@@ -41,7 +41,7 @@ export function SearchMessagesPage({ messages, channels }: any) {
         />
         <DropdownMenu.Root>
           <DropdownMenu.Trigger>
-            <Button>Channel</Button>
+            <Button color="amber">Filter</Button>
           </DropdownMenu.Trigger>
           <DropdownMenu.Content>
             {channels.map((channel: any) => (
@@ -51,7 +51,7 @@ export function SearchMessagesPage({ messages, channels }: any) {
             ))}
           </DropdownMenu.Content>
         </DropdownMenu.Root>
-        <Button color="jade" onClick={handleSearch}>Search</Button>
+        <Button color="blue" onClick={handleSearch}><MagnifyingGlassIcon />Search</Button>
       </Flex>
 
       {/* Active Filters */}
