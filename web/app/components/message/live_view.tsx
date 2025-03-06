@@ -69,7 +69,7 @@ export function LiveView() {
       >
         <Flex direction="column" gap="2" px={"2"}>
           <div ref={topRef} />
-            <MessageList messages={messages} />
+            <MessageList messages={messages} hidePermaLink={false} />
           <div ref={bottomRef} />
         </Flex>
       </ScrollArea>

@@ -56,9 +56,9 @@ export function SearchMessagesPage({ messages, channels }: any) {
 
       {/* Active Filters */}
       <Flex pb={"2"} gap={"2"} align={"center"}>
-        <Text weight={"bold"} style={{ color: "var(--subheading-color)" }}>Filters: </Text>
+        <Text weight={"bold"} style={{ color: "var(--indigo-12)" }}>Filters: </Text>
         {filters.map((filter) => (
-          <Badge key={filter} size={"2"} color="amber" onClick={() => removeFilter(filter)}>
+          <Badge key={filter} size={"2"} color="tomato" onClick={() => removeFilter(filter)}>
             {filter} <Cross1Icon />
           </Badge>
         ))}
@@ -68,7 +68,7 @@ export function SearchMessagesPage({ messages, channels }: any) {
       {fetcher.state === "submitting" || fetcher.state === "loading" ? (
         <Text>Loading messages...</Text>
       ) : (
-        <MessageList messages={fetcher.data?.messages ?? messages} />
+        <MessageList messages={fetcher.data?.messages ?? messages} hidePermaLink={true} />
       )}
     </Flex>
   );

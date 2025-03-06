@@ -24,7 +24,7 @@ export function UserPage({ username, id } : { username: string, id: string}) {
           </Flex>
           <DropdownMenu.Root>
             <DropdownMenu.Trigger>
-              <Button color="ruby">Ban</Button>
+              <Button color="red">Ban</Button>
             </DropdownMenu.Trigger>
             <DropdownMenu.Content>
 
