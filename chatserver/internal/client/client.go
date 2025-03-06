@@ -91,7 +91,7 @@ func (c *Client) ReadPump() {
 		log.Printf("Receiived message: %s", receivedMessage.Message)
 
 		// Process received message
-		msg := messages.NewChatMessage(c.Username, receivedMessage.Channel, receivedMessage.Message, time.Now())
+		msg := messages.NewChatMessage(c.Sub, c.Username, receivedMessage.Channel, receivedMessage.Message, time.Now())
 		log.Printf("Message received from %s", c.Username)
 
 		// Send the message to the hub

@@ -1,6 +1,7 @@
 package db
 
 import (
+	"chatserver/internal/messages"
 	"chatserver/internal/models"
 	"context"
 	"fmt"
@@ -117,12 +118,7 @@ func FetchChannels(db *pgxpool.Pool) ([]models.Channel, error) {
 	return channels, nil
 }
 
-type ChannelMessageCount struct {
-	Channel      string `json:"channel"`
-	MessageCount int    `json:"message_count"`
-}
-
-func FetchMessageCountByChannel(db *pgxpool.Pool) ([]ChannelMessageCount, error) {
+func FetchMessageCountByChannel(db *pgxpool.Pool) ([]messages.ChannelMessageCount, error) {
 	rows, err := db.Query(context.Background(), `
 		SELECT channel, COUNT(*) AS message_count
 		FROM chatserver.chat_messages
@@ -133,9 +129,9 @@ func FetchMessageCountByChannel(db *pgxpool.Pool) ([]ChannelMessageCount, error)
 	}
 	defer rows.Close()
 
-	var counts []ChannelMessageCount
+	var counts []messages.ChannelMessageCount
 	for rows.Next() {
-		var count ChannelMessageCount
+		var count messages.ChannelMessageCount
 		if err := rows.Scan(&count.Channel, &count.MessageCount); err != nil {
 			return nil, fmt.Errorf("failed to scan message count row: %w", err)
 		}
@@ -200,17 +196,23 @@ func FetchSessionActivity(db *pgxpool.Pool) ([]models.SessionActivity, error) {
 	return activity, nil
 }
 
-func FetchMessages(db *pgxpool.Pool, channels []string, keyword string, limit, offset int) ([]models.ChatMessage, error) {
+func FetchMessages(db *pgxpool.Pool, channels []string, keyword string, limit, offset int) ([]messages.MessageSearchResult, error) {
 	var query string
 	var args []interface{}
 	var conditions []string
 
 	query = `
-		SELECT id, owner_id, channel, message, authored_at
-		FROM chatserver.chat_messages
+		SELECT 
+			m.id, 
+			m.owner_id, 
+			COALESCE(u.username, '[Unknown]') AS username, 
+			m.channel, 
+			m.message, 
+			m.authored_at
+		FROM chatserver.chat_messages m
+		LEFT JOIN keycloak.public.user_entity u ON m.owner_id::TEXT = u.id
 	`
 
-	// Add conditions dynamically
 	argIndex := 1
 
 	if len(channels) > 0 {
@@ -220,23 +222,21 @@ func FetchMessages(db *pgxpool.Pool, channels []string, keyword string, limit, o
 			args = append(args, channel)
 			argIndex++
 		}
-		conditions = append(conditions, fmt.Sprintf("channel IN (%s)", strings.Join(placeholders, ", ")))
+		conditions = append(conditions, fmt.Sprintf("m.channel IN (%s)", strings.Join(placeholders, ", ")))
 	}
 
 	if keyword != "" {
-		conditions = append(conditions, fmt.Sprintf("search_vector @@ plainto_tsquery('english', $%d)", argIndex))
+		conditions = append(conditions, fmt.Sprintf("m.search_vector @@ plainto_tsquery('english', $%d)", argIndex))
 		args = append(args, keyword)
 		argIndex++
 	}
 
-	// Only add WHERE if there are conditions
 	if len(conditions) > 0 {
 		query += " WHERE " + strings.Join(conditions, " AND ")
 	}
 
-	// Add ordering and pagination
 	query += fmt.Sprintf(`
-		ORDER BY authored_at DESC
+		ORDER BY m.authored_at DESC
 		LIMIT $%d OFFSET $%d;
 	`, argIndex, argIndex+1)
 
@@ -248,20 +248,19 @@ func FetchMessages(db *pgxpool.Pool, channels []string, keyword string, limit, o
 	}
 	defer rows.Close()
 
-	// Parse results
-	var messages []models.ChatMessage
+	var search_messages []messages.MessageSearchResult
 	for rows.Next() {
-		var msg models.ChatMessage
-		if err := rows.Scan(&msg.ID, &msg.OwnerID, &msg.Channel, &msg.Message, &msg.AuthoredAt); err != nil {
+		var msg messages.MessageSearchResult
+		if err := rows.Scan(&msg.ID, &msg.OwnerID, &msg.Username, &msg.Channel, &msg.Message, &msg.Sent); err != nil {
 			return nil, fmt.Errorf("failed to scan chat message row: %w", err)
 		}
-		messages = append(messages, msg)
+		search_messages = append(search_messages, msg)
 	}
 
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("error after iterating chat message rows: %w", err)
 	}
 
-	log.Printf("Fetched %d messages from database (channels: %v, keyword: %s)", len(messages), channels, keyword)
-	return messages, nil
+	log.Printf("Fetched %d messages from database (channels: %v, keyword: %s)", len(search_messages), channels, keyword)
+	return search_messages, nil
 }

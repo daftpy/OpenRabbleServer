@@ -4,7 +4,7 @@ import { SearchMessagesPage } from "~/pages/search_messages"
 import { useLoaderData } from "react-router";
 
 export async function loader({ params }: Route.LoaderArgs) {
-  const messageResponse = await fetch("https://chat.localhost/messages?channel=General&limit=20&offset=0");
+  const messageResponse = await fetch("https://chat.localhost/messages?limit=20&offset=0");
   const channelResponse  = await fetch("https://chat.localhost/channels");
 
   
@@ -21,7 +21,7 @@ export async function loader({ params }: Route.LoaderArgs) {
   console.log(channelData);
   
   return {
-    messages: messageData.messages ?? [],
+    messages: messageData.payload.messages ?? [],
     channels: channelData.channels ?? [],
   };
 }
@@ -40,9 +40,11 @@ export async function clientAction({ request }: Route.ActionArgs) {
   if (!response.ok) {
     throw new Response("Failed to fetch messages", { status: response.status });
   }
+  
 
   const messageData = await response.json();
-  return { messages: messageData.messages ?? [] };
+  console.log("CLIENT ACTION", messageData)
+  return { messages: messageData.payload.messages ?? [] };
 }
 
 

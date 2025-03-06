@@ -2,6 +2,7 @@ package server
 
 import (
 	database "chatserver/internal/db"
+	"chatserver/internal/messages"
 	"chatserver/internal/models"
 	"encoding/json"
 	"fmt"
@@ -97,12 +98,12 @@ func HandleMessages(db *pgxpool.Pool) http.HandlerFunc {
 		case http.MethodGet:
 			// Extract query parameters
 			channels := r.URL.Query()["channel"]
-			keyword := r.URL.Query().Get("keyword") // Optional
+			keyword := r.URL.Query().Get("keyword")
 			limitStr := r.URL.Query().Get("limit")
 			offsetStr := r.URL.Query().Get("offset")
 
-			limit := 50 // Default: 50 messages per request
-			offset := 0 // Default: No offset (start from latest messages)
+			limit := 50 // Default
+			offset := 0 // Default
 
 			if limitStr != "" {
 				parsedLimit, err := strconv.Atoi(limitStr)
@@ -122,16 +123,25 @@ func HandleMessages(db *pgxpool.Pool) http.HandlerFunc {
 				offset = parsedOffset
 			}
 
-			// Fetch messages from the database
-			messages, err := database.FetchMessages(db, channels, keyword, limit, offset)
+			// Fetch messages
+			search_messages, err := database.FetchMessages(db, channels, keyword, limit, offset)
 			if err != nil {
 				log.Printf("Failed to fetch messages for channels '%v': %v", channels, err)
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
 			}
 
+			// Wrap messages in the correct struct
+			payload := messages.MessageSearchResultPayload{
+				Messages: search_messages, // Fixing struct usage
+			}
+
+			// Use NewMessageSearchResultMessage with correct payload
+			responseMessage := messages.NewMessageSearchResultMessage(payload)
+
+			// Send JSON response
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string][]models.ChatMessage{"messages": messages})
+			json.NewEncoder(w).Encode(responseMessage)
 
 		default:
 			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)

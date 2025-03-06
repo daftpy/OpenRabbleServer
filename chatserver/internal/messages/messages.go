@@ -1,7 +1,6 @@
 package messages
 
 import (
-	"chatserver/internal/db"
 	"chatserver/internal/models"
 	"log"
 	"time"
@@ -15,6 +14,7 @@ const (
 	MessageCountByChannelType  = "message_count_by_channel"
 	SessionActivityMessageType = "session_activity"
 	BulkChatMessagesType       = "bulk_chat_messages"
+	MessageSearchResultType    = "message_search_result"
 )
 
 type BaseMessage struct {
@@ -28,14 +28,14 @@ ChatMessage represents a chat message sent by a user.
 This message is broadcasted to all clients in the specified channel.
 */
 type ChatMessagePayload struct {
-	ID       int       `json:"id,omitempty"`
+	ID       string    `json:"id,omitempty"`
 	Username string    `json:"username"`
 	Channel  string    `json:"channel"`
 	Message  string    `json:"message"`
 	Sent     time.Time `json:"sent_at"`
 }
 
-func NewChatMessage(username, channel, message string, authoredAt time.Time) BaseMessage {
+func NewChatMessage(ID, username, channel, message string, authoredAt time.Time) BaseMessage {
 	log.Printf("DEBUG STEP LOOK %s, %s, %s", username, channel, message)
 	return BaseMessage{
 		Type:   ChatMessageType,
@@ -45,6 +45,7 @@ func NewChatMessage(username, channel, message string, authoredAt time.Time) Bas
 			Channel:  channel,
 			Message:  message,
 			Sent:     authoredAt,
+			ID:       ID,
 		},
 	}
 }
@@ -108,10 +109,10 @@ func NewActiveChannelsMessage(channels []models.Channel) BaseMessage {
 }
 
 type MessageCountByChannelPayload struct {
-	Channels []db.ChannelMessageCount `json:"channels"`
+	Channels []ChannelMessageCount `json:"channels"`
 }
 
-func NewMessageCountByChannelMessage(channels []db.ChannelMessageCount) BaseMessage {
+func NewMessageCountByChannelMessage(channels []ChannelMessageCount) BaseMessage {
 	return BaseMessage{
 		Type:   MessageCountByChannelType,
 		Sender: "Server",
@@ -133,6 +134,32 @@ func NewSessionActivityMessage(activity []models.SessionActivity) BaseMessage {
 			Activity: activity,
 		},
 	}
+}
+
+type MessageSearchResult struct {
+	ID       int       `json:"id"`
+	OwnerID  string    `json:"owner_id"`
+	Username string    `json:"username"`
+	Channel  string    `json:"channel"`
+	Message  string    `json:"message"`
+	Sent     time.Time `json:"authored_at"`
+}
+
+type MessageSearchResultPayload struct {
+	Messages []MessageSearchResult `json:"messages"`
+}
+
+func NewMessageSearchResultMessage(payload MessageSearchResultPayload) BaseMessage {
+	return BaseMessage{
+		Type:    MessageSearchResultType,
+		Sender:  "server",
+		Payload: payload, // Should be a single struct, not a slice
+	}
+}
+
+type ChannelMessageCount struct {
+	Channel      string `json:"channel"`
+	MessageCount int    `json:"message_count"`
 }
 
 /*
