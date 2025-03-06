@@ -148,3 +148,21 @@ func HandleMessages(db *pgxpool.Pool) http.HandlerFunc {
 		}
 	}
 }
+
+func HandleUsers(db *pgxpool.Pool) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		users, err := database.FetchUsers(db)
+		if err != nil {
+			log.Printf("Failed to fetch users: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+		payload := messages.UserSearchResultPayload{
+			Users: users,
+		}
+
+		response := messages.NewUseerSearchResultMessage(payload)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
+	}
+}

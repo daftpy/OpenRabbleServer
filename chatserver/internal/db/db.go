@@ -264,3 +264,27 @@ func FetchMessages(db *pgxpool.Pool, channels []string, keyword string, limit, o
 	log.Printf("Fetched %d messages from database (channels: %v, keyword: %s)", len(search_messages), channels, keyword)
 	return search_messages, nil
 }
+
+func FetchUsers(db *pgxpool.Pool) ([]messages.UserSearchResult, error) {
+	var query string
+
+	query = `
+		SELECT id, username
+		FROM keycloak.public.user_entity
+	`
+
+	rows, err := db.Query(context.Background(), query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch users: %w", err)
+	}
+
+	var users []messages.UserSearchResult
+	for rows.Next() {
+		var user messages.UserSearchResult
+		if err := rows.Scan(&user.ID, &user.Username); err != nil {
+			return nil, fmt.Errorf("failed to scan user row: %w", err)
+		}
+		users = append(users, user)
+	}
+	return users, nil
+}

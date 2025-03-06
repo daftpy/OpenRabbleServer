@@ -6,6 +6,12 @@ import (
 	"time"
 )
 
+// TODO: find a home for this
+type ChannelMessageCount struct {
+	Channel      string `json:"channel"`
+	MessageCount int    `json:"message_count"`
+}
+
 const (
 	ChatMessageType            = "chat_message"
 	UserStatusMessageType      = "user_status"
@@ -15,6 +21,7 @@ const (
 	SessionActivityMessageType = "session_activity"
 	BulkChatMessagesType       = "bulk_chat_messages"
 	MessageSearchResultType    = "message_search_result"
+	UserSearchResultType       = "user_search_result"
 )
 
 type BaseMessage struct {
@@ -157,9 +164,21 @@ func NewMessageSearchResultMessage(payload MessageSearchResultPayload) BaseMessa
 	}
 }
 
-type ChannelMessageCount struct {
-	Channel      string `json:"channel"`
-	MessageCount int    `json:"message_count"`
+type UserSearchResult struct {
+	ID       string `json:"id"`
+	Username string `json:"username"`
+}
+
+type UserSearchResultPayload struct {
+	Users []UserSearchResult `json:"users"`
+}
+
+func NewUseerSearchResultMessage(payload UserSearchResultPayload) BaseMessage {
+	return BaseMessage{
+		Type:    UserSearchResultType,
+		Sender:  "server",
+		Payload: payload,
+	}
 }
 
 /*
