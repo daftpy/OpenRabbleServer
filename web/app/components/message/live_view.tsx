@@ -62,7 +62,7 @@ export function LiveView() {
         className="bg-blue-50 p-2"
         style={{
           minHeight: "50px",
-          maxHeight: "150px",
+          maxHeight: "190px",
           backgroundColor: "var(--indigo-2)",
         }}
         ref={scrollRef}
