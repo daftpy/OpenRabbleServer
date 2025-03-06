@@ -4,7 +4,7 @@ import { UsersPage } from "~/pages/users";
 import { useLoaderData } from "react-router";
 
 export async function loader({ params }: Route.LoaderArgs) {
-  const response = await fetch("https://chat.localhost/api/users");
+  const response = await fetch("https://chat.localhost/users");
   if (!response.ok) {
     throw new Response("Failed to load users", { status: response.status });
   }

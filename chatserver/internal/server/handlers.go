@@ -151,7 +151,8 @@ func HandleMessages(db *pgxpool.Pool) http.HandlerFunc {
 
 func HandleUsers(db *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		users, err := database.FetchUsers(db)
+		username := r.URL.Query().Get("username")
+		users, err := database.FetchUsers(db, username)
 		if err != nil {
 			log.Printf("Failed to fetch users: %v", err)
 			http.Error(w, "Internal server error", http.StatusInternalServerError)

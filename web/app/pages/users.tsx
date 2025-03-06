@@ -40,7 +40,10 @@ export function UsersPage({ users } : any) {
             style={{borderBottom: index == users.length - 1 ? "none" : "2px solid var(--indigo-3)"}}
           >
             <Flex direction={"column"} gap={"1"} py={"3"} flexGrow={"1"}>
-              <Flex gap={"2"} align={"center"}><PersonIcon /><Text weight={"bold"}>{user.username}</Text></Flex>
+              <Flex gap={"2"} align={"center"}>
+                <PersonIcon />
+                <Text weight={"bold"}><Link to={`/users/${user.username}`}>{user.username}</Link></Text>
+              </Flex>
               <Flex gap={"2"}><Text weight={"bold"} size={"1"}>ID</Text><Text size={"1"}>{user.id}</Text></Flex>
             </Flex>
             <Button size={"1"} color="iris">Manage</Button>

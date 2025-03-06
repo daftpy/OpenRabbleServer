@@ -265,18 +265,24 @@ func FetchMessages(db *pgxpool.Pool, channels []string, keyword string, limit, o
 	return search_messages, nil
 }
 
-func FetchUsers(db *pgxpool.Pool) ([]messages.UserSearchResult, error) {
+func FetchUsers(db *pgxpool.Pool, username string) ([]messages.UserSearchResult, error) {
 	var query string
-
+	var args []interface{}
 	query = `
 		SELECT id, username
 		FROM keycloak.public.user_entity
 	`
 
-	rows, err := db.Query(context.Background(), query)
+	if username != "" { // Only filter if username is provided
+		query += " WHERE username = $1"
+		args = append(args, username)
+	}
+
+	rows, err := db.Query(context.Background(), query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch users: %w", err)
 	}
+	defer rows.Close()
 
 	var users []messages.UserSearchResult
 	for rows.Next() {
@@ -286,5 +292,10 @@ func FetchUsers(db *pgxpool.Pool) ([]messages.UserSearchResult, error) {
 		}
 		users = append(users, user)
 	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating over user rows: %w", err)
+	}
+
 	return users, nil
 }
