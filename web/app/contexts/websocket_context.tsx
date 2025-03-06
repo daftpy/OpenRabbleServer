@@ -8,7 +8,8 @@ interface WebSocketContextType {
   messages: ChatMessageType[];
 }
 
-const MAX_MESSAGES = 5;
+// How many messages the WebSocketProvider holds. Cyclical bufferr
+const MAX_MESSAGES = 100;
 
 export const WebSocketContext = createContext<WebSocketContextType>({
   socket: null,
