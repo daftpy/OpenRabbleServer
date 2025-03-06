@@ -1,8 +1,9 @@
 import { MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons";
 import { Box, Button, Container, DropdownMenu, Flex, Heading, Text, TextField } from "@radix-ui/themes";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 export function UsersPage({ users } : any) {
+  const navigate = useNavigate();
   console.log("USERS", users);
   users.map((user: any) => {
     console.log("A USER:", user);
@@ -32,7 +33,7 @@ export function UsersPage({ users } : any) {
         <Button color={"blue"}><MagnifyingGlassIcon />Search</Button>
       </Flex>
       <Flex pt={"2"} gap={"2"}>
-        <Text weight={"bold"} size={"1"}>Searching by: </Text><Text style={{color: "var(--link-color)"}} size="1">username</Text>
+        <Text weight={"bold"} size={"1"}>Searching by: </Text><Text color="amber" size="1">username</Text>
       </Flex>
       <Flex direction={"column"} pt={"4"}>
         {users.map((user: any, index: number) => (
@@ -42,11 +43,16 @@ export function UsersPage({ users } : any) {
             <Flex direction={"column"} gap={"1"} py={"3"} flexGrow={"1"}>
               <Flex gap={"2"} align={"center"}>
                 <PersonIcon />
-                <Text weight={"bold"}><Link to={`/users/${user.username}`}>{user.username}</Link></Text>
+                <Text weight={"bold"} style={{color: "var(--indigo-12)"}}>
+                  <Link to={`/users/profile/${user.username}`}>{user.username}</Link>
+                  </Text>
               </Flex>
-              <Flex gap={"2"}><Text weight={"bold"} size={"1"}>ID</Text><Text size={"1"}>{user.id}</Text></Flex>
+              <Flex gap={"2"}>
+                <Text weight={"bold"} size={"1"}>ID</Text>
+                <Text size={"1"} style={{color: "var(--link-color)"}}>{user.id}</Text>
+              </Flex>
             </Flex>
-            <Button size={"1"} color="iris">Manage</Button>
+            <Button size={"1"} color="iris" onClick={() => navigate(`/users/profile/${user.username}`)}>Manage</Button>
           </Flex>
         ))}
       </Flex>

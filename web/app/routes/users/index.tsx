@@ -1,5 +1,5 @@
 import RouteProtector from "~/components/route_protector";
-import type { Route } from "./+types/users";
+import type { Route } from "./+types/index";
 import { UsersPage } from "~/pages/users";
 import { useLoaderData } from "react-router";
 

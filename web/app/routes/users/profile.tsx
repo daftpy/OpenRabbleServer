@@ -1,6 +1,6 @@
 import RouteProtector from "~/components/route_protector";
-import { UserPage } from "~/pages/user";
-import type { Route } from "./+types/user";
+import { UserPage } from "~/pages/users/profile";
+import type { Route } from "./+types/profile";
 import { useLoaderData } from "react-router";
 
 export async function loader({ params }: Route.LoaderArgs) {

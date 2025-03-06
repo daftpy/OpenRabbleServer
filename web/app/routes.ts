@@ -5,8 +5,8 @@ export default [
     route("messages", "routes/search_messages.tsx"),
     route("channels", "routes/channel.tsx"),
     ...prefix("users", [
-        index("routes/users.tsx"),
-        route(":userId", "routes/user.tsx")
+        index("routes/users/index.tsx"),
+        route("profile/:userId", "routes/users/profile.tsx")
     ]),
     route("unauthorized", "routes/unauthorized.tsx")
 ] satisfies RouteConfig;
