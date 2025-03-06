@@ -92,7 +92,7 @@ export function LiveView() {
         }}
         ref={scrollRef}
       >
-        <Flex direction="column" gap="2">
+        <Flex direction="column" gap="2" px={"2"}>
           <div ref={topRef} />
             <MessageList messages={messages} />
           <div ref={bottomRef} />
