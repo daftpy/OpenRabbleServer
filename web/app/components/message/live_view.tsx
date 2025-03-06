@@ -1,8 +1,7 @@
 import { Box, Flex, ScrollArea } from "@radix-ui/themes";
 import { useEffect, useRef, useState } from "react";
-import type { ServerMessage } from "~/messages";
-import { emitter } from "~/root";
 import { MessageList } from "./message_list";
+import { useWebSocket } from "~/contexts/websocket_context";
 
 // TODO: refactor this out
 export interface ChatMessageType {
@@ -13,7 +12,8 @@ export interface ChatMessageType {
 }
 
 export function LiveView() {
-  const [messages, setMessages] = useState<ChatMessageType[]>([]);
+  // const [messages, setMessages] = useState<ChatMessageType[]>([]);
+  const { messages } = useWebSocket();
   // Track whether messages have been hydrated
   const [isHydrated, setIsHydrated] = useState(false);
   const [observerEnabled, setObserverEnabled] = useState(false);
@@ -55,32 +55,6 @@ export function LiveView() {
 
     return () => observer.disconnect();
   }, [observerEnabled]); // Runs only after observer is enabled
-  
-  useEffect(() => {
-    console.log("loaded");
-    const handler = (message: ServerMessage) => {
-      if (message.type === "chat_message") {
-        console.log("channel", message.payload.channel);
-        setMessages((prev) => [
-          ...prev,
-          { username: message.payload.username, channel: message.payload.channel, message: message.payload.message, authored_at: message.payload.authored_at },
-        ]);
-      } else if (message.type === "bulk_chat_messages") {
-        setMessages((prev) => [
-          ...prev,
-          ...message.payload.messages // Spread the array correctly here
-        ]);
-        console.log("messages added");
-      }
-    };
-
-    emitter.on("chat_message", handler);
-    emitter.on("bulk_chat_messages", handler);
-    return () => {
-      emitter.off("chat_message", handler);
-      emitter.off("bulk_chat_messages", handler);
-    };
-  }, []);
 
   return (
     <Box className="rounded-sm p-2" style={{ border: "2px solid var(--indigo-3)" }}>
