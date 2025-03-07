@@ -26,7 +26,7 @@ export function Message(props : props) {
           <Text size="1" weight={"bold"} color="indigo">{ props.meessage.channel } #</Text>
           <Flex align={"center"} justify={"between"} flexGrow={"1"}>
             <Flex gap={"1"} align={"center"}><PersonIcon />
-              <Heading size="1">
+              <Heading size="1" style={{color: "var(--link-color)"}}>
                 <Link to={`/users/profile/${props.meessage.username}`}>{ props.meessage.username }</Link>
               </Heading>
             </Flex>
@@ -38,7 +38,7 @@ export function Message(props : props) {
           </Flex>
         </Flex>
         <Text size="2" wrap={"wrap"} className="py-1">{ props.meessage.message }</Text>
-        <Flex align={"center"} gap={"1"}><TimerIcon style={{color: "var(--highlighted-color)", fontWeight: "bold", width: "13px", height: "13px"}} /><Text size={"1"} style={{color: "var(--highlighted-color)"}}>{sent}</Text></Flex>
+        <Flex align={"center"} gap={"1"}><TimerIcon style={{color: "var(--muted-text-color)", fontWeight: "bold", width: "13px", height: "13px"}} /><Text size={"1"} style={{color: "var(--muted-text-color)"}}>{sent}</Text></Flex>
       </Flex>
     </Flex>
   )

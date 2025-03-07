@@ -196,6 +196,45 @@ func FetchSessionActivity(db *pgxpool.Pool) ([]models.SessionActivity, error) {
 	return activity, nil
 }
 
+func FetchUserMessages(db *pgxpool.Pool, id string, limit, offset int) ([]messages.MessageSearchResult, error) {
+	query := `
+		SELECT 
+			m.id, 
+			m.owner_id, 
+			COALESCE(u.username, '[Unknown]') AS username, 
+			m.channel, 
+			m.message, 
+			m.authored_at
+		FROM chatserver.chat_messages m
+		LEFT JOIN keycloak.public.user_entity u ON m.owner_id::TEXT = u.id
+		WHERE m.owner_id = $1
+		ORDER BY m.authored_at DESC
+		LIMIT $2 OFFSET $3;
+	`
+
+	rows, err := db.Query(context.Background(), query, id, limit, offset)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch messages for user %s: %w", id, err)
+	}
+	defer rows.Close()
+
+	var userMessages []messages.MessageSearchResult
+	for rows.Next() {
+		var msg messages.MessageSearchResult
+		if err := rows.Scan(&msg.ID, &msg.OwnerID, &msg.Username, &msg.Channel, &msg.Message, &msg.Sent); err != nil {
+			return nil, fmt.Errorf("failed to scan user message row: %w", err)
+		}
+		userMessages = append(userMessages, msg)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error after iterating user message rows: %w", err)
+	}
+
+	log.Printf("Fetched %d messages for user ID %s", len(userMessages), id)
+	return userMessages, nil
+}
+
 func FetchMessages(db *pgxpool.Pool, channels []string, keyword string, limit, offset int) ([]messages.MessageSearchResult, error) {
 	var query string
 	var args []interface{}

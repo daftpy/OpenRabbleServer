@@ -16,7 +16,8 @@ body {
   --secondary-button-color: var(--indigo-2);
   --subheading-color: var(--indigo-11);
   --subheading2-color: var(--indigo-8);
-  --highlighted-color: var(--blue-9);
+  --highlighted-color: var(--blue-10);
+  --muted-text-color: var(--blue-9);
 }
 
 .light {
@@ -25,4 +26,5 @@ body {
   --subheading-color:rgb(60, 65, 165);
   --subheading2-color: rgb(20, 25, 121);
   --highlighted-color: var(--crimson-9);
+  --muted-text-color: var(--blue-12);
 }

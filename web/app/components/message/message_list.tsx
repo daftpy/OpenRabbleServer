@@ -11,7 +11,7 @@ export function MessageList({ messages, hidePermaLink }: Props) {
 
   return (
     <>
-      {messages.map((message, index) => (
+      {messages && messages.map((message, index) => (
         <Message
           key={index}
           // username={message.username}

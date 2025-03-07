@@ -16,12 +16,31 @@ export async function loader({ params }: Route.LoaderArgs) {
   return data.payload.users[0];
 }
 
+export async function clientLoader({
+  serverLoader,
+  params,
+}: Route.ClientLoaderArgs) {
+  
+  const serverData = await serverLoader();
+  const res = await fetch(`https://chat.localhost/messages?user_id=${serverData.id}`);
+  const data = await res.json();
+  console.log("CLIENT ACTION RES", data.payload);
+  return { ...serverData, ...data.payload };
+}
+
+// force the client loader to run during hydration
+clientLoader.hydrate = true as const; // `as const` for type inference
+
+export function HydrateFallback() {
+  return <div>Loading...</div>;
+}
+
 export default function UserRoute() {
-  const { username, id } = useLoaderData();
+  const { username, id, messages } = useLoaderData();
   console.log("USERNAME", username);
   return (
     <RouteProtector>
-      <UserPage username={username} id={id} />
+      <UserPage username={username} id={id} messages={messages} />
     </RouteProtector>
   )
 }

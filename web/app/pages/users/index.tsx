@@ -10,11 +10,11 @@ export function UsersPage({ users } : any) {
   });
   return (
     <Container p={"6"}>
-      <Heading size={"8"} weight={"bold"} className="text-xl pb-1" style={{ color: "var(--indigo-9)" }}>
+      <Heading size={"8"} weight={"bold"} className="text-xl pb-1" style={{ color: "var(--slate-12)" }}>
         <Link to="/">Your OnRabble Server</Link>
       </Heading>
       <Box pt={"4"}>
-      <Heading style={{color: "var(--subheading-color)"}}>User Management</Heading>
+      <Heading style={{color: "var(--indigo-9)"}}>User Management</Heading>
       <Text>Manage your users here. You can ban users, manage their roles, or inspect their activity.</Text>
       <Flex pt={"2"} gap={"4"}>
         <TextField.Root placeholder="username" className="grow" />
@@ -45,13 +45,13 @@ export function UsersPage({ users } : any) {
             <Flex direction={"column"} gap={"1"} py={"3"} flexGrow={"1"}>
               <Flex gap={"2"} align={"center"}>
                 <PersonIcon />
-                <Text weight={"bold"} style={{color: "var(--highlighted-color)"}}>
+                <Text weight={"bold"} style={{color: "var(--link-color)"}}>
                   <Link to={`/users/profile/${user.username}`}>{user.username}</Link>
                   </Text>
               </Flex>
               <Flex gap={"2"}>
                 <Text weight={"bold"} size={"1"}>ID</Text>
-                <Text size={"1"} >{user.id}</Text>
+                <Text size={"1"} style={{color: "var(--muted-text-color)"}}>{user.id}</Text>
               </Flex>
             </Flex>
             <Button size={"1"} color="iris" onClick={() => navigate(`/users/profile/${user.username}`)}>Manage</Button>

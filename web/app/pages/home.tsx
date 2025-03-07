@@ -29,7 +29,7 @@ export function HomePage({ channels }: { channels: Channel[] }) {
       <Flex direction="column" gap={"6"} height={"100%"} maxWidth={"900px"} m={"auto"} flexGrow={"1"} px={"4"} py={"6"}>
 
         <Flex direction={"column"}>
-          <Heading size={"8"} weight={"bold"} className="text-xl pb-1" style={{color: "var(--indigo-9)"}}>Your OnRabble Server</Heading>
+          <Heading size={"8"} weight={"bold"} className="text-xl pb-1" style={{ color: "var(--slate-12)" }}>Your OnRabble Server</Heading>
           <Text>Welcome to your dashboard.</Text>
           <NavLink to="#" style={{color: "var(--link-color)"}}>Hide Live Chat</NavLink>
         </Flex>
