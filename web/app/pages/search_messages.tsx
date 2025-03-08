@@ -3,26 +3,14 @@ import { Badge, Box, Button, DropdownMenu, Flex, Heading, Text, TextField } from
 import { useState } from "react";
 import { Link, useFetcher } from "react-router";
 import { MessageList } from "~/components/message/message_list";
+import { MessageSearchInput } from "~/components/message/search_input";
 
-export function SearchMessagesPage({ messages, channels }: any) {
-  const fetcher = useFetcher();
-  const [filters, setFilters] = useState<string[]>([]);
-  const [keyword, setKeyword] = useState<string>("");
+export function SearchMessagesPage({ messages }: any) {
+  const [filteredMessages, setFilteredMessages] = useState<any>(null);
 
-  const addFilter = (filter: string) => {
-    setFilters((prev) => [...prev, filter]);
-  };
-
-  const removeFilter = (targetFilter: string) => {
-    setFilters((prev) => prev.filter((filter) => filter !== targetFilter));
-  };
-
-  const handleSearch = () => {
-    let formData = new FormData();
-    formData.append("keyword", keyword);
-    filters.forEach((filter) => formData.append("channel", filter));
-    fetcher.submit(formData, { method: "post" });
-  };
+  const handleMessageUpdate = (messages: any) => {
+    setFilteredMessages(messages);
+  }
 
   return (
     <Flex direction={"column"} maxWidth={"990px"} m={"auto"} px={"4"} py={"6"}>
@@ -34,44 +22,11 @@ export function SearchMessagesPage({ messages, channels }: any) {
         <Text>Search messages stored in your cache or database. Filter by <strong style={{ color: "var(--link-color)" }}>channel </strong>or <strong style={{ color: "var(--link-color)" }}>keyword</strong>.</Text>
       </Box>
       {/* Search Input & Filters */}
-      <Flex gap={"4"} py={"2"}>
-        <TextField.Root
-          placeholder="keyword"
-          className="grow"
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-        />
-        <DropdownMenu.Root>
-          <DropdownMenu.Trigger>
-            <Button color="amber">Filter</Button>
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Content>
-            {channels.map((channel: any) => (
-              <DropdownMenu.Item key={channel.name} onClick={() => addFilter(channel.name)}>
-                {channel.name}
-              </DropdownMenu.Item>
-            ))}
-          </DropdownMenu.Content>
-        </DropdownMenu.Root>
-        <Button color="blue" onClick={handleSearch}><MagnifyingGlassIcon />Search</Button>
-      </Flex>
+      <MessageSearchInput onMessagesUpdate={handleMessageUpdate} />
 
-      {/* Active Filters */}
-      <Flex gap={"2"} align={"center"} pb={"4"}>
-        <Text weight={"bold"} style={{ color: "var(--indigo-12)" }}>Filters: </Text>
-        {filters.map((filter) => (
-          <Badge key={filter} size={"2"} color="tomato" onClick={() => removeFilter(filter)}>
-            {filter} <Cross1Icon />
-          </Badge>
-        ))}
-      </Flex>
+      {/* Show messages */}
+      <MessageList messages={filteredMessages ? filteredMessages : messages} hidePermaLink={true} />
 
-      {/* Show messages - if fetcher is pending, show loading */}
-      {fetcher.state === "submitting" || fetcher.state === "loading" ? (
-        <Text>Loading messages...</Text>
-      ) : (
-        <MessageList messages={fetcher.data?.messages ?? messages} hidePermaLink={true} />
-      )}
     </Flex>
   );
 }

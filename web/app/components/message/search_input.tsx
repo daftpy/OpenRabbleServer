@@ -1,6 +1,7 @@
-import { CropIcon, Cross1Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import { Cross1Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { Badge, Button, DropdownMenu, Flex, Text, TextField } from "@radix-ui/themes";
-import { useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
+import { useFetcher } from "react-router";
 
 function reducer(state : any, action: any) {
   switch (action.type) {
@@ -16,16 +17,55 @@ function reducer(state : any, action: any) {
   }
 }
 
-export function MessageSearchInput({ 
-  keyword,
-  filters,
-  handleSearch 
+export function MessageSearchInput({
+  userId,
+  onMessagesUpdate 
 } : {
-  keyword: string,
-  filters: string[],
-  handleSearch: ({ filters, keyword }: { filters: any; keyword: string }) => void;
+  userId?: string,
+  onMessagesUpdate: (messages: any) => void;
 }) {
-  const [state, dispatch] = useReducer(reducer, {keyword: keyword, activeFilters: []});
+  const [state, dispatch] = useReducer(reducer, {keyword: "", activeFilters: []});
+  const [availableFilters, setAvailableFilters] = useState<string[]>([]);
+  const messageFetcher = useFetcher();
+  const channelFetcher = useFetcher();
+
+  // Search messages using keywords and filters if available
+  const handleSearch = () => {
+    let formData = new FormData(); // Create the new form
+
+    // Add the conditional parameters for the search
+    if (state.keyword) {
+      formData.append("keyword", state.keyword);
+    }
+    if (userId) {
+      formData.append("user_id", userId);
+    }
+    state.activeFilters.forEach((filter: any) => {
+      formData.append("channel", filter.name);
+    })
+
+    messageFetcher.submit(formData, {method: "post", action: "/messages"});
+  }
+
+  // Fetch the server channels to use as filters
+  useEffect(() => {
+    channelFetcher.submit({}, {method: "post", action: "/channels"});
+  }, [])
+
+  // Retrieve the server channels and set them as available fiilters
+  useEffect(() => {
+    if (channelFetcher.data?.channels) {
+      setAvailableFilters(channelFetcher.data.channels);
+    }
+  }, [channelFetcher.data])
+
+  // Update the fetchedMessages when the handleSearch is over
+  useEffect(() => {
+    console.log("NEW searched meessages:", messageFetcher.data);
+    if (messageFetcher.data?.messages) {
+      onMessagesUpdate(messageFetcher.data.messages);
+    }
+  }, [messageFetcher.data]);
 
   return (
     <Flex direction={"column"} gap={"1"}>
@@ -41,18 +81,18 @@ export function MessageSearchInput({
               <Button color="amber">Filter</Button>
             </DropdownMenu.Trigger>
             <DropdownMenu.Content>
-              {filters && filters.map((filter: any) => (
+              {availableFilters.length > 0 && availableFilters.map((filter: any) => (
                 <DropdownMenu.Item key={filter.name} onClick={(e) => dispatch({ type: "add_filter", filter: filter })}>
                   { filter.name }
                 </DropdownMenu.Item>
               ))}
             </DropdownMenu.Content>
           </DropdownMenu.Root>
-          <Button color="blue" onClick={() => handleSearch({ filters: state.activeFilters, keyword: state.keyword })}><MagnifyingGlassIcon />Search</Button>
+          <Button color="blue" onClick={() => handleSearch()}><MagnifyingGlassIcon />Search</Button>
       </Flex>
       <Flex gap={"2"} align={"baseline"}>
         <Text weight={"bold"} style={{ color: "var(--indigo-12)" }}>Filters: </Text>
-        {state.activeFilters.map((filter: any) => (
+        {state.activeFilters && state.activeFilters.map((filter: any) => (
           <Badge key={filter.name} size={"2"} color="tomato" onClick={(e) => dispatch({type: "remove_filter", filter: filter})}>
             {filter.name} <Cross1Icon />
           </Badge>

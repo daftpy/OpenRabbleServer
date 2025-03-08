@@ -5,7 +5,7 @@ import RouteProtector from "~/components/route_protector";
 import { ChannelPage } from "~/pages/channels";
 
 export async function loader({ params }: Route.LoaderArgs) {
-  const response = await fetch("https://chat.localhost/channels"); // ✅ Update to use the correct service name
+  const response = await fetch("https://chat.localhost/channels");
   
   if (!response.ok) {
     throw new Response("Failed to load channels", { status: response.status });
@@ -17,6 +17,17 @@ export async function loader({ params }: Route.LoaderArgs) {
     return [];
   }
   return data.channels;
+}
+
+export async function clientAction({ request }: Route.ActionArgs) {
+  const response = await fetch("https://chat.localhost/channels");
+  
+  if (!response.ok) {
+    throw new Response("Failed to fetch channels", { status: response.status });
+  }
+  
+  const channelsData = await response.json();
+  return { channels: channelsData.channels ? channelsData.channels : [] };
 }
 
 export function meta({}: Route.MetaArgs) {

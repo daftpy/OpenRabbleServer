@@ -5,24 +5,16 @@ import { useLoaderData } from "react-router";
 
 export async function loader({ params }: Route.LoaderArgs) {
   const messageResponse = await fetch("https://chat.localhost/messages?limit=20&offset=0");
-  const channelResponse  = await fetch("https://chat.localhost/channels");
-
   
   if (!messageResponse.ok) {
     throw new Response("Failed to load messages", { status: messageResponse.status });
   }
-  if (!channelResponse.ok) {
-    throw new Response("Failed to load channels", { status: channelResponse.status });
-  }
 
   const messageData = await messageResponse.json();
-  const channelData = await channelResponse.json();
   console.log(messageData);
-  console.log(channelData);
   
   return {
-    messages: messageData.payload.messages ?? [],
-    channels: channelData.channels ?? [],
+    messages: messageData.payload.messages ?? []
   };
 }
 

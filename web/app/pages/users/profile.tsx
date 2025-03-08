@@ -1,36 +1,17 @@
 import { CircleBackslashIcon, PersonIcon, TimerIcon } from "@radix-ui/react-icons";
 import { Box, Button, Container, DropdownMenu, Flex, Heading, ScrollArea, Text } from "@radix-ui/themes";
-import { useEffect, useState } from "react";
-import { Link, useFetcher } from "react-router";
+import { useState } from "react";
+import { Link } from "react-router";
 import { MessageList } from "~/components/message/message_list";
 import { MessageSearchInput } from "~/components/message/search_input";
 
-export function UserPage({ username, id, messages, channels } : { username: string, id: string, messages: any, channels: string[]}) {
-  const fetcher = useFetcher();
+export function UserPage({ username, id, messages } : { username: string, id: string, messages: any }) {
   const [filteredMessages, setFilteredMessages] = useState<any>(null);
 
-  const handleSearch = ({filters, keyword} : { filters: any, keyword: string }) => {
-    console.log("SEARCHING");
-    // Create the form
-    let formData = new FormData();
-    console.log("KEYWORD:", keyword);
-
-    keyword && formData.append("keyword", keyword);
-    formData.append("user_id", id);
-    console.log("USING ID:", id);
-    filters.forEach((filter: any) => {
-      console.log("using filter", filter);
-      formData.append("channel", filter.name);
-    });
-    fetcher.submit(formData, { method: "post", action: "/messages" });
+  const handleMessageUpdate = (messages: any) => {
+    setFilteredMessages(messages);
   }
-  useEffect(() => {
-    console.log("Fetcher got messages:", fetcher.data);
-    if (fetcher.data) {
-      console.log("fetcher data retrieved");
-      setFilteredMessages(fetcher.data.messages);
-    }
-  }, [fetcher.data]);
+
   return (
     <Container p={"6"}>
       <Heading size={"8"} weight={"bold"} className="text-xl pb-1" style={{ color: "var(--slate-12)" }}>
@@ -70,7 +51,7 @@ export function UserPage({ username, id, messages, channels } : { username: stri
           <Box pb={"4"}>
             <Heading style={{color: "var(--subheading-color)"}}>Message History</Heading>
             <Text>You can search through a users chat history and filter by channel or keyword.</Text>
-            <MessageSearchInput keyword="" filters={channels} handleSearch={handleSearch} />
+            <MessageSearchInput userId={id} onMessagesUpdate={handleMessageUpdate} />
           </Box>
           <ScrollArea style={{maxHeight: "300px", border: "1px solid var(--indigo-4)", padding: "1em", borderRadius: "4px"}}>
             <MessageList messages={filteredMessages ? filteredMessages : messages} hidePermaLink={true} />

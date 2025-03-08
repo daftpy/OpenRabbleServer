@@ -3,6 +3,7 @@ import { UserPage } from "~/pages/users/profile";
 import type { Route } from "./+types/profile";
 import { useLoaderData } from "react-router";
 
+// Get the users information by username. Here we need the userID
 export async function loader({ params }: Route.LoaderArgs) {
   const response = await fetch(`https://chat.localhost/users?username=${params.userId}`);
   if (!response.ok) {
@@ -16,6 +17,7 @@ export async function loader({ params }: Route.LoaderArgs) {
   return data.payload.users[0];
 }
 
+// Use the userID to retrieve the users meessages
 export async function clientLoader({
   serverLoader,
   params,
@@ -25,9 +27,7 @@ export async function clientLoader({
   const messagesRes = await fetch(`https://chat.localhost/messages?user_id=${serverData.id}`);
   const messagesData = await messagesRes.json();
 
-  const channelsRes = await fetch("https://chat.localhost/channels");
-  const channelData = await channelsRes.json();
-  return { ...serverData, ...messagesData.payload, ...channelData };
+  return { ...serverData, ...messagesData.payload };
 }
 
 // force the client loader to run during hydration
@@ -37,34 +37,12 @@ export function HydrateFallback() {
   return <div>Loading...</div>;
 }
 
-export async function clientAction({ request }: Route.ActionArgs) {
-  let formData = await request.formData();
-  let keyword = formData.get("keyword") || "";
-  let channels = formData.getAll("channel"); // Support multiple selected channels
-
-  const queryParams = new URLSearchParams();
-  if (keyword) queryParams.append("keyword", keyword.toString());
-  channels.forEach((channel) => queryParams.append("channel", channel.toString()));
-
-  const response = await fetch(`https://chat.localhost/messages?${queryParams.toString()}`);
-  
-  if (!response.ok) {
-    throw new Response("Failed to fetch messages", { status: response.status });
-  }
-  
-
-  const messageData = await response.json();
-  console.log("CLIENT ACTION", messageData)
-  return { messages: messageData.payload.messages ?? [] };
-}
-
 export default function UserRoute() {
-  const { username, id, messages, channels } = useLoaderData();
+  const { username, id, messages } = useLoaderData();
   console.log("USERNAME", username);
-  console.log("CHANNELS", channels);
   return (
     <RouteProtector>
-      <UserPage username={username} id={id} messages={messages} channels={channels} />
+      <UserPage username={username} id={id} messages={messages} />
     </RouteProtector>
   )
 }
