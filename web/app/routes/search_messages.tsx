@@ -30,9 +30,11 @@ export async function clientAction({ request }: Route.ActionArgs) {
   let formData = await request.formData();
   let keyword = formData.get("keyword") || "";
   let channels = formData.getAll("channel"); // Support multiple selected channels
+  let user_id = formData.get("user_id");
 
   const queryParams = new URLSearchParams();
   if (keyword) queryParams.append("keyword", keyword.toString());
+  if (user_id) queryParams.append("user_id", user_id.toString());
   channels.forEach((channel) => queryParams.append("channel", channel.toString()));
 
   const response = await fetch(`https://chat.localhost/messages?${queryParams.toString()}`);

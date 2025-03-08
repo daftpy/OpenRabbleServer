@@ -22,10 +22,12 @@ export async function clientLoader({
 }: Route.ClientLoaderArgs) {
   
   const serverData = await serverLoader();
-  const res = await fetch(`https://chat.localhost/messages?user_id=${serverData.id}`);
-  const data = await res.json();
-  console.log("CLIENT ACTION RES", data.payload);
-  return { ...serverData, ...data.payload };
+  const messagesRes = await fetch(`https://chat.localhost/messages?user_id=${serverData.id}`);
+  const messagesData = await messagesRes.json();
+
+  const channelsRes = await fetch("https://chat.localhost/channels");
+  const channelData = await channelsRes.json();
+  return { ...serverData, ...messagesData.payload, ...channelData };
 }
 
 // force the client loader to run during hydration
@@ -35,12 +37,34 @@ export function HydrateFallback() {
   return <div>Loading...</div>;
 }
 
+export async function clientAction({ request }: Route.ActionArgs) {
+  let formData = await request.formData();
+  let keyword = formData.get("keyword") || "";
+  let channels = formData.getAll("channel"); // Support multiple selected channels
+
+  const queryParams = new URLSearchParams();
+  if (keyword) queryParams.append("keyword", keyword.toString());
+  channels.forEach((channel) => queryParams.append("channel", channel.toString()));
+
+  const response = await fetch(`https://chat.localhost/messages?${queryParams.toString()}`);
+  
+  if (!response.ok) {
+    throw new Response("Failed to fetch messages", { status: response.status });
+  }
+  
+
+  const messageData = await response.json();
+  console.log("CLIENT ACTION", messageData)
+  return { messages: messageData.payload.messages ?? [] };
+}
+
 export default function UserRoute() {
-  const { username, id, messages } = useLoaderData();
+  const { username, id, messages, channels } = useLoaderData();
   console.log("USERNAME", username);
+  console.log("CHANNELS", channels);
   return (
     <RouteProtector>
-      <UserPage username={username} id={id} messages={messages} />
+      <UserPage username={username} id={id} messages={messages} channels={channels} />
     </RouteProtector>
   )
 }

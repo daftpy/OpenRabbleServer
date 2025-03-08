@@ -14,10 +14,10 @@ const ChannelRow = ({ channel, isLast } : { channel : Channel, isLast: boolean }
   return (
     <React.Fragment>
       <Box style={{borderBottom: isLast ? noLine : line}} pr={"2"} py={"2"}>
-        <Text>{ channel.name }</Text>
+        <Text style={{color: "var(--indigo-12)"}} weight={"bold"} size={"2"}>{ channel.name }</Text>
       </Box>
       <Flex flexGrow={"1"} gap={"4"} overflow={"hidden"} style={{borderBottom: isLast ? noLine : line}}  py={"2"}> 
-        <Text truncate>{ channel.description }</Text>
+        <Text truncate size={"2"}>{ channel.description }</Text>
         <Flex gap={"2"} flexGrow={"1"} justify={"end"}>
           <Button color="iris" size={"1"} radius="full" style={{ boxShadow: "var(--shadow-1)", height: "20px", width: "20px"}}><Box><CaretSortIcon style={{width: "14px", height: "14px"}} /></Box></Button>
           <Button color="blue" size={"1"} radius="full" style={{ boxShadow: "var(--shadow-1)", height: "20px", width: "20px"}}><Box><GearIcon style={{width: "14px", height: "14px"}} /></Box></Button>

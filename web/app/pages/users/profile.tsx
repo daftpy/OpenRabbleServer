@@ -1,9 +1,36 @@
 import { CircleBackslashIcon, PersonIcon, TimerIcon } from "@radix-ui/react-icons";
 import { Box, Button, Container, DropdownMenu, Flex, Heading, ScrollArea, Text } from "@radix-ui/themes";
-import { Link } from "react-router";
+import { useEffect, useState } from "react";
+import { Link, useFetcher } from "react-router";
 import { MessageList } from "~/components/message/message_list";
+import { MessageSearchInput } from "~/components/message/search_input";
 
-export function UserPage({ username, id, messages } : { username: string, id: string, messages: any}) {
+export function UserPage({ username, id, messages, channels } : { username: string, id: string, messages: any, channels: string[]}) {
+  const fetcher = useFetcher();
+  const [filteredMessages, setFilteredMessages] = useState<any>(null);
+
+  const handleSearch = ({filters, keyword} : { filters: any, keyword: string }) => {
+    console.log("SEARCHING");
+    // Create the form
+    let formData = new FormData();
+    console.log("KEYWORD:", keyword);
+
+    keyword && formData.append("keyword", keyword);
+    formData.append("user_id", id);
+    console.log("USING ID:", id);
+    filters.forEach((filter: any) => {
+      console.log("using filter", filter);
+      formData.append("channel", filter.name);
+    });
+    fetcher.submit(formData, { method: "post", action: "/messages" });
+  }
+  useEffect(() => {
+    console.log("Fetcher got messages:", fetcher.data);
+    if (fetcher.data) {
+      console.log("fetcher data retrieved");
+      setFilteredMessages(fetcher.data.messages);
+    }
+  }, [fetcher.data]);
   return (
     <Container p={"6"}>
       <Heading size={"8"} weight={"bold"} className="text-xl pb-1" style={{ color: "var(--slate-12)" }}>
@@ -30,26 +57,29 @@ export function UserPage({ username, id, messages } : { username: string, id: st
               <Button color="red">Ban</Button>
             </DropdownMenu.Trigger>
             <DropdownMenu.Content>
-
                 <DropdownMenu.Item>
                   <CircleBackslashIcon /> Permanent
                 </DropdownMenu.Item>
                 <DropdownMenu.Item>
                   <TimerIcon /> Temporary
                 </DropdownMenu.Item>
-
             </DropdownMenu.Content>
           </DropdownMenu.Root>
         </Flex>
         <Box pt={"2"}>
-          <Box pb={"3"}>
-            <Heading style={{color: "var(--subheading-color)"}}>Messages</Heading>
+          <Box pb={"4"}>
+            <Heading style={{color: "var(--subheading-color)"}}>Message History</Heading>
+            <Text>You can search through a users chat history and filter by channel or keyword.</Text>
+            <MessageSearchInput keyword="" filters={channels} handleSearch={handleSearch} />
           </Box>
           <ScrollArea style={{maxHeight: "300px", border: "1px solid var(--indigo-4)", padding: "1em", borderRadius: "4px"}}>
-            <MessageList messages={messages} hidePermaLink={true} />
+            <MessageList messages={filteredMessages ? filteredMessages : messages} hidePermaLink={true} />
           </ScrollArea>
         </Box>
-        <Heading style={{color: "var(--subheading-color)"}}>Session Activity</Heading>
+        <Box>
+          <Heading style={{color: "var(--subheading-color)"}}>Session Activity</Heading>
+          <Text>You can review a users session activity, showing you when sessions begin, end, and their duration.</Text>
+        </Box>
       </Flex>
     </Container>
   )

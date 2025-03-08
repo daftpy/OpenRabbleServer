@@ -49,7 +49,7 @@ export default function UserList() {
             <User key={username} username={username} />
           ))
         ) : (
-        <Text>
+        <Text size={"2"}>
           No users connected
         </Text>
       )}

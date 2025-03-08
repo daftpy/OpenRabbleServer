@@ -31,7 +31,11 @@ export function HomePage({ channels }: { channels: Channel[] }) {
         <Flex direction={"column"}>
           <Heading size={"8"} weight={"bold"} className="text-xl pb-1" style={{ color: "var(--slate-12)" }}>Your OnRabble Server</Heading>
           <Text>Welcome to your dashboard.</Text>
-          <NavLink to="#" style={{color: "var(--link-color)"}}>Hide Live Chat</NavLink>
+          <NavLink to="#" style={{color: "var(--link-color)"}}>
+            <Text size={"2"}>
+              Hide Live Chat
+            </Text>
+          </NavLink>
         </Flex>
 
         <LiveView />
