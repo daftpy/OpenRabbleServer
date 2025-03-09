@@ -134,7 +134,7 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 		client.SendMessage(analyticsMsg)
 
 		// Send the activity analytics
-		activity, err := db.FetchSessionActivity(s.db)
+		activity, err := db.FetchSessionActivity(s.db, "")
 		if err != nil {
 			log.Printf("Failed to get recent activity: %v", err)
 		}
@@ -219,6 +219,7 @@ func New(addr string, h hub.HubInterface, db *pgxpool.Pool) (*Server, error) {
 	mux.HandleFunc("/channels", HandleChannels(db, srv))
 	mux.HandleFunc("/messages", HandleMessages(db))
 	mux.HandleFunc("/users", HandleUsers(db))
+	mux.HandleFunc("/activity", HandleRecentActivity(db))
 
 	return srv, nil
 }

@@ -152,7 +152,7 @@ func RecordUserSession(db *pgxpool.Pool, userID string, start, end time.Time) er
 	return err
 }
 
-func FetchSessionActivity(db *pgxpool.Pool) ([]models.SessionActivity, error) {
+func FetchSessionActivity(db *pgxpool.Pool, userID string) ([]models.SessionActivity, error) {
 	query := `
 		SELECT
 			DATE(start_time) AS session_date,
@@ -160,11 +160,21 @@ func FetchSessionActivity(db *pgxpool.Pool) ([]models.SessionActivity, error) {
 			SUM(end_time - start_time)::TEXT AS total_duration
 		FROM chatserver.chat_sessions
 		WHERE start_time >= NOW() - INTERVAL '7 days'
+	`
+
+	var args []interface{}
+
+	if userID != "" {
+		query += " AND owner_id = $1"
+		args = append(args, userID)
+	}
+
+	query += `
 		GROUP BY session_date
 		ORDER BY session_date;
 	`
 
-	rows, err := db.Query(context.Background(), query)
+	rows, err := db.Query(context.Background(), query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch session activity: %w", err)
 	}
