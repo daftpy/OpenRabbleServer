@@ -27,7 +27,7 @@ export async function clientLoader({
   const messagesRes = await fetch(`https://chat.localhost/messages?user_id=${serverData.id}`);
   const messagesData = await messagesRes.json();
 
-  const activityRes = await fetch(`https://chat.localhost/activity?user_id=${serverData.id}`)
+  const activityRes = await fetch(`https://chat.localhost/activity/sessions?user_id=${serverData.id}`)
   const activityData = await activityRes.json();
   console.log("ACTIVITY: ", activityData);
 

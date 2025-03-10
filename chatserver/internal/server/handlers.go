@@ -184,3 +184,16 @@ func HandleRecentActivity(db *pgxpool.Pool) http.HandlerFunc {
 		json.NewEncoder(w).Encode(msg)
 	}
 }
+
+func HandleChannelActivity(db *pgxpool.Pool) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		activity, err := database.FetchMessageCountByChannel(db)
+		if err != nil {
+			log.Printf("Failed to fetch channel message counts: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+		}
+		msg := messages.NewMessageCountByChannelMessage(activity)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(msg)
+	}
+}

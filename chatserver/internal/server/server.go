@@ -219,7 +219,8 @@ func New(addr string, h hub.HubInterface, db *pgxpool.Pool) (*Server, error) {
 	mux.HandleFunc("/channels", HandleChannels(db, srv))
 	mux.HandleFunc("/messages", HandleMessages(db))
 	mux.HandleFunc("/users", HandleUsers(db))
-	mux.HandleFunc("/activity", HandleRecentActivity(db))
+	mux.HandleFunc("/activity/sessions", HandleRecentActivity(db))
+	mux.HandleFunc("/activity/channels", HandleChannelActivity(db))
 
 	return srv, nil
 }

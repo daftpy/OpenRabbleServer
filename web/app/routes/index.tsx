@@ -25,7 +25,7 @@ export async function clientLoader({
   
   const serverData = await serverLoader();
 
-  const activityRes = await fetch(`https://chat.localhost/activity`)
+  const activityRes = await fetch(`https://chat.localhost/activity/sessions`)
   const activityData = await activityRes.json();
   console.log("ACTIVITY: ", serverData);
 
