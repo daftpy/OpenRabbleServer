@@ -34,6 +34,13 @@ export async function clientLoader({
   return { ...serverData, ...messagesData.payload, ...activityData.payload };
 }
 
+// force the client loader to run during hydration
+clientLoader.hydrate = true as const; // `as const` for type inference
+
+export function HydrateFallback() {
+  return <div>Loading...</div>;
+}
+
 export default function UserRoute({loaderData,} : Route.ComponentProps) {
   const { username, id, messages, session_activity } = loaderData;
   console.log("USERNAME", username);
