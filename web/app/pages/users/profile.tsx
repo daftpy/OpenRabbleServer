@@ -14,8 +14,6 @@ export function UserPage({ username, id, messages, session_activity } : { userna
     setFilteredMessages(messages);
   }
 
-  console.log("SESSION ACTIVITY USER PAGE:", session_activity);
-
   return (
     <Container p={"6"}>
       <Heading size={"8"} weight={"bold"} className="text-xl pb-1" style={{ color: "var(--slate-12)" }}>

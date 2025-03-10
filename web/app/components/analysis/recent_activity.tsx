@@ -25,16 +25,15 @@ export function RecentActivity({ session_activity } : any) {
       }
     ]
   });
-  
-  let data: any;
-  let labels: any;
-
-  if (session_activity) {
-    labels = session_activity.map((entry : any) => entry.session_date);
-    data = session_activity.map((entry : any) => entry.session_count);
-  }
 
   useEffect(() => {
+    let data: any;
+    let labels: any;
+
+    if (session_activity) {
+      labels = session_activity.map((entry : any) => entry.session_date);
+      data = session_activity.map((entry : any) => entry.session_count);
+    }
     setLineData({
       labels,
       datasets: [
@@ -47,7 +46,7 @@ export function RecentActivity({ session_activity } : any) {
         }
       ]
     });
-  }, [])
+  }, [session_activity])
   const aspectRatio = 2;
 
   // Colors for buttons
