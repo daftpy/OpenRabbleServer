@@ -27,7 +27,11 @@ export async function clientLoader({
   const messagesRes = await fetch(`https://chat.localhost/messages?user_id=${serverData.id}`);
   const messagesData = await messagesRes.json();
 
-  return { ...serverData, ...messagesData.payload };
+  const activityRes = await fetch(`https://chat.localhost/activity?user_id=${serverData.id}`)
+  const activityData = await activityRes.json();
+  console.log("ACTIVITY: ", activityData);
+
+  return { ...serverData, ...messagesData.payload, ...activityData.payload };
 }
 
 // force the client loader to run during hydration
@@ -38,11 +42,11 @@ export function HydrateFallback() {
 }
 
 export default function UserRoute() {
-  const { username, id, messages } = useLoaderData();
+  const { username, id, messages, session_activity } = useLoaderData();
   console.log("USERNAME", username);
   return (
     <RouteProtector>
-      <UserPage username={username} id={id} messages={messages} />
+      <UserPage username={username} id={id} messages={messages} session_activity={session_activity}/>
     </RouteProtector>
   )
 }

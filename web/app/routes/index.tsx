@@ -18,6 +18,27 @@ export async function loader({ params }: Route.LoaderArgs) {
   return data.channels;
 }
 
+export async function clientLoader({
+  serverLoader,
+  params,
+}: Route.ClientLoaderArgs) {
+  
+  const serverData = await serverLoader();
+
+  const activityRes = await fetch(`https://chat.localhost/activity`)
+  const activityData = await activityRes.json();
+  console.log("ACTIVITY: ", serverData);
+
+  return { channels: serverData, ...activityData.payload };
+}
+
+// force the client loader to run during hydration
+clientLoader.hydrate = true as const; // `as const` for type inference
+
+export function HydrateFallback() {
+  return <div>Loading...</div>;
+}
+
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "New React Router App" },
@@ -26,14 +47,14 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Index({loaderData,}: Route.ComponentProps) {
-  const channels = useLoaderData();
+  const {channels, session_activity} = useLoaderData();
   useEffect(() => {
-    console.log("Test home");
+    console.log("Test home", channels);
   }, []);
 
   return (
     <RouteProtector>
-      <HomePage channels={channels} />
+      <HomePage channels={channels} session_activity={session_activity} />
     </RouteProtector>
   );
 }

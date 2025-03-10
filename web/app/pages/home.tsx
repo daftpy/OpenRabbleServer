@@ -20,7 +20,7 @@ import { LiveView } from "~/components/message/live_view";
   TODO: Added a test navigate button here to move between pages. It works properly
   and does not accidentally trigger a refresh of the auth provider. Perfect!
 */
-export function HomePage({ channels }: { channels: Channel[] }) {
+export function HomePage({ channels, session_activity }: { channels: Channel[], session_activity: any }) {
   const [channelList, setChannelList] = useState<Channel[]>(channels);
   const navigate = useNavigate();
   
@@ -66,7 +66,7 @@ export function HomePage({ channels }: { channels: Channel[] }) {
           <Text>Essential server analytics are available. Track basic metrics like how many messages you serve, user statistics, and other activity.</Text>
         </Box>
 
-        <RecentActivity />
+        <RecentActivity session_activity={session_activity} />
 
       </Flex>
     </main>   

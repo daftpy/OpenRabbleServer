@@ -2,25 +2,29 @@ import { CircleBackslashIcon, PersonIcon, TimerIcon } from "@radix-ui/react-icon
 import { Box, Button, Container, DropdownMenu, Flex, Heading, ScrollArea, Text } from "@radix-ui/themes";
 import { useState } from "react";
 import { Link } from "react-router";
+import { RecentActivity } from "~/components/analysis/recent_activity";
 import { MessageList } from "~/components/message/message_list";
 import { MessageSearchInput } from "~/components/message/search_input";
+import "chart.js/auto"
 
-export function UserPage({ username, id, messages } : { username: string, id: string, messages: any }) {
+export function UserPage({ username, id, messages, session_activity } : { username: string, id: string, messages: any, session_activity: any }) {
   const [filteredMessages, setFilteredMessages] = useState<any>(null);
 
   const handleMessageUpdate = (messages: any) => {
     setFilteredMessages(messages);
   }
 
+  console.log("SESSION ACTIVITY USER PAGE:", session_activity);
+
   return (
     <Container p={"6"}>
       <Heading size={"8"} weight={"bold"} className="text-xl pb-1" style={{ color: "var(--slate-12)" }}>
         <Link to="/">Your OnRabble Server</Link>
       </Heading>
-      <Flex direction="column" pt={"4"} gap={"4"}>
+      <Flex direction="column" pt={"4"} gap={"6"}>
         <Box>
-        <Heading style={{color: "var(--indigo-10)"}}>User Information</Heading>
-        <Text>Here you can set a users roles, inspect their activity, and ban them from the chatserver if needed.</Text>
+          <Heading style={{color: "var(--indigo-10)"}}>User Information</Heading>
+          <Text>Here you can set a users roles, inspect their activity, and ban them from the chatserver if needed.</Text>
         </Box>
         <Flex align={"center"} gap={"4"}>
           <Flex direction={"column"} gap={"2"} flexGrow={"1"}>
@@ -57,10 +61,11 @@ export function UserPage({ username, id, messages } : { username: string, id: st
             <MessageList messages={filteredMessages ? filteredMessages : messages} hidePermaLink={true} />
           </ScrollArea>
         </Box>
-        <Box>
+        {/* <Box>
           <Heading style={{color: "var(--subheading-color)"}}>Session Activity</Heading>
           <Text>You can review a users session activity, showing you when sessions begin, end, and their duration.</Text>
-        </Box>
+        </Box> */}
+        <RecentActivity session_activity={session_activity} />
       </Flex>
     </Container>
   )

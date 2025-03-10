@@ -14,7 +14,7 @@ export type SessionActivity = {
 };
 
 
-export function RecentActivity() {
+export function RecentActivity({ session_activity } : any) {
   const [selected, setSelected] = useState<Date>();
   const [lineData, setLineData] = useState<any>({
     labels: ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6", "Day 7"],
@@ -25,47 +25,29 @@ export function RecentActivity() {
       }
     ]
   });
+  
+  let data: any;
+  let labels: any;
+
+  if (session_activity) {
+    labels = session_activity.map((entry : any) => entry.session_date);
+    data = session_activity.map((entry : any) => entry.session_count);
+  }
 
   useEffect(() => {
-    const handler = (message: ServerMessage) => {
-      if (message.type === "session_activity") {
-        const recentActivity = message as RecentActivityMessage;
-        console.log("Recent activity data:", recentActivity.payload.session_activity);
-
-        // Transform session activity into chart data format
-        const labels = recentActivity.payload.session_activity.map((entry) => entry.session_date);
-        const data = recentActivity.payload.session_activity.map((entry) => entry.session_count);
-
-        // Update the chart data
-        setLineData({
-          labels,
-          datasets: [
-            {
-              label: "Chat Sessions",
-              data,
-              borderColor: "rgb(62, 99, 221)",
-              backgroundColor: "rgb(98, 132, 244)",
-              fill: true,
-            }
-          ]
-        });
-      }
-    };
-
-    emitter.on("session_activity", handler);
-    return () => {
-      emitter.off("session_activity", handler);
-    };
-  }, []);
-  const data = {
-    labels: ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6", "Day 7"],
-    datasets: [
-      {
-        label: "Chat Sessions",
-        data: [1, 2, 3, 4, 5, 6, 7]
-      }
-    ]
-  }
+    setLineData({
+      labels,
+      datasets: [
+        {
+          label: "Chat Sessions",
+          data,
+          borderColor: "rgb(62, 99, 221)",
+          backgroundColor: "rgb(98, 132, 244)",
+          fill: true,
+        }
+      ]
+    });
+  }, [])
   const aspectRatio = 2;
 
   // Colors for buttons
