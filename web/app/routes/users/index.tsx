@@ -1,7 +1,19 @@
 import RouteProtector from "~/components/route_protector";
 import type { Route } from "./+types/index";
 import { UsersPage } from "~/pages/users";
-import { useLoaderData } from "react-router";
+
+export type User = {
+  id: string;
+  username: string;
+}
+
+type UsersSearchResult = {
+  type: string;
+  sender: string;
+  payload: {
+    users: User[];
+  };
+};
 
 export async function loader({ params }: Route.LoaderArgs) {
   const response = await fetch("https://chat.localhost/users");
@@ -9,16 +21,17 @@ export async function loader({ params }: Route.LoaderArgs) {
     throw new Response("Failed to load users", { status: response.status });
   }
 
-  const data = await response.json();
+  const data : UsersSearchResult = await response.json();
   console.log(data);
   if (data.payload == null) {
     return [];
   }
-  return data.payload;
+  return data;
 }
 
 export default function UsersRoute({loaderData,} : Route.ComponentProps) {
-  const { users } = useLoaderData() as { users: any[] };
+const { payload: { users } } = loaderData as UsersSearchResult;
+
   return (
     <RouteProtector>
       <UsersPage users={users} />

@@ -1,13 +1,14 @@
 import { MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons";
 import { Box, Button, Container, DropdownMenu, Flex, Heading, Text, TextField } from "@radix-ui/themes";
 import { Link, useNavigate } from "react-router";
+import type { User } from "~/routes/users";
 
-export function UsersPage({ users } : any) {
+type props = {
+  users: User[];
+};
+
+export function UsersPage({ users } : props) {
   const navigate = useNavigate();
-  console.log("USERS", users);
-  users.map((user: any) => {
-    console.log("A USER:", user);
-  });
   return (
     <Container p={"6"}>
       <Heading size={"8"} weight={"bold"} className="text-xl pb-1" style={{ color: "var(--slate-12)" }}>
@@ -38,7 +39,7 @@ export function UsersPage({ users } : any) {
       </Flex>
       </Box>
       <Flex direction={"column"} pt={"4"}>
-        {users.map((user: any, index: number) => (
+        {users.map((user: User, index: number) => (
           <Flex align={"center"}
             style={{borderBottom: index == users.length - 1 ? "none" : "2px solid var(--indigo-3)"}}
           >
