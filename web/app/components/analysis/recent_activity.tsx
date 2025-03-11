@@ -29,8 +29,8 @@ export function RecentActivity({ session_activity } : props) {
     let labels: any;
 
     if (session_activity) {
-      labels = session_activity.map((entry : any) => entry.session_date);
-      data = session_activity.map((entry : any) => entry.session_count);
+      labels = session_activity.map((entry : SessionActivity) => entry.session_date);
+      data = session_activity.map((entry : SessionActivity) => entry.session_count);
     }
     setLineData({
       labels,
@@ -56,7 +56,7 @@ export function RecentActivity({ session_activity } : props) {
   return (
     <Box>
       <Flex justify={"between"} pb={"2"}>
-        <Heading style={{color: "var(--subheading-color)"}}>Recent Activity</Heading>
+        <Heading style={{color: "var(--indigo-12)"}}>Recent Activity</Heading>
         <Flex  gap={"2"}>
           <Button size="2"><LapTimerIcon /> Sessions</Button>
           <Button size="2" color="gray" style={buttonStyle}><ChatBubbleIcon /> Messages</Button>

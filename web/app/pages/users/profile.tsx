@@ -29,7 +29,7 @@ export function UserPage({ username, id, messages, session_activity } : { userna
           <Flex direction={"column"} gap={"2"} flexGrow={"1"}>
             <Flex align={"center"} gap={"2"}>
               <PersonIcon style={{width: "1.5em", height: "1.5em", color: "var(--slate-11)", padding: "0.1em", border: "1px solid var(--slate-11)", borderRadius: "15px"}} />
-              <Heading style={{color: "var(--link-color)"}}>{username}</Heading>
+              <Heading style={{color: "var(--indigo-12)"}}>{username}</Heading>
             </Flex>
             <Flex gap={"2"}>
               <Text weight={"bold"} size={"1"}>ID: </Text>
@@ -60,10 +60,10 @@ export function UserPage({ username, id, messages, session_activity } : { userna
             <MessageList messages={filteredMessages ? filteredMessages : messages} hidePermaLink={true} />
           </ScrollArea>
         </Box>
-        {/* <Box>
+        <Box>
           <Heading style={{color: "var(--subheading-color)"}}>Session Activity</Heading>
           <Text>You can review a users session activity, showing you when sessions begin, end, and their duration.</Text>
-        </Box> */}
+        </Box>
         <RecentActivity session_activity={session_activity} />
       </Flex>
     </Container>
