@@ -206,7 +206,7 @@ func FetchSessionActivity(db *pgxpool.Pool, userID string) ([]models.SessionActi
 	return activity, nil
 }
 
-func FetchMessages(db *pgxpool.Pool, userID string, channels []string, keyword string, limit, offset int) ([]messages.MessageSearchResult, error) {
+func FetchMessages(db *pgxpool.Pool, userID string, channels []string, keyword string, limit, offset int) ([]messages.MessageSearchResult, bool, error) {
 	var query string
 	var args []interface{}
 	var conditions []string
@@ -261,11 +261,11 @@ func FetchMessages(db *pgxpool.Pool, userID string, channels []string, keyword s
 		LIMIT $%d OFFSET $%d;
 	`, argIndex, argIndex+1)
 
-	args = append(args, limit, offset)
+	args = append(args, limit+1, offset) // Request one extra row
 
 	rows, err := db.Query(context.Background(), query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch chat messages: %w", err)
+		return nil, false, fmt.Errorf("failed to fetch chat messages: %w", err)
 	}
 	defer rows.Close()
 
@@ -273,17 +273,19 @@ func FetchMessages(db *pgxpool.Pool, userID string, channels []string, keyword s
 	for rows.Next() {
 		var msg messages.MessageSearchResult
 		if err := rows.Scan(&msg.ID, &msg.OwnerID, &msg.Username, &msg.Channel, &msg.Message, &msg.Sent); err != nil {
-			return nil, fmt.Errorf("failed to scan chat message row: %w", err)
+			return nil, false, fmt.Errorf("failed to scan chat message row: %w", err)
 		}
 		searchMessages = append(searchMessages, msg)
 	}
 
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("error after iterating chat message rows: %w", err)
+	// Determine if there are more messages beyond this 'page'
+	hasMore := len(searchMessages) > limit
+	if hasMore {
+		searchMessages = searchMessages[:limit]
 	}
 
 	log.Printf("Fetched %d messages from database (user: %s, channels: %v, keyword: %s)", len(searchMessages), userID, channels, keyword)
-	return searchMessages, nil
+	return searchMessages, hasMore, nil
 }
 
 func FetchUsers(db *pgxpool.Pool, username string) ([]messages.UserSearchResult, error) {

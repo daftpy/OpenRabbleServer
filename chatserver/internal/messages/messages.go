@@ -154,6 +154,7 @@ type MessageSearchResult struct {
 
 type MessageSearchResultPayload struct {
 	Messages []MessageSearchResult `json:"messages"`
+	HasMore  bool                  `json:"has_more"`
 }
 
 func NewMessageSearchResultMessage(payload MessageSearchResultPayload) BaseMessage {

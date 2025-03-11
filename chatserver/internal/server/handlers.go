@@ -126,7 +126,7 @@ func HandleMessages(db *pgxpool.Pool) http.HandlerFunc {
 			userID := r.URL.Query().Get("user_id")
 
 			// Fetch messages
-			search_messages, err := database.FetchMessages(db, userID, channels, keyword, limit, offset)
+			search_messages, hasMore, err := database.FetchMessages(db, userID, channels, keyword, limit, offset)
 			if err != nil {
 				log.Printf("Failed to fetch messages for channels '%v': %v", channels, err)
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -136,6 +136,7 @@ func HandleMessages(db *pgxpool.Pool) http.HandlerFunc {
 			// Wrap messages in the correct struct
 			payload := messages.MessageSearchResultPayload{
 				Messages: search_messages, // Fixing struct usage
+				HasMore:  hasMore,
 			}
 
 			// Use NewMessageSearchResultMessage with correct payload
