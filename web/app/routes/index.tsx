@@ -1,8 +1,22 @@
 import type { Route } from "./+types/index";
-import { useLoaderData } from "react-router";
 import { useEffect } from "react";
 import RouteProtector from "~/components/route_protector";
 import { HomePage } from "~/pages/home";
+
+export type SessionActivity = {
+  session_date: string; // e.g., "2025-02-23"
+  session_count: number; // Number of sessions for that day
+  total_duration: string; // e.g., "15 hours 30 minutes"
+};
+
+type SessionActivityResult = {
+  type: string;
+  sender: string;
+  payload: {
+    session_activity: SessionActivity[];
+  };
+};
+
 
 export async function loader({ params }: Route.LoaderArgs) {
   const response = await fetch("https://chat.localhost/channels");
@@ -26,7 +40,7 @@ export async function clientLoader({
   const serverData = await serverLoader();
 
   const activityRes = await fetch(`https://chat.localhost/activity/sessions`)
-  const activityData = await activityRes.json();
+  const activityData : SessionActivityResult = await activityRes.json();
   console.log("ACTIVITY: ", serverData);
 
   return { channels: serverData, ...activityData.payload };

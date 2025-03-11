@@ -6,8 +6,9 @@ import { RecentActivity } from "~/components/analysis/recent_activity";
 import { MessageList } from "~/components/message/message_list";
 import { MessageSearchInput } from "~/components/message/search_input";
 import "chart.js/auto"
+import type { SessionActivity } from "~/routes/index";
 
-export function UserPage({ username, id, messages, session_activity } : { username: string, id: string, messages: any, session_activity: any }) {
+export function UserPage({ username, id, messages, session_activity } : { username: string, id: string, messages: any, session_activity: SessionActivity[] }) {
   const [filteredMessages, setFilteredMessages] = useState<any>(null);
 
   const handleMessageUpdate = (messages: any) => {

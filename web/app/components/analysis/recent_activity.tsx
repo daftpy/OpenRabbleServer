@@ -6,15 +6,13 @@ import type { RecentActivityMessage, ServerMessage } from "~/messages";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
 import { ChatBubbleIcon, LapTimerIcon } from "@radix-ui/react-icons";
+import type { SessionActivity } from "~/routes/index";
 
-export type SessionActivity = {
-  session_date: string; // e.g., "2025-02-23"
-  session_count: number; // Number of sessions for that day
-  total_duration: string; // e.g., "15 hours 30 minutes"
-};
+type props = {
+  session_activity: SessionActivity[]
+}
 
-
-export function RecentActivity({ session_activity } : any) {
+export function RecentActivity({ session_activity } : props) {
   const [selected, setSelected] = useState<Date>();
   const [lineData, setLineData] = useState<any>({
     labels: ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6", "Day 7"],

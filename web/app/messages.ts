@@ -1,4 +1,4 @@
-import type { SessionActivity } from "./components/analysis/recent_activity";
+import type { SessionActivity } from "./routes/index";
 import type { Channel } from "./components/channel/channel_list";
 import type { ChatMessageType } from "./components/message/live_view";
 

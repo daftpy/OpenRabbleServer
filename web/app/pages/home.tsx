@@ -12,15 +12,16 @@ import type { Channel } from "~/components/channel/channel_list";
 import UserList from "~/components/user_list";
 import { GearIcon, LockClosedIcon, MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons";
 import "chart.js/auto"
-import { MessagesPerChannel } from "~/components/analysis/messages_per_channel";
 import { RecentActivity } from "~/components/analysis/recent_activity";
 import { LiveView } from "~/components/message/live_view";
+import type { SessionActivity } from "../routes/index";
+
 
 /*
   TODO: Added a test navigate button here to move between pages. It works properly
   and does not accidentally trigger a refresh of the auth provider. Perfect!
 */
-export function HomePage({ channels, session_activity }: { channels: Channel[], session_activity: any }) {
+export function HomePage({ channels, session_activity }: { channels: Channel[], session_activity: SessionActivity[] }) {
   const [channelList, setChannelList] = useState<Channel[]>(channels);
   const navigate = useNavigate();
   

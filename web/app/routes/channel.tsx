@@ -1,5 +1,4 @@
-import type { Route } from "./+types/index";
-import { useLoaderData } from "react-router";
+import type { Route } from "./+types/channel";
 import { useEffect } from "react";
 import RouteProtector from "~/components/route_protector";
 import { ChannelPage } from "~/pages/channels";
@@ -58,7 +57,7 @@ export function HydrateFallback() {
 }
 
 export default function ChannelRoute({loaderData,}: Route.ComponentProps) {
-  const { channels, channel_activity } = loaderData;
+  const {channels, channel_activity } = loaderData;
   useEffect(() => {
     console.log("Test home");
   }, [channels]);
