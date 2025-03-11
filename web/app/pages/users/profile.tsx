@@ -28,8 +28,8 @@ export function UserPage({ username, id, messages, session_activity } : { userna
         <Flex align={"center"} gap={"4"}>
           <Flex direction={"column"} gap={"2"} flexGrow={"1"}>
             <Flex align={"center"} gap={"2"}>
-              <PersonIcon style={{width: "1.5em", height: "1.5em", color: "var(--slate-11)", padding: "0.1em", border: "1px solid var(--slate-11)", borderRadius: "15px"}} />
-              <Heading style={{color: "var(--indigo-12)"}}>{username}</Heading>
+              <PersonIcon style={{width: "2em", height: "2em", color: "var(--indigo-12)", padding: "0.2em", border: "1px solid var(--indigo-12)", borderRadius: "15px"}} />
+              <Heading style={{color: "var(--indigo-12)"}} size={"8"}>{username}</Heading>
             </Flex>
             <Flex gap={"2"}>
               <Text weight={"bold"} size={"1"}>ID: </Text>
