@@ -1,6 +1,6 @@
 import { Cross1Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { Badge, Button, DropdownMenu, Flex, Text, TextField } from "@radix-ui/themes";
-import { useCallback, useEffect, useMemo, useState, } from "react";
+import { useEffect, useMemo } from "react";
 import { useFetcher } from "react-router";
 import { MessageSearchActionType, type MessageSearchAction, type MessageSearchState } from "~/hooks/useMessageSearch";
 import type { Channel } from "../channel/channel_list";
