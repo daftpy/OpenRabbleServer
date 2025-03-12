@@ -18,6 +18,30 @@ export async function loader({ request }: Route.LoaderArgs) {
   });
 }
 
+export async function action({ request }: Route.ActionArgs) {
+  if (request.method === "DELETE") {
+    const formData = await request.formData();
+    const messageId = formData.get("id");
+
+    if (!messageId) {
+      return new Response("Missing message ID", { status: 400 });
+    }
+
+    const response = await fetch(`/api/messages?id=${messageId}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      return new Response("Failed to delete message", { status: 500 });
+    }
+
+    return new Response(null, { status: 204 }); // No Content (Success)
+  }
+
+  return new Response("Method Not Allowed", { status: 405 });
+}
+
+
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "New React Router App" },

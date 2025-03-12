@@ -146,6 +146,37 @@ func HandleMessages(db *pgxpool.Pool) http.HandlerFunc {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(responseMessage)
 
+		case http.MethodDelete:
+			// Get the message ID from query parameters
+			messageIDStr := r.URL.Query().Get("id")
+			if messageIDStr == "" {
+				http.Error(w, "Missing 'id' query parameter", http.StatusBadRequest)
+				return
+			}
+
+			// Convert string to integer
+			messageID, err := strconv.Atoi(messageIDStr)
+			if err != nil || messageID <= 0 {
+				http.Error(w, "Invalid 'id' query parameter", http.StatusBadRequest)
+				return
+			}
+
+			// Call RemoveMessage function
+			deleted, err := database.RemoveMessage(db, messageID)
+			if err != nil {
+				log.Printf("Failed to delete message ID %d: %v", messageID, err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+
+			if !deleted {
+				http.Error(w, "Message not found", http.StatusNotFound)
+				return
+			}
+
+			// Respond with success
+			w.WriteHeader(http.StatusNoContent)
+
 		default:
 			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		}

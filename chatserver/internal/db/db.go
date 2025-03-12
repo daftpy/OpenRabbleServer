@@ -288,6 +288,23 @@ func FetchMessages(db *pgxpool.Pool, userID string, channels []string, keyword s
 	return searchMessages, hasMore, nil
 }
 
+func RemoveMessage(db *pgxpool.Pool, messageID int) (bool, error) {
+	query := `DELETE FROM chatserver.chat_messages WHERE id = $1`
+
+	cmd, err := db.Exec(context.Background(), query, messageID)
+	if err != nil {
+		return false, fmt.Errorf("failed to delete message: %w", err)
+	}
+
+	// Check if a row was actually deleted
+	if cmd.RowsAffected() == 0 {
+		return false, nil // No message found with that ID
+	}
+
+	// Message was successfully deleted
+	return true, nil
+}
+
 func FetchUsers(db *pgxpool.Pool, username string) ([]messages.UserSearchResult, error) {
 	var query string
 	var args []interface{}
