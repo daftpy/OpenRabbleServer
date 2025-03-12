@@ -5,7 +5,7 @@ import { MessageSearchInput } from "~/components/message/search_input";
 import { useMessageSearch } from "~/hooks/useMessageSearch";
 
 export function SearchMessagesPage({ messages, hasMore }: {messages: any, hasMore: boolean}) {
-  const { state, dispatch, searchMessages, nextPage, prevPage } = useMessageSearch({ messages, hasMore });
+  const { state, dispatch, nextPage, prevPage } = useMessageSearch({ messages, hasMore });
   console.log("SearchMessagesPage says hello");
   return (
     <Flex direction={"column"} maxWidth={"990px"} m={"auto"} px={"4"} py={"6"}>
@@ -17,7 +17,7 @@ export function SearchMessagesPage({ messages, hasMore }: {messages: any, hasMor
         <Text>Search messages stored in your cache or database. Filter by <strong style={{ color: "var(--link-color)" }}>channel </strong>or <strong style={{ color: "var(--link-color)" }}>keyword</strong>.</Text>
       </Box>
       {/* Search Input & Filters */}
-      <MessageSearchInput state={state} dispatch={dispatch} searchMessages={searchMessages} />
+      <MessageSearchInput state={state} dispatch={dispatch} />
 
       {/* Show messages */}
       <MessageList messages={state.messages} hidePermaLink={true} />

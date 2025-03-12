@@ -8,11 +8,9 @@ import type { Channel } from "../channel/channel_list";
 export function MessageSearchInput({
   state,
   dispatch,
-  searchMessages
 } : {
   state: MessageSearchState;
   dispatch: React.Dispatch<MessageSearchAction>;
-  searchMessages: () => void;
 }) {
   const channelFetcher = useFetcher();
 

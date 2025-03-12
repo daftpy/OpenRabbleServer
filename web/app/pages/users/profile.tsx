@@ -9,7 +9,7 @@ import type { SessionActivity } from "~/routes/index";
 import { useMessageSearch } from "~/hooks/useMessageSearch";
 
 export function UserPage({ username, id, messages, session_activity } : { username: string, id: string, messages: any, session_activity: SessionActivity[] }) {
-  const { state, dispatch, searchMessages, nextPage, prevPage } = useMessageSearch({ messages, userId: id, hasMore: false });
+  const { state, dispatch, nextPage, prevPage } = useMessageSearch({ messages, userId: id, hasMore: false });
 
   return (
     <Container p={"6"}>
@@ -50,7 +50,7 @@ export function UserPage({ username, id, messages, session_activity } : { userna
           <Box pb={"4"}>
             <Heading style={{color: "var(--subheading-color)"}}>Message History</Heading>
             <Text>You can search through a users chat history and filter by channel or keyword.</Text>
-            <MessageSearchInput state={state} dispatch={dispatch} searchMessages={searchMessages} />
+            <MessageSearchInput state={state} dispatch={dispatch}  />
           </Box>
           {/* <ScrollArea style={{height: "600px", border: "1px solid var(--indigo-4)", padding: "1em", borderRadius: "4px"}}> */}
             <MessageList messages={state.messages} hidePermaLink={true} />
