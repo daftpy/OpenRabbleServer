@@ -269,7 +269,7 @@ func FetchMessages(db *pgxpool.Pool, userID string, channels []string, keyword s
 	}
 	defer rows.Close()
 
-	var searchMessages []messages.MessageSearchResult
+	searchMessages := []messages.MessageSearchResult{}
 	for rows.Next() {
 		var msg messages.MessageSearchResult
 		if err := rows.Scan(&msg.ID, &msg.OwnerID, &msg.Username, &msg.Channel, &msg.Message, &msg.Sent); err != nil {

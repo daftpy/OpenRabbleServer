@@ -1,46 +1,22 @@
 import { useEffect } from "react";
 import type { Route } from "./+types/search_messages";
 import { SearchMessagesPage } from "~/pages/search_messages"
-import { useLoaderData } from "react-router";
+import { useLoaderData, type ShouldRevalidateFunctionArgs } from "react-router";
+import { fetchMessagesFromAPI } from "~/components/api/fetchMessages";
 
-export async function loader({ params }: Route.LoaderArgs) {
-  const messageResponse = await fetch("https://chat.localhost/messages?limit=20&offset=0");
-  
-  if (!messageResponse.ok) {
-    throw new Response("Failed to load messages", { status: messageResponse.status });
-  }
+// TODO the default limit is hardcoded twice here and again in the SearchMessagesPage
+// It is currently fragile and should possibly be refactored
+export async function loader({ request }: Route.LoaderArgs) {
+  const url = new URL(request.url);
 
-  const messageData = await messageResponse.json();
-  console.log(messageData);
-  
-  return {
-    messages: messageData.payload.messages ?? []
-  };
+  return fetchMessagesFromAPI({
+    keyword: url.searchParams.get("keyword") ?? "",
+    channels: url.searchParams.getAll("channel"),
+    user_id: url.searchParams.get("user_id") ?? undefined,
+    limit: url.searchParams.get("limit") ?? "10",
+    offset: url.searchParams.get("offset") ?? "0"
+  });
 }
-
-export async function clientAction({ request }: Route.ActionArgs) {
-  let formData = await request.formData();
-  let keyword = formData.get("keyword") || "";
-  let channels = formData.getAll("channel"); // Support multiple selected channels
-  let user_id = formData.get("user_id");
-
-  const queryParams = new URLSearchParams();
-  if (keyword) queryParams.append("keyword", keyword.toString());
-  if (user_id) queryParams.append("user_id", user_id.toString());
-  channels.forEach((channel) => queryParams.append("channel", channel.toString()));
-
-  const response = await fetch(`https://chat.localhost/messages?${queryParams.toString()}`);
-  
-  if (!response.ok) {
-    throw new Response("Failed to fetch messages", { status: response.status });
-  }
-  
-
-  const messageData = await response.json();
-  console.log("CLIENT ACTION", messageData)
-  return { messages: messageData.payload.messages ?? [] };
-}
-
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -50,11 +26,11 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function About({loaderData,}: Route.ComponentProps) {
-  const { messages, channels } = useLoaderData() as { messages: any[], channels: any[] };
+  const { messages, channels, hasMore } = useLoaderData() as { messages: any[], channels: any[], hasMore: boolean };
   useEffect(() => {
     console.log("Test search page");
   }, []);
   return (
-    <SearchMessagesPage messages={messages} channels={channels} />
+    <SearchMessagesPage messages={messages} hasMore={hasMore} />
   )
 }

@@ -22,7 +22,7 @@ export function MessageSearchInput({
   onMessagesUpdate 
 } : {
   userId?: string,
-  onMessagesUpdate: (messages: any) => void;
+  onMessagesUpdate: (messages: any, hasMore: boolean, keyWord: string, filters: string[]) => void;
 }) {
   const [state, dispatch] = useReducer(reducer, {keyword: "", activeFilters: []});
   const [availableFilters, setAvailableFilters] = useState<string[]>([]);
@@ -31,25 +31,21 @@ export function MessageSearchInput({
 
   // Search messages using keywords and filters if available
   const handleSearch = () => {
-    let formData = new FormData(); // Create the new form
+    const params = new URLSearchParams();
+    params.append("keyword", state.keyword);
+    userId && params.append("user_id", userId);
 
-    // Add the conditional parameters for the search
-    if (state.keyword) {
-      formData.append("keyword", state.keyword);
-    }
-    if (userId) {
-      formData.append("user_id", userId);
-    }
     state.activeFilters.forEach((filter: any) => {
-      formData.append("channel", filter.name);
-    })
+      params.append("channel", filter.name);
+    });
 
-    messageFetcher.submit(formData, {method: "post", action: "/messages"});
+    // Trigger the loader by calling fetcher.load
+    messageFetcher.load(`/messages?${params.toString()}`);
   }
 
   // Fetch the server channels to use as filters
   useEffect(() => {
-    channelFetcher.submit({}, {method: "post", action: "/channels"});
+    channelFetcher.load("/channels");
   }, [])
 
   // Retrieve the server channels and set them as available fiilters
@@ -63,7 +59,7 @@ export function MessageSearchInput({
   useEffect(() => {
     console.log("NEW searched meessages:", messageFetcher.data);
     if (messageFetcher.data?.messages) {
-      onMessagesUpdate(messageFetcher.data.messages);
+      onMessagesUpdate(messageFetcher.data.messages, messageFetcher.data.hasMore, state.keyword, state.activeFilters);
     }
   }, [messageFetcher.data]);
 

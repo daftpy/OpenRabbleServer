@@ -31,17 +31,6 @@ export async function clientLoader({
   return { channels: serverData, channel_activity: activityData.payload.channels };
 }
 
-export async function clientAction({ request }: Route.ActionArgs) {
-  const response = await fetch("https://chat.localhost/channels");
-  
-  if (!response.ok) {
-    throw new Response("Failed to fetch channels", { status: response.status });
-  }
-  
-  const channelsData = await response.json();
-  return { channels: channelsData.channels ? channelsData.channels : [] };
-}
-
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "New React Router App" },
