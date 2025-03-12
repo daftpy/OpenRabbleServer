@@ -26,10 +26,7 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function About({loaderData,}: Route.ComponentProps) {
-  const { messages, channels, hasMore } = useLoaderData() as { messages: any[], channels: any[], hasMore: boolean };
-  useEffect(() => {
-    console.log("Test search page");
-  }, []);
+  const { messages, hasMore } = useLoaderData() as { messages: any[], hasMore: boolean };
   return (
     <SearchMessagesPage messages={messages} hasMore={hasMore} />
   )

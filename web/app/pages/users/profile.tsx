@@ -1,19 +1,15 @@
 import { CircleBackslashIcon, PersonIcon, TimerIcon } from "@radix-ui/react-icons";
 import { Box, Button, Container, DropdownMenu, Flex, Heading, ScrollArea, Text } from "@radix-ui/themes";
-import { useState } from "react";
 import { Link } from "react-router";
 import { RecentActivity } from "~/components/analysis/recent_activity";
 import { MessageList } from "~/components/message/message_list";
 import { MessageSearchInput } from "~/components/message/search_input";
 import "chart.js/auto"
 import type { SessionActivity } from "~/routes/index";
+import { useMessageSearch } from "~/hooks/useMessageSearch";
 
 export function UserPage({ username, id, messages, session_activity } : { username: string, id: string, messages: any, session_activity: SessionActivity[] }) {
-  const [filteredMessages, setFilteredMessages] = useState<any>(null);
-
-  const handleMessageUpdate = (messages: any) => {
-    setFilteredMessages(messages);
-  }
+  const { state, dispatch, searchMessages, nextPage, prevPage } = useMessageSearch({ messages, userId: id, hasMore: false });
 
   return (
     <Container p={"6"}>
@@ -54,11 +50,25 @@ export function UserPage({ username, id, messages, session_activity } : { userna
           <Box pb={"4"}>
             <Heading style={{color: "var(--subheading-color)"}}>Message History</Heading>
             <Text>You can search through a users chat history and filter by channel or keyword.</Text>
-            <MessageSearchInput userId={id} onMessagesUpdate={handleMessageUpdate} />
+            <MessageSearchInput state={state} dispatch={dispatch} searchMessages={searchMessages} />
           </Box>
-          <ScrollArea style={{maxHeight: "300px", border: "1px solid var(--indigo-4)", padding: "1em", borderRadius: "4px"}}>
-            <MessageList messages={filteredMessages ? filteredMessages : messages} hidePermaLink={true} />
-          </ScrollArea>
+          {/* <ScrollArea style={{height: "600px", border: "1px solid var(--indigo-4)", padding: "1em", borderRadius: "4px"}}> */}
+            <MessageList messages={state.messages} hidePermaLink={true} />
+          {/* </ScrollArea> */}
+          <Flex justify={"between"} pt={"4"}>
+            <Button 
+              disabled={state.page === 0} 
+              onClick={() => prevPage()}
+            >
+              Previous Page
+            </Button>
+            <Button 
+              disabled={!state.hasMore}
+              onClick={() => nextPage()}
+            >
+              Next Page
+            </Button>
+          </Flex>
         </Box>
         <Box>
           <Heading style={{color: "var(--subheading-color)"}}>Session Activity</Heading>
