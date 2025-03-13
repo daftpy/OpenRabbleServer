@@ -100,17 +100,18 @@ export function useMessageSearch({userId, messages, hasMore } : {userId?: string
   useEffect(() => {
     // If data was received, update the messages
     if (messageFetcher.data?.messages) {
+      console.log("Messages fetched?");
       dispatch({ type: MessageSearchActionType.SetMessages, messages: messageFetcher.data.messages, hasMore: messageFetcher.data.hasMore });
     }
   }, [messageFetcher.data]);
 
-  const nextPage = () => {
+  const nextPage = useCallback(() => {
     dispatch({ type: MessageSearchActionType.NextPage });
-  }
+  }, []);
 
-  const prevPage = () => {
+  const prevPage = useCallback(() => {
     dispatch({ type: MessageSearchActionType.PrevPage });
-  }
+  }, []);
 
   // When the page or keyword changes, execute a search
   useEffect(() => {
@@ -122,6 +123,7 @@ export function useMessageSearch({userId, messages, hasMore } : {userId?: string
 
   return {
     state,
+    messageFetcher,
     dispatch,
     searchMessages,
     nextPage,

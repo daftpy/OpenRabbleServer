@@ -18,7 +18,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   });
 }
 
-export async function action({ request }: Route.ActionArgs) {
+export async function clientAction({ request }: Route.ActionArgs) {
   if (request.method === "DELETE") {
     const formData = await request.formData();
     const messageId = formData.get("id");
@@ -27,7 +27,7 @@ export async function action({ request }: Route.ActionArgs) {
       return new Response("Missing message ID", { status: 400 });
     }
 
-    const response = await fetch(`/api/messages?id=${messageId}`, {
+    const response = await fetch(`https://chat.localhost/messages?id=${messageId}`, {
       method: "DELETE",
     });
 
