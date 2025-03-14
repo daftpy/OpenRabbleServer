@@ -46,7 +46,7 @@ export function UsersPage({ users } : props) {
             <Flex direction={"column"} gap={"1"} py={"3"} flexGrow={"1"}>
               <Flex gap={"2"} align={"center"}>
                 <PersonIcon />
-                <Text weight={"bold"} style={{color: "var(--link-color)"}}>
+                <Text weight={"bold"} style={{color: "var(--indigo-12)"}}>
                   <Link to={`/users/profile/${user.username}`}>{user.username}</Link>
                   </Text>
               </Flex>

@@ -50,7 +50,10 @@ function reducer(state: MessageSearchState, action: MessageSearchAction) {
     case MessageSearchActionType.SetTemporaryKeyword:
       return { ...state, temporaryKeyword: action.keyword }
     case MessageSearchActionType.AddFilter:
-      return { ...state, activeFilters: [...state.activeFilters, action.filter]};
+      if (!state.activeFilters.includes(action.filter)) {
+        return { ...state, activeFilters: [...state.activeFilters, action.filter]};
+      }
+      return state;
     case MessageSearchActionType.RemoveFilter:
       return { ...state, activeFilters: state.activeFilters.filter((filter: string) => filter !== action.filter) };
     case MessageSearchActionType.SetMessages:

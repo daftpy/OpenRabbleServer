@@ -10,7 +10,7 @@ import { useMessageSearch } from "~/hooks/useMessageSearch";
 
 export function UserPage({ username, id, messages, hasMore, session_activity } : { username: string, id: string, messages: any, hasMore: boolean, session_activity: SessionActivity[] }) {
   console.log("HAS MORE?", hasMore);
-  const { state, dispatch, nextPage, prevPage } = useMessageSearch({ messages, userId: id, hasMore: hasMore });
+  const { state, messageFetcher, dispatch, nextPage, prevPage } = useMessageSearch({ messages, userId: id, hasMore: hasMore });
 
   return (
     <Container p={"6"}>
@@ -54,7 +54,7 @@ export function UserPage({ username, id, messages, hasMore, session_activity } :
             <MessageSearchInput state={state} dispatch={dispatch}  />
           </Box>
           {/* <ScrollArea style={{height: "600px", border: "1px solid var(--indigo-4)", padding: "1em", borderRadius: "4px"}}> */}
-            <MessageList messages={state.messages} hidePermaLink={true} />
+            <MessageList messages={messageFetcher.data?.messages ? messageFetcher.data.messages : messages} hidePermaLink={true} />
           {/* </ScrollArea> */}
           <Flex justify={"between"} pt={"4"}>
             <Button 
