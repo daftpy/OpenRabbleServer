@@ -1,5 +1,5 @@
 export async function fetchMessagesFromAPI(params: { keyword?: string; channels?: string[]; user_id?: string; limit?: string; offset?: string }) {
-    const { keyword = "", channels = [], user_id, limit = "2", offset = "0" } = params;
+    const { keyword = "", channels = [], user_id, limit = "10", offset = "0" } = params;
   
     const queryParams = new URLSearchParams();
     if (keyword) queryParams.append("keyword", keyword);
