@@ -15,6 +15,8 @@ type props = {
   meessage: MessageType;
   isLast: boolean;
   hidePermaLink: boolean;
+  isSelected: boolean;
+  onSelect: (id: number) => void;
 }
 
 export function Message(props : props) {
@@ -42,7 +44,7 @@ export function Message(props : props) {
             </Flex>
             {props.hidePermaLink ? (
               // <><Cross1Icon onClick={() => deleteMe()} /></>
-              <Checkbox />
+              <Checkbox checked={props.isSelected ? true : false} onCheckedChange={() => props.onSelect(props.meessage.id)} />
             ) : (
               <Box>
                 <Link to={`/messages`}><Link1Icon style={{color: "var(--gray-10)", width: "12px", height: "12px", cursor: "pointer"}} /></Link>

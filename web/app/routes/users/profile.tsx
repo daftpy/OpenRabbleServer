@@ -24,12 +24,13 @@ export async function clientLoader({
 }: Route.ClientLoaderArgs) {
   
   const serverData = await serverLoader();
-  const messagesRes = await fetch(`https://chat.localhost/messages?user_id=${serverData.id}`);
+  const messagesRes = await fetch(`https://chat.localhost/messages?user_id=${serverData.id}&limit=10&offset=0`);
   const messagesData = await messagesRes.json();
 
   const activityRes = await fetch(`https://chat.localhost/activity/sessions?user_id=${serverData.id}`)
   const activityData = await activityRes.json();
   console.log("ACTIVITY: ", activityData);
+  console.log("MESSAGES:", messagesData);
 
   return { ...serverData, ...messagesData.payload, ...activityData.payload };
 }
@@ -42,11 +43,11 @@ export function HydrateFallback() {
 }
 
 export default function UserRoute({loaderData,} : Route.ComponentProps) {
-  const { username, id, messages, session_activity } = loaderData;
+  const { username, id, messages, has_more, session_activity } = loaderData;
   console.log("USERNAME", username);
   return (
     <RouteProtector>
-      <UserPage username={username} id={id} messages={messages} session_activity={session_activity}/>
+      <UserPage username={username} id={id} messages={messages} session_activity={session_activity} hasMore={has_more} />
     </RouteProtector>
   )
 }

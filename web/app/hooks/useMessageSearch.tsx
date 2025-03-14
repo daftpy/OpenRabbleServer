@@ -71,7 +71,7 @@ function reducer(state: MessageSearchState, action: MessageSearchAction) {
 export function useMessageSearch({userId, messages, hasMore } : {userId?: string, messages: any, hasMore: boolean}) {
   const [state, dispatch] = useReducer(reducer, { keyword: "", temporaryKeyword: "", activeFilters: [], availableFilters: [], messages: messages, hasMore: hasMore, page: 0, searching: false });
   // Used to fetch messages
-  const messageFetcher = useFetcher();
+  const messageFetcher = useFetcher({key: "my-key"});
 
   // Perform the search
   const searchMessages = useCallback((limit = 10, offset = state.page * limit) => {

@@ -147,34 +147,36 @@ func HandleMessages(db *pgxpool.Pool) http.HandlerFunc {
 			json.NewEncoder(w).Encode(responseMessage)
 
 		case http.MethodDelete:
-			// Get the message ID from query parameters
-			messageIDStr := r.URL.Query().Get("id")
-			if messageIDStr == "" {
-				http.Error(w, "Missing 'id' query parameter", http.StatusBadRequest)
+			// 1) Parse JSON body
+			var body struct {
+				IDs []int `json:"ids"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+				http.Error(w, "Invalid JSON body", http.StatusBadRequest)
+				return
+			}
+			log.Printf("Received these IDs to be deleted: %v", body.IDs)
+
+			if len(body.IDs) == 0 {
+				http.Error(w, "No IDs provided", http.StatusBadRequest)
 				return
 			}
 
-			// Convert string to integer
-			messageID, err := strconv.Atoi(messageIDStr)
-			if err != nil || messageID <= 0 {
-				http.Error(w, "Invalid 'id' query parameter", http.StatusBadRequest)
-				return
-			}
-
-			// Call RemoveMessage function
-			deleted, err := database.RemoveMessage(db, messageID)
+			// 2) Call your bulk deletion function
+			rowsDeleted, err := database.RemoveMessages(db, body.IDs)
 			if err != nil {
-				log.Printf("Failed to delete message ID %d: %v", messageID, err)
+				log.Printf("Failed to delete messages: %v", err)
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
 			}
 
-			if !deleted {
-				http.Error(w, "Message not found", http.StatusNotFound)
+			// 3) If zero rows are deleted, none of those IDs existed
+			if rowsDeleted == 0 {
+				http.Error(w, "No messages were deleted (IDs not found)", http.StatusNotFound)
 				return
 			}
 
-			// Respond with success
+			// 4) Respond with success
 			w.WriteHeader(http.StatusNoContent)
 
 		default:

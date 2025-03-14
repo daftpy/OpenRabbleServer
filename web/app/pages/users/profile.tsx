@@ -8,28 +8,29 @@ import "chart.js/auto"
 import type { SessionActivity } from "~/routes/index";
 import { useMessageSearch } from "~/hooks/useMessageSearch";
 
-export function UserPage({ username, id, messages, session_activity } : { username: string, id: string, messages: any, session_activity: SessionActivity[] }) {
-  const { state, dispatch, nextPage, prevPage } = useMessageSearch({ messages, userId: id, hasMore: false });
+export function UserPage({ username, id, messages, hasMore, session_activity } : { username: string, id: string, messages: any, hasMore: boolean, session_activity: SessionActivity[] }) {
+  console.log("HAS MORE?", hasMore);
+  const { state, dispatch, nextPage, prevPage } = useMessageSearch({ messages, userId: id, hasMore: hasMore });
 
   return (
     <Container p={"6"}>
       <Heading size={"8"} weight={"bold"} className="text-xl pb-1" style={{ color: "var(--slate-12)" }}>
-        <Link to="/">Your OnRabble Server</Link>
+        <Link to="/">OnRabble Server</Link>
       </Heading>
       <Flex direction="column" pt={"4"} gap={"6"}>
         <Box>
-          <Heading style={{color: "var(--indigo-10)"}}>User Information</Heading>
+          <Heading style={{color: "var(--indigo-10)"}} size={"7"}>User Information</Heading>
           <Text>Here you can set a users roles, inspect their activity, and ban them from the chatserver if needed.</Text>
         </Box>
         <Flex align={"center"} gap={"4"}>
-          <Flex direction={"column"} gap={"2"} flexGrow={"1"}>
+          <Flex direction={"column"} gap={"3"} flexGrow={"1"}>
             <Flex align={"center"} gap={"2"}>
               <PersonIcon style={{width: "2em", height: "2em", color: "var(--indigo-12)", padding: "0.2em", border: "1px solid var(--indigo-12)", borderRadius: "15px"}} />
               <Heading style={{color: "var(--indigo-12)"}} size={"8"}>{username}</Heading>
             </Flex>
             <Flex gap={"2"}>
-              <Text weight={"bold"} size={"1"}>ID: </Text>
-              <Text size={"1"} style={{color: "var(--muted-text-color)"}}>{ id }</Text>
+              <Text weight={"bold"} size={"2"}>ID: </Text>
+              <Text size={"2"} style={{color: "var(--muted-text-color)"}}>{ id }</Text>
             </Flex>
           </Flex>
           <DropdownMenu.Root>
@@ -48,7 +49,7 @@ export function UserPage({ username, id, messages, session_activity } : { userna
         </Flex>
         <Box pt={"2"}>
           <Box pb={"4"}>
-            <Heading style={{color: "var(--subheading-color)"}}>Message History</Heading>
+            <Heading style={{color: "var(--subheading-color)"}} size={"6"}>Message History</Heading>
             <Text>You can search through a users chat history and filter by channel or keyword.</Text>
             <MessageSearchInput state={state} dispatch={dispatch}  />
           </Box>

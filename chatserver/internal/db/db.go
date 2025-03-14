@@ -298,11 +298,26 @@ func RemoveMessage(db *pgxpool.Pool, messageID int) (bool, error) {
 
 	// Check if a row was actually deleted
 	if cmd.RowsAffected() == 0 {
-		return false, nil // No message found with that ID
+		// No message found with that ID
+		return false, nil
 	}
 
 	// Message was successfully deleted
 	return true, nil
+}
+
+func RemoveMessages(db *pgxpool.Pool, messageIDs []int) (int64, error) {
+	if len(messageIDs) == 0 {
+		return 0, fmt.Errorf("no message IDs provided")
+	}
+
+	query := `DELETE FROM chatserver.chat_messages WHERE id = ANY($1)`
+	cmd, err := db.Exec(context.Background(), query, messageIDs)
+	if err != nil {
+		return 0, fmt.Errorf("failed to delete messages: %w", err)
+	}
+
+	return cmd.RowsAffected(), nil
 }
 
 func FetchUsers(db *pgxpool.Pool, username string) ([]messages.UserSearchResult, error) {

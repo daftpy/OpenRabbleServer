@@ -9,6 +9,7 @@ export interface ChatMessageType {
   channel: string;
   message: string;
   authored_at: string;
+  id: number;
 }
 
 export function LiveView() {
