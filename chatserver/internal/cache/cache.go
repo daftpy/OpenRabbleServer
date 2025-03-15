@@ -74,6 +74,34 @@ func (m *MessageCache) CacheChatMessage(msg messages.ChatMessagePayload) {
 	}
 }
 
+func (m *MessageCache) cacheBannedUser(userID string, hours int) {
+	ctx := context.Background()
+
+	// Convert hours to total ban duration in seconds
+	ttlSeconds := int64(hours * 3600)
+
+	// Construct a unique ban key for the user
+	banKey := fmt.Sprintf("temp_ban:%s", userID)
+
+	// Store the ban length (in hours) as the value, and set the TTL to the computed seconds
+	_, err := m.ValkeyClient.Do(
+		ctx,
+		m.ValkeyClient.B().
+			Setex().
+			Key(banKey).
+			Seconds(ttlSeconds).
+			Value(fmt.Sprintf("%d", hours)).
+			Build(),
+	).ToString()
+
+	if err != nil {
+		log.Printf("Failed to set temp ban for user %s: %v", userID, err)
+		return
+	}
+
+	log.Printf("User %s is temporarily banned for %d hour(s)", userID, hours)
+}
+
 // Retrieves chat messages from the circular cache
 func (m *MessageCache) GetCachedChatMessages() []messages.ChatMessagePayload {
 	recentCacheKey := "recent_messages"

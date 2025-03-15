@@ -354,3 +354,48 @@ func FetchUsers(db *pgxpool.Pool, username string) ([]messages.UserSearchResult,
 
 	return users, nil
 }
+
+func BanUser(db *pgxpool.Pool, ownerID, banishedID, reason string, duration int) error {
+	ctx := context.Background()
+
+	// Determine endTime based on duration
+	var endTime *time.Time // Use a pointer to allow NULL values
+	if duration > 0 {
+		tempEndTime := time.Now().Add(time.Duration(duration) * time.Hour)
+		endTime = &tempEndTime
+	}
+
+	query := `
+		INSERT INTO chatserver.bans (owner_id, banished_id, reason, end_time)
+		VALUES ($1, $2, $3, $4)
+	`
+
+	_, err := db.Exec(ctx, query, ownerID, banishedID, reason, endTime)
+	if err != nil {
+		log.Printf("Failed to insert ban record: %v", err)
+		return err
+	}
+
+	log.Printf("User %s banned by %s for %d hours. Reason: %s", banishedID, ownerID, duration, reason)
+	return nil
+}
+
+func IsUserBanned(db *pgxpool.Pool, banishedID string) (bool, error) {
+	ctx := context.Background()
+
+	query := `
+		SELECT COUNT(*)
+		FROM chatserver.bans
+		WHERE banished_id = $1
+		AND (end_time is NULL OR end_time > NOW())
+	`
+
+	var count int
+	err := db.QueryRow(ctx, query, banishedID).Scan(&count)
+	if err != nil {
+		log.Printf("Failed to check ban status for user %s: %v", banishedID, err)
+		return false, err
+	}
+
+	return count > 0, nil
+}

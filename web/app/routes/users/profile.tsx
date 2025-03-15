@@ -42,6 +42,42 @@ export function HydrateFallback() {
   return <div>Loading...</div>;
 }
 
+export async function clientAction({ params, request }: Route.ActionArgs) {
+  if (request.method !== "POST") {
+    return new Response("Method Not Allowed", { status: 405 });
+  }
+
+  const formData = await request.formData();
+  const reason = formData.get("reason");
+  const duration = formData.get("duration");
+
+  let data = {
+    banished_id: formData.get("banishedId"),
+    reason: reason,
+    duration: 0
+  }
+
+  if (duration) {
+    data.duration = parseInt(duration.toString(), 10);
+  }
+  
+  const banResponse = await fetch("https://chat.localhost/users/ban", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!banResponse.ok) {
+    return new Response("Failed to ban user", { status: 500 });
+  }
+  console.log("User banned");
+
+  return new Response(
+    JSON.stringify({ message: "User banned successfully" }),
+    { status: 200 }
+  );
+}
+
 export default function UserRoute({loaderData,} : Route.ComponentProps) {
   const { username, id, messages, has_more, session_activity } = loaderData;
   console.log("USERNAME", username);

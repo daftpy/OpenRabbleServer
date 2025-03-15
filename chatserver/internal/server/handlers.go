@@ -231,3 +231,74 @@ func HandleChannelActivity(db *pgxpool.Pool) http.HandlerFunc {
 		json.NewEncoder(w).Encode(msg)
 	}
 }
+
+func HandleBanUser(db *pgxpool.Pool) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			log.Printf("Wrong method for bans")
+			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		// temp owner_id
+		ownerID := "ace4e8be-d2a2-46d7-9c9e-57f04f915835"
+
+		var request struct {
+			BanishedID string `json:"banished_id"` // The user being banned
+			Reason     string `json:"reason"`      // Reason for the ban
+			Duration   *int   `json:"duration"`    // Duration in hours (optional, nil means permanent)
+		}
+
+		// Parse request body
+		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+			log.Printf("Failed to decode JSON")
+			http.Error(w, "Invalid JSON body", http.StatusBadRequest)
+			return
+		}
+
+		// Validate required fields
+		if ownerID == "" || request.BanishedID == "" {
+			log.Printf("Failed to read banishedID: %s", request.BanishedID)
+			http.Error(w, "Both owner_id and banished_id are required", http.StatusBadRequest)
+			return
+		}
+
+		// Determine duration (default to 0 for permanent bans)
+		duration := 0
+		if request.Duration != nil {
+			duration = *request.Duration
+		}
+
+		// Call the `BanUser` function from your database package
+		err := database.BanUser(db, ownerID, request.BanishedID, request.Reason, duration)
+		if err != nil {
+			log.Printf("Failed to ban user: %v", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		log.Printf("User %s banned by %s. Reason: %s, Duration: %s",
+			request.BanishedID, ownerID, request.Reason,
+			func() string {
+				if duration == 0 {
+					return "Permanent"
+				}
+				return fmt.Sprintf("%d hours", duration)
+			}(),
+		)
+
+		// Return success response
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{
+			"message":  "User banned successfully",
+			"banished": request.BanishedID,
+			"reason":   request.Reason,
+			"duration": func() string {
+				if duration == 0 {
+					return "Permanent"
+				}
+				return fmt.Sprintf("%d hours", duration)
+			}(),
+		})
+	}
+}

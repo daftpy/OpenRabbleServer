@@ -28,3 +28,14 @@ CREATE TABLE IF NOT EXISTS chatserver.chat_sessions (
     end_time TIMESTAMP NOT NULL,
     duration INTERVAL GENERATED ALWAYS AS (end_time - start_time) STORED
 );
+
+CREATE TABLE IF NOT EXISTS chatserver.bans (
+    id SERIAL PRIMARY KEY,
+    owner_id VARCHAR(36) NOT NULL,
+    banished_id VARCHAR(36) NOT NULL,
+    start_time TIMESTAMP DEFAULT now(),
+    reason VARCHAR(256),
+    end_time TIMESTAMP NULL,
+    duration INTERVAL GENERATED ALWAYS AS 
+        (CASE WHEN end_time IS NOT NULL THEN end_time - start_time ELSE NULL END) STORED
+);

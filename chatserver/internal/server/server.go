@@ -83,12 +83,23 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 
 		if c, ok := claims["azp"].(string); ok {
 			clientID = c
-			log.Printf("%s connected through %s", username, clientID)
+			log.Printf("%s connecting through %s", username, clientID)
 		} else {
 			log.Println("No keycloak client found.")
 			http.Error(w, "Bad Request", http.StatusBadRequest)
 			return
 		}
+	}
+
+	banned, err := db.IsUserBanned(s.db, userSub)
+	if err != nil {
+		http.Error(w, "Could not determine ban status for user.", http.StatusInternalServerError)
+		return
+	}
+	if banned {
+		log.Printf("User %s is banned", userSub)
+		http.Error(w, "User is banned.", http.StatusUnauthorized)
+		return
 	}
 
 	log.Println("User connected:", username)
@@ -219,6 +230,7 @@ func New(addr string, h hub.HubInterface, db *pgxpool.Pool) (*Server, error) {
 	mux.HandleFunc("/channels", HandleChannels(db, srv))
 	mux.HandleFunc("/messages", HandleMessages(db))
 	mux.HandleFunc("/users", HandleUsers(db))
+	mux.HandleFunc("/users/ban", HandleBanUser(db))
 	mux.HandleFunc("/activity/sessions", HandleRecentActivity(db))
 	mux.HandleFunc("/activity/channels", HandleChannelActivity(db))
 

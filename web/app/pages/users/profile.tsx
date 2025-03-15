@@ -1,6 +1,6 @@
 import { CircleBackslashIcon, PersonIcon, TimerIcon } from "@radix-ui/react-icons";
 import { Box, Button, Container, DropdownMenu, Flex, Heading, ScrollArea, Text } from "@radix-ui/themes";
-import { Link } from "react-router";
+import { Link, useFetcher } from "react-router";
 import { RecentActivity } from "~/components/analysis/recent_activity";
 import { MessageList } from "~/components/message/message_list";
 import { MessageSearchInput } from "~/components/message/search_input";
@@ -11,6 +11,20 @@ import { useMessageSearch } from "~/hooks/useMessageSearch";
 export function UserPage({ username, id, messages, hasMore, session_activity } : { username: string, id: string, messages: any, hasMore: boolean, session_activity: SessionActivity[] }) {
   console.log("HAS MORE?", hasMore);
   const { state, messageFetcher, dispatch, nextPage, prevPage } = useMessageSearch({ messages, userId: id, hasMore: hasMore });
+  const fetcher = useFetcher();
+  
+
+  const handleBanUser = (duration? : number) => {
+    const formData = new FormData();
+    formData.append("banishedId", id);
+    formData.append("reason", "Harassment");
+
+    if (duration !== undefined) {
+      formData.append("duration", duration.toString());
+    }
+
+    fetcher.submit(formData, { method: "POST" });
+  };
 
   return (
     <Container p={"6"}>
@@ -38,10 +52,10 @@ export function UserPage({ username, id, messages, hasMore, session_activity } :
               <Button color="red">Ban</Button>
             </DropdownMenu.Trigger>
             <DropdownMenu.Content>
-                <DropdownMenu.Item>
+                <DropdownMenu.Item onClick={() => handleBanUser()}>
                   <CircleBackslashIcon /> Permanent
                 </DropdownMenu.Item>
-                <DropdownMenu.Item>
+                <DropdownMenu.Item onClick={() => handleBanUser(24)}>
                   <TimerIcon /> Temporary
                 </DropdownMenu.Item>
             </DropdownMenu.Content>
