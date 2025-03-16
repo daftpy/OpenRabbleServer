@@ -4,6 +4,7 @@ import (
 	"chatserver/internal/messages"
 	"chatserver/internal/models"
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
@@ -421,4 +422,81 @@ func IsUserBanned(db *pgxpool.Pool, banishedID string) (bool, error) {
 	}
 
 	return count > 0, nil
+}
+
+func FetchBanRecords(db *pgxpool.Pool) ([]models.BanRecord, error) {
+	ctx := context.Background()
+
+	query := `
+		SELECT 
+			b.id, 
+			b.owner_id, 
+			b.banished_id, 
+			COALESCE(u.username, '[Unknown]') AS banished_username, 
+			b.start_time, 
+			b.reason, 
+			b.end_time, 
+			b.duration::TEXT, 
+			b.pardoned
+		FROM chatserver.bans b
+		LEFT JOIN keycloak.public.user_entity u 
+			ON b.banished_id = u.id
+	`
+
+	rows, err := db.Query(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch ban records: %w", err)
+	}
+	defer rows.Close()
+
+	var bans []models.BanRecord
+	for rows.Next() {
+		var ban models.BanRecord
+		var reason sql.NullString
+		var duration sql.NullString
+		var banishedUsername sql.NullString
+
+		err := rows.Scan(
+			&ban.ID,
+			&ban.OwnerID,
+			&ban.BanishedID,
+			&banishedUsername, // Fetch username from Keycloak
+			&ban.Start,
+			&reason,
+			&ban.End,
+			&duration,
+			&ban.Pardoned,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan ban record: %w", err)
+		}
+
+		// Assign values correctly
+		if reason.Valid {
+			ban.Reason = &reason.String
+		} else {
+			ban.Reason = nil
+		}
+
+		if duration.Valid {
+			ban.Duration = &duration.String
+		} else {
+			ban.Duration = nil
+		}
+
+		if banishedUsername.Valid {
+			ban.BanishedUsername = banishedUsername.String
+		} else {
+			ban.BanishedUsername = "[Unknown]"
+		}
+
+		bans = append(bans, ban)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error after iterating ban records: %w", err)
+	}
+
+	log.Printf("Fetched %d ban records", len(bans))
+	return bans, nil
 }

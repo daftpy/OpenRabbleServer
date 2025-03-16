@@ -22,6 +22,7 @@ const (
 	BulkChatMessagesType       = "bulk_chat_messages"
 	MessageSearchResultType    = "message_search_result"
 	UserSearchResultType       = "user_search_result"
+	BanRecordsResultType       = "ban_records_result"
 )
 
 type BaseMessage struct {
@@ -180,6 +181,20 @@ func NewUseerSearchResultMessage(payload UserSearchResultPayload) BaseMessage {
 		Type:    UserSearchResultType,
 		Sender:  "server",
 		Payload: payload,
+	}
+}
+
+type BanRecordsPayload struct {
+	Records []models.BanRecord `json:"records"`
+}
+
+func NewBanRecordsResultMessage(records []models.BanRecord) BaseMessage {
+	return BaseMessage{
+		Type:   BanRecordsResultType,
+		Sender: "server",
+		Payload: BanRecordsPayload{
+			Records: records,
+		},
 	}
 }
 

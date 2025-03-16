@@ -302,3 +302,26 @@ func HandleBanUser(db *pgxpool.Pool) http.HandlerFunc {
 		})
 	}
 }
+
+func HandleBanRecords(db *pgxpool.Pool) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		banRecords, err := database.FetchBanRecords(db)
+		if err != nil {
+			log.Printf("Failed to fetch ban records: %v", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		// Create message payload
+		response := messages.NewBanRecordsResultMessage(banRecords)
+
+		// Send response
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
+	}
+}
