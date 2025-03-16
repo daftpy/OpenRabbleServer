@@ -37,5 +37,6 @@ CREATE TABLE IF NOT EXISTS chatserver.bans (
     reason VARCHAR(256),
     end_time TIMESTAMP NULL,
     duration INTERVAL GENERATED ALWAYS AS 
-        (CASE WHEN end_time IS NOT NULL THEN end_time - start_time ELSE NULL END) STORED
+        (CASE WHEN end_time IS NOT NULL THEN end_time - start_time ELSE NULL END) STORED,
+    pardoned BOOLEAN DEFAULT FALSE
 );

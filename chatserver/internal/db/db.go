@@ -321,19 +321,32 @@ func RemoveMessages(db *pgxpool.Pool, messageIDs []int) (int64, error) {
 }
 
 func FetchUsers(db *pgxpool.Pool, username string) ([]messages.UserSearchResult, error) {
-	var query string
-	var args []interface{}
-	query = `
-		SELECT id, username
-		FROM keycloak.public.user_entity
+	ctx := context.Background()
+
+	query := `
+		SELECT DISTINCT ON (u.id) 
+			u.id, 
+			u.username,
+			CASE 
+				WHEN b.banished_id IS NOT NULL THEN TRUE 
+				ELSE FALSE 
+			END AS banned
+		FROM keycloak.public.user_entity u
+		LEFT JOIN chatserver.bans b 
+			ON u.id = b.banished_id 
+			AND (b.end_time IS NULL OR b.end_time > NOW())
 	`
 
-	if username != "" { // Only filter if username is provided
-		query += " WHERE username = $1"
+	var args []interface{}
+	if username != "" {
+		query += " WHERE u.username = $1"
 		args = append(args, username)
 	}
 
-	rows, err := db.Query(context.Background(), query, args...)
+	// Ensure ORDER BY always comes after WHERE
+	query += " ORDER BY u.id, b.start_time DESC"
+
+	rows, err := db.Query(ctx, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch users: %w", err)
 	}
@@ -342,7 +355,7 @@ func FetchUsers(db *pgxpool.Pool, username string) ([]messages.UserSearchResult,
 	var users []messages.UserSearchResult
 	for rows.Next() {
 		var user messages.UserSearchResult
-		if err := rows.Scan(&user.ID, &user.Username); err != nil {
+		if err := rows.Scan(&user.ID, &user.Username, &user.Banned); err != nil {
 			return nil, fmt.Errorf("failed to scan user row: %w", err)
 		}
 		users = append(users, user)
@@ -365,12 +378,20 @@ func BanUser(db *pgxpool.Pool, ownerID, banishedID, reason string, duration int)
 		endTime = &tempEndTime
 	}
 
+	// Convert empty reason to NULL
+	var reasonSQL interface{}
+	if reason == "" {
+		reasonSQL = nil
+	} else {
+		reasonSQL = reason
+	}
+
 	query := `
 		INSERT INTO chatserver.bans (owner_id, banished_id, reason, end_time)
 		VALUES ($1, $2, $3, $4)
 	`
 
-	_, err := db.Exec(ctx, query, ownerID, banishedID, reason, endTime)
+	_, err := db.Exec(ctx, query, ownerID, banishedID, reasonSQL, endTime)
 	if err != nil {
 		log.Printf("Failed to insert ban record: %v", err)
 		return err
@@ -383,11 +404,13 @@ func BanUser(db *pgxpool.Pool, ownerID, banishedID, reason string, duration int)
 func IsUserBanned(db *pgxpool.Pool, banishedID string) (bool, error) {
 	ctx := context.Background()
 
+	// Check if the user is banned or pardoned
 	query := `
 		SELECT COUNT(*)
 		FROM chatserver.bans
 		WHERE banished_id = $1
 		AND (end_time is NULL OR end_time > NOW())
+		AND (pardoned IS NULL OR pardoned = FALSE)
 	`
 
 	var count int

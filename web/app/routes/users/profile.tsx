@@ -50,6 +50,7 @@ export async function clientAction({ params, request }: Route.ActionArgs) {
   const formData = await request.formData();
   const reason = formData.get("reason");
   const duration = formData.get("duration");
+  console.log("formDuration", duration);
 
   let data = {
     banished_id: formData.get("banishedId"),
@@ -59,6 +60,7 @@ export async function clientAction({ params, request }: Route.ActionArgs) {
 
   if (duration) {
     data.duration = parseInt(duration.toString(), 10);
+    console.log("Duration", duration);
   }
   
   const banResponse = await fetch("https://chat.localhost/users/ban", {
@@ -79,11 +81,11 @@ export async function clientAction({ params, request }: Route.ActionArgs) {
 }
 
 export default function UserRoute({loaderData,} : Route.ComponentProps) {
-  const { username, id, messages, has_more, session_activity } = loaderData;
+  const { username, id, is_banned, messages, has_more, session_activity } = loaderData;
   console.log("USERNAME", username);
   return (
     <RouteProtector>
-      <UserPage username={username} id={id} messages={messages} session_activity={session_activity} hasMore={has_more} />
+      <UserPage username={username} id={id} messages={messages} session_activity={session_activity} isBanned={is_banned} hasMore={has_more} />
     </RouteProtector>
   )
 }

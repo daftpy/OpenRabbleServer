@@ -1,4 +1,4 @@
-import { MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons";
+import { Cross1Icon, CrossCircledIcon, MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons";
 import { Box, Button, Container, DropdownMenu, Flex, Heading, Text, TextField } from "@radix-ui/themes";
 import { Link, useNavigate } from "react-router";
 import type { User } from "~/routes/users";
@@ -45,8 +45,8 @@ export function UsersPage({ users } : props) {
           >
             <Flex direction={"column"} gap={"1"} py={"3"} flexGrow={"1"}>
               <Flex gap={"2"} align={"center"}>
-                <PersonIcon />
-                <Text weight={"bold"} style={{color: "var(--indigo-12)"}}>
+                { user.is_banned ? <CrossCircledIcon color="red" /> : <PersonIcon />}
+                <Text weight={"bold"} style={{color: user.is_banned ? "var(--red-9)" : "var(--indigo-12)"}}>
                   <Link to={`/users/profile/${user.username}`}>{user.username}</Link>
                   </Text>
               </Flex>

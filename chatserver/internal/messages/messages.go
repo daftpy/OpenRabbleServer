@@ -168,6 +168,7 @@ func NewMessageSearchResultMessage(payload MessageSearchResultPayload) BaseMessa
 type UserSearchResult struct {
 	ID       string `json:"id"`
 	Username string `json:"username"`
+	Banned   bool   `json:"is_banned"`
 }
 
 type UserSearchResultPayload struct {

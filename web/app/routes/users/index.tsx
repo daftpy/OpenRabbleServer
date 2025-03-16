@@ -5,6 +5,7 @@ import { UsersPage } from "~/pages/users";
 export type User = {
   id: string;
   username: string;
+  is_banned: boolean;
 }
 
 type UsersSearchResult = {
