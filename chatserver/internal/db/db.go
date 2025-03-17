@@ -424,7 +424,7 @@ func IsUserBanned(db *pgxpool.Pool, banishedID string) (bool, error) {
 	return count > 0, nil
 }
 
-func FetchBanRecords(db *pgxpool.Pool) ([]models.BanRecord, error) {
+func FetchBanRecords(db *pgxpool.Pool, limit, offset int) ([]models.BanRecord, bool, error) {
 	ctx := context.Background()
 
 	query := `
@@ -441,11 +441,13 @@ func FetchBanRecords(db *pgxpool.Pool) ([]models.BanRecord, error) {
 		FROM chatserver.bans b
 		LEFT JOIN keycloak.public.user_entity u 
 			ON b.banished_id = u.id
+		ORDER BY b.start_time DESC
+		LIMIT $1 OFFSET $2
 	`
 
-	rows, err := db.Query(ctx, query)
+	rows, err := db.Query(ctx, query, limit+1, offset) // Fetch one extra row to check for more results
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch ban records: %w", err)
+		return nil, false, fmt.Errorf("failed to fetch ban records: %w", err)
 	}
 	defer rows.Close()
 
@@ -460,7 +462,7 @@ func FetchBanRecords(db *pgxpool.Pool) ([]models.BanRecord, error) {
 			&ban.ID,
 			&ban.OwnerID,
 			&ban.BanishedID,
-			&banishedUsername, // Fetch username from Keycloak
+			&banishedUsername,
 			&ban.Start,
 			&reason,
 			&ban.End,
@@ -468,10 +470,9 @@ func FetchBanRecords(db *pgxpool.Pool) ([]models.BanRecord, error) {
 			&ban.Pardoned,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan ban record: %w", err)
+			return nil, false, fmt.Errorf("failed to scan ban record: %w", err)
 		}
 
-		// Assign values correctly
 		if reason.Valid {
 			ban.Reason = &reason.String
 		} else {
@@ -493,10 +494,12 @@ func FetchBanRecords(db *pgxpool.Pool) ([]models.BanRecord, error) {
 		bans = append(bans, ban)
 	}
 
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("error after iterating ban records: %w", err)
+	// Check if there are more results beyond this page
+	hasMore := len(bans) > limit
+	if hasMore {
+		bans = bans[:limit] // Remove the extra record used for checking
 	}
 
-	log.Printf("Fetched %d ban records", len(bans))
-	return bans, nil
+	log.Printf("Fetched %d ban records (limit: %d, offset: %d)", len(bans), limit, offset)
+	return bans, hasMore, nil
 }

@@ -310,7 +310,31 @@ func HandleBanRecords(db *pgxpool.Pool) http.HandlerFunc {
 			return
 		}
 
-		banRecords, err := database.FetchBanRecords(db)
+		limitStr := r.URL.Query().Get("limit")
+		offsetStr := r.URL.Query().Get("offset")
+
+		limit := 50 // Default
+		offset := 0 // Default
+
+		if limitStr != "" {
+			parsedLimit, err := strconv.Atoi(limitStr)
+			if err != nil || parsedLimit <= 0 {
+				http.Error(w, "Invalid 'limit' query parameter", http.StatusBadRequest)
+				return
+			}
+			limit = parsedLimit
+		}
+
+		if offsetStr != "" {
+			parsedOffset, err := strconv.Atoi(offsetStr)
+			if err != nil || parsedOffset < 0 {
+				http.Error(w, "Invalid 'offset' query parameter", http.StatusBadRequest)
+				return
+			}
+			offset = parsedOffset
+		}
+
+		banRecords, hasMore, err := database.FetchBanRecords(db, limit, offset)
 		if err != nil {
 			log.Printf("Failed to fetch ban records: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -318,7 +342,7 @@ func HandleBanRecords(db *pgxpool.Pool) http.HandlerFunc {
 		}
 
 		// Create message payload
-		response := messages.NewBanRecordsResultMessage(banRecords)
+		response := messages.NewBanRecordsResultMessage(banRecords, hasMore)
 
 		// Send response
 		w.Header().Set("Content-Type", "application/json")

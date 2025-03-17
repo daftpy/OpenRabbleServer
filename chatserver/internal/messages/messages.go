@@ -186,14 +186,16 @@ func NewUseerSearchResultMessage(payload UserSearchResultPayload) BaseMessage {
 
 type BanRecordsPayload struct {
 	Records []models.BanRecord `json:"records"`
+	HasMore bool               `json:"has_more"`
 }
 
-func NewBanRecordsResultMessage(records []models.BanRecord) BaseMessage {
+func NewBanRecordsResultMessage(records []models.BanRecord, hasMore bool) BaseMessage {
 	return BaseMessage{
 		Type:   BanRecordsResultType,
 		Sender: "server",
 		Payload: BanRecordsPayload{
 			Records: records,
+			HasMore: hasMore,
 		},
 	}
 }
