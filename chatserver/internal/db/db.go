@@ -307,18 +307,43 @@ func RemoveMessage(db *pgxpool.Pool, messageID int) (bool, error) {
 	return true, nil
 }
 
-func RemoveMessages(db *pgxpool.Pool, messageIDs []int) (int64, error) {
+func RemoveMessages(db *pgxpool.Pool, messageIDs []int) (int64, []int, error) {
 	if len(messageIDs) == 0 {
-		return 0, fmt.Errorf("no message IDs provided")
+		return 0, nil, fmt.Errorf("no message IDs provided")
 	}
 
-	query := `DELETE FROM chatserver.chat_messages WHERE id = ANY($1)`
-	cmd, err := db.Exec(context.Background(), query, messageIDs)
+	ctx := context.Background()
+
+	// Step 1: Fetch cacheIDs before deletion
+	queryCacheIDs := `SELECT cache_id FROM chatserver.chat_messages WHERE id = ANY($1)`
+	rows, err := db.Query(ctx, queryCacheIDs, messageIDs)
 	if err != nil {
-		return 0, fmt.Errorf("failed to delete messages: %w", err)
+		return 0, nil, fmt.Errorf("failed to fetch cacheIDs: %w", err)
+	}
+	defer rows.Close()
+
+	var cacheIDs []int
+	for rows.Next() {
+		var cacheID int
+		if err := rows.Scan(&cacheID); err != nil {
+			return 0, nil, fmt.Errorf("failed to scan cacheID: %w", err)
+		}
+		cacheIDs = append(cacheIDs, cacheID)
 	}
 
-	return cmd.RowsAffected(), nil
+	// Ensure we proceed only if there are valid cacheIDs
+	if len(cacheIDs) == 0 {
+		return 0, nil, fmt.Errorf("no matching messages found for provided IDs")
+	}
+
+	// Step 2: Delete messages from the database
+	queryDelete := `DELETE FROM chatserver.chat_messages WHERE id = ANY($1)`
+	cmd, err := db.Exec(ctx, queryDelete, messageIDs)
+	if err != nil {
+		return 0, nil, fmt.Errorf("failed to delete messages: %w", err)
+	}
+
+	return cmd.RowsAffected(), cacheIDs, nil
 }
 
 func FetchUsers(db *pgxpool.Pool, username string) ([]messages.UserSearchResult, error) {

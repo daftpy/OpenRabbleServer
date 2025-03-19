@@ -52,7 +52,7 @@ func main() {
 	}
 
 	// Create the Server instance and pass the Hub
-	srv, err := server.New("0.0.0.0:8080", h, conn)
+	srv, err := server.New("0.0.0.0:8080", h, conn, messageCache)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}

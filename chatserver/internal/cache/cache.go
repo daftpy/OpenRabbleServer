@@ -232,3 +232,56 @@ func (m *MessageCache) StartPeriodicFlush() {
 		}
 	}()
 }
+
+func (m *MessageCache) DeleteCachedMessage(cacheID int) bool {
+	var deleteMessageScript = valkey.NewLuaScript(`
+	local recentKey = KEYS[1]
+	local flushKey = KEYS[2]
+	local cacheID = ARGV[1]
+
+	-- Function to remove the message by cacheID
+	local function removeMessage(key, cacheID)
+		local messages = redis.call("LRANGE", key, 0, -1)
+		for i, msg in ipairs(messages) do
+			local decoded = cjson.decode(msg)
+			if decoded.cache_id == tonumber(cacheID) then
+				redis.call("LREM", key, 1, msg)
+				return 1  -- Success, message deleted
+			end
+		end
+		return 0  -- Message not found
+	end
+
+	-- Remove from both lists
+	local removedRecent = removeMessage(recentKey, cacheID)
+	local removedFlush = removeMessage(flushKey, cacheID)
+
+	return removedRecent + removedFlush  -- Return number of deletions
+	`)
+
+	recentCacheKey := "recent_messages"
+	flushCacheKey := "flush_messages"
+	ctx := context.Background()
+
+	// Execute the Lua script
+	deleted, err := deleteMessageScript.Exec(
+		ctx,
+		m.ValkeyClient,
+		[]string{recentCacheKey, flushCacheKey}, // KEYS
+		[]string{fmt.Sprintf("%d", cacheID)},    // ARGV (cacheID as string)
+	).ToInt64()
+
+	if err != nil {
+		log.Printf("Failed to delete message with cacheID %d: %v", cacheID, err)
+		return false
+	}
+
+	// If deleted count > 0, the message was found and removed
+	if deleted > 0 {
+		log.Printf("Deleted message with cacheID %d from cache.", cacheID)
+		return true
+	}
+
+	log.Printf("Message with cacheID %d not found in cache.", cacheID)
+	return false
+}

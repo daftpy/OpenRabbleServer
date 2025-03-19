@@ -1,6 +1,7 @@
 package server
 
 import (
+	"chatserver/internal/cache"
 	database "chatserver/internal/db"
 	"chatserver/internal/messages"
 	"chatserver/internal/models"
@@ -92,7 +93,7 @@ func HandleChannels(db *pgxpool.Pool, s *Server) http.HandlerFunc {
 	}
 }
 
-func HandleMessages(db *pgxpool.Pool) http.HandlerFunc {
+func HandleMessages(db *pgxpool.Pool, cache *cache.MessageCache) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
@@ -147,7 +148,7 @@ func HandleMessages(db *pgxpool.Pool) http.HandlerFunc {
 			json.NewEncoder(w).Encode(responseMessage)
 
 		case http.MethodDelete:
-			// 1) Parse JSON body
+			// Parse JSON body
 			var body struct {
 				IDs []int `json:"ids"`
 			}
@@ -155,28 +156,36 @@ func HandleMessages(db *pgxpool.Pool) http.HandlerFunc {
 				http.Error(w, "Invalid JSON body", http.StatusBadRequest)
 				return
 			}
-			log.Printf("Received these IDs to be deleted: %v", body.IDs)
 
 			if len(body.IDs) == 0 {
 				http.Error(w, "No IDs provided", http.StatusBadRequest)
 				return
 			}
 
-			// 2) Call your bulk deletion function
-			rowsDeleted, err := database.RemoveMessages(db, body.IDs)
+			// Call RemoveMessages to delete from DB and get cacheIDs
+			rowsDeleted, cacheIDs, err := database.RemoveMessages(db, body.IDs)
 			if err != nil {
 				log.Printf("Failed to delete messages: %v", err)
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
 			}
 
-			// 3) If zero rows are deleted, none of those IDs existed
 			if rowsDeleted == 0 {
 				http.Error(w, "No messages were deleted (IDs not found)", http.StatusNotFound)
 				return
 			}
 
-			// 4) Respond with success
+			// Purge messages from the cache
+			for _, cacheID := range cacheIDs {
+				success := cache.DeleteCachedMessage(cacheID)
+				if success {
+					log.Printf("Purged message with cacheID %d from cache", cacheID)
+				} else {
+					log.Printf("Failed to purge message with cacheID %d from cache", cacheID)
+				}
+			}
+
+			// Respond with success
 			w.WriteHeader(http.StatusNoContent)
 
 		default:

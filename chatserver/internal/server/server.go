@@ -1,6 +1,7 @@
 package server
 
 import (
+	"chatserver/internal/cache"
 	"chatserver/internal/client"
 	"chatserver/internal/db"
 	"chatserver/internal/hub"
@@ -22,10 +23,11 @@ Server handles incoming websocket connections and authenticates them.
 It validates JWT tokens, registers clients with the hub, and manages connections.
 */
 type Server struct {
-	HttpServer *http.Server
-	jwkKeyFunc jwt.Keyfunc
-	hub        hub.HubInterface
-	db         *pgxpool.Pool
+	HttpServer   *http.Server
+	jwkKeyFunc   jwt.Keyfunc
+	hub          hub.HubInterface
+	db           *pgxpool.Pool
+	MessageCache *cache.MessageCache
 }
 
 // Upgrades HTTP requests to websocket connections
@@ -201,7 +203,7 @@ func enableCORS(next http.Handler) http.Handler {
 New initializes and returns a new Server instance.
 It sets up the WebSocket handler and configures JWT authentication.
 */
-func New(addr string, h hub.HubInterface, db *pgxpool.Pool) (*Server, error) {
+func New(addr string, h hub.HubInterface, db *pgxpool.Pool, cache *cache.MessageCache) (*Server, error) {
 	mux := http.NewServeMux()
 
 	// Apply CORS Middleware to Allow Cross-Origin Requests
@@ -228,7 +230,7 @@ func New(addr string, h hub.HubInterface, db *pgxpool.Pool) (*Server, error) {
 	// Register handlers
 	mux.HandleFunc("/discovery", HandleDiscovery())
 	mux.HandleFunc("/channels", HandleChannels(db, srv))
-	mux.HandleFunc("/messages", HandleMessages(db))
+	mux.HandleFunc("/messages", HandleMessages(db, cache))
 	mux.HandleFunc("/users", HandleUsers(db))
 	mux.HandleFunc("/users/ban", HandleBanUser(db))
 	mux.HandleFunc("/users/bans", HandleBanRecords(db))
