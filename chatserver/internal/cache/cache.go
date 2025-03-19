@@ -177,7 +177,7 @@ func (m *MessageCache) FlushCacheToDB() {
 			`INSERT INTO chatserver.chat_messages (owner_id, channel, message, authored_at)
 			 VALUES ($1, $2, $3, $4)
 			`,
-			msg.ID, msg.Channel, msg.Message, msg.Sent,
+			msg.OwnerID, msg.Channel, msg.Message, msg.Sent,
 		)
 
 		if err != nil {

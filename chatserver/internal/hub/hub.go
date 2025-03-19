@@ -132,6 +132,9 @@ func (h *Hub) handleMessage(msg messages.BaseMessage) {
 // Retrieves chat messages from the MessageCache and returns them as a slice of ChatMessage
 func (h *Hub) GetCachedChatMessages() []messages.ChatMessagePayload {
 	chatMessages := h.MessageCache.GetCachedChatMessages()
+	for i := 0; i < len(chatMessages); i++ {
+		log.Printf("Message %d: %v", i, chatMessages[i])
+	}
 	return chatMessages
 }
 

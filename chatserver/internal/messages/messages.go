@@ -36,7 +36,8 @@ ChatMessage represents a chat message sent by a user.
 This message is broadcasted to all clients in the specified channel.
 */
 type ChatMessagePayload struct {
-	ID       string    `json:"id,omitempty"`
+	ID       int       `json:"id,omitempty"`
+	OwnerID  string    `json:"owner_id"`
 	Username string    `json:"username"`
 	Channel  string    `json:"channel"`
 	Message  string    `json:"message"`
@@ -53,7 +54,7 @@ func NewChatMessage(ID, username, channel, message string, authoredAt time.Time)
 			Channel:  channel,
 			Message:  message,
 			Sent:     authoredAt,
-			ID:       ID,
+			OwnerID:  ID,
 		},
 	}
 }
@@ -144,18 +145,9 @@ func NewSessionActivityMessage(activity []models.SessionActivity) BaseMessage {
 	}
 }
 
-type MessageSearchResult struct {
-	ID       int       `json:"id"`
-	OwnerID  string    `json:"owner_id"`
-	Username string    `json:"username"`
-	Channel  string    `json:"channel"`
-	Message  string    `json:"message"`
-	Sent     time.Time `json:"authored_at"`
-}
-
 type MessageSearchResultPayload struct {
-	Messages []MessageSearchResult `json:"messages"`
-	HasMore  bool                  `json:"has_more"`
+	Messages []ChatMessagePayload `json:"messages"`
+	HasMore  bool                 `json:"has_more"`
 }
 
 func NewMessageSearchResultMessage(payload MessageSearchResultPayload) BaseMessage {

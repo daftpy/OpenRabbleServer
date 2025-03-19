@@ -207,7 +207,7 @@ func FetchSessionActivity(db *pgxpool.Pool, userID string) ([]models.SessionActi
 	return activity, nil
 }
 
-func FetchMessages(db *pgxpool.Pool, userID string, channels []string, keyword string, limit, offset int) ([]messages.MessageSearchResult, bool, error) {
+func FetchMessages(db *pgxpool.Pool, userID string, channels []string, keyword string, limit, offset int) ([]messages.ChatMessagePayload, bool, error) {
 	var query string
 	var args []interface{}
 	var conditions []string
@@ -270,9 +270,9 @@ func FetchMessages(db *pgxpool.Pool, userID string, channels []string, keyword s
 	}
 	defer rows.Close()
 
-	searchMessages := []messages.MessageSearchResult{}
+	searchMessages := []messages.ChatMessagePayload{}
 	for rows.Next() {
-		var msg messages.MessageSearchResult
+		var msg messages.ChatMessagePayload
 		if err := rows.Scan(&msg.ID, &msg.OwnerID, &msg.Username, &msg.Channel, &msg.Message, &msg.Sent); err != nil {
 			return nil, false, fmt.Errorf("failed to scan chat message row: %w", err)
 		}
