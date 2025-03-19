@@ -64,7 +64,7 @@ export const MessageList = memo(({ messages, hidePermaLink }: Props) => {
   };
 
   return (
-    <>
+    <Box>
       {hidePermaLink && (
         <Flex justify="end" pb="3">
           <DropdownMenu.Root>
@@ -85,7 +85,7 @@ export const MessageList = memo(({ messages, hidePermaLink }: Props) => {
 
       {messages.length > 0 ? (messages.map((message, index) => (
         <Message
-          key={message.id}
+          key={index}
           isLast={index === messages.length - 1}
           meessage={message}
           hidePermaLink={hidePermaLink}
@@ -94,10 +94,10 @@ export const MessageList = memo(({ messages, hidePermaLink }: Props) => {
           onSelect={() => selectMessage(message.id)}
         />
       ))) : (
-        <Box py={"4"}>
+        <Box py={"4"} key="none">
           <Text align={"center"} as="div" size="5" style={{color: "var(--muted-text-color)"}}>No Messages</Text>
         </Box>
       )}
-    </>
+    </Box>
   );
 });

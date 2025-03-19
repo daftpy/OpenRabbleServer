@@ -1,4 +1,4 @@
-import { Cross1Icon, CrossCircledIcon, MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons";
+import { CrossCircledIcon, MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons";
 import { Box, Button, Container, DropdownMenu, Flex, Heading, Text, TextField } from "@radix-ui/themes";
 import { Link, useNavigate } from "react-router";
 import type { User } from "~/routes/users";
@@ -40,7 +40,7 @@ export function UsersPage({ users } : props) {
       </Box>
       <Flex direction={"column"} pt={"4"}>
         {users.map((user: User, index: number) => (
-          <Flex align={"center"}
+          <Flex align={"center"} key={index}
             style={{borderBottom: index == users.length - 1 ? "none" : "2px solid var(--indigo-3)"}}
           >
             <Flex direction={"column"} gap={"1"} py={"3"} flexGrow={"1"}>
