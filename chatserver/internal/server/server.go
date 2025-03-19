@@ -7,6 +7,7 @@ import (
 	"chatserver/internal/hub"
 	"chatserver/internal/messages"
 	"chatserver/internal/models"
+	"chatserver/internal/server/handlers"
 	"context"
 	"fmt"
 	"log"
@@ -228,14 +229,14 @@ func New(addr string, h hub.HubInterface, db *pgxpool.Pool, cache *cache.Message
 	mux.HandleFunc("/ws", srv.handleConnection)
 
 	// Register handlers
-	mux.HandleFunc("/discovery", HandleDiscovery())
-	mux.HandleFunc("/channels", HandleChannels(db, srv))
-	mux.HandleFunc("/messages", HandleMessages(db, cache))
-	mux.HandleFunc("/users", HandleUsers(db))
-	mux.HandleFunc("/users/ban", HandleBanUser(db))
-	mux.HandleFunc("/users/bans", HandleBanRecords(db))
-	mux.HandleFunc("/activity/sessions", HandleRecentActivity(db))
-	mux.HandleFunc("/activity/channels", HandleChannelActivity(db))
+	mux.HandleFunc("/discovery", handlers.HandleDiscovery())
+	mux.HandleFunc("/channels", handlers.HandleChannels(db))
+	mux.HandleFunc("/messages", handlers.HandleMessages(db, cache))
+	mux.HandleFunc("/users", handlers.HandleUsers(db))
+	mux.HandleFunc("/users/ban", handlers.HandleBanUser(db))
+	mux.HandleFunc("/users/bans", handlers.HandleBanRecords(db))
+	mux.HandleFunc("/activity/sessions", handlers.HandleRecentActivity(db))
+	mux.HandleFunc("/activity/channels", handlers.HandleChannelActivity(db))
 
 	return srv, nil
 }
