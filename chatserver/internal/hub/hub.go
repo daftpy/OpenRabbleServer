@@ -108,12 +108,25 @@ func (h *Hub) handleMessage(msg messages.BaseMessage) {
 	switch msg.Type {
 	case messages.ChatMessageType:
 		log.Printf("Handling chat message from: %s", msg.Sender)
+		log.Printf("DEBUG: msg.Payload actual type: %T", msg.Payload)
+
+		// Extract chat message payload
 		payload, ok := msg.Payload.(messages.ChatMessagePayload)
 		if !ok {
 			log.Println("invalid chat message payload")
 			return
 		}
-		h.MessageCache.CacheChatMessage(payload)
+
+		// Get cacheID from CacheChatMessage
+		cacheID := h.MessageCache.CacheChatMessage(payload)
+
+		// Attach cacheID to msg.Payload for broadcasting
+		payload.CacheID = cacheID
+		msg.Payload = payload // Update BaseMessage with new payload
+
+		log.Printf("Broadcasting message with cacheID %d", cacheID)
+
+		// Now broadcast with cacheID included
 		h.Broadcast(msg)
 
 	case messages.UserStatusMessageType:

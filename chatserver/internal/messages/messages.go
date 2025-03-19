@@ -37,6 +37,7 @@ This message is broadcasted to all clients in the specified channel.
 */
 type ChatMessagePayload struct {
 	ID       int       `json:"id,omitempty"`
+	CacheID  int       `json:"cacheID,omitempty"`
 	OwnerID  string    `json:"owner_id"`
 	Username string    `json:"username"`
 	Channel  string    `json:"channel"`

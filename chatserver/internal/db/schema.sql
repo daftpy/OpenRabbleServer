@@ -12,8 +12,9 @@ CREATE TABLE IF NOT EXISTS chatserver.channels (
 
 CREATE TABLE IF NOT EXISTS chatserver.chat_messages (
     id SERIAL PRIMARY KEY,
+    cache_id BIGINT UNIQUE NOT NULL,  -- Stores Valkey's INCR value
     owner_id VARCHAR(36) NOT NULL,
-    channel VARCHAR(24) NOT NULL,  -- Stores the channel name directly
+    channel VARCHAR(24) NOT NULL,  -- Stores the channel name directly (not channel ID)
     message TEXT NOT NULL,
     authored_at TIMESTAMP NOT NULL,
     search_vector TSVECTOR GENERATED ALWAYS AS (to_tsvector('english', message)) STORED

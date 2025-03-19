@@ -23,17 +23,27 @@ type MessageCache struct {
 var cacheMessageScript = valkey.NewLuaScript(`
     local recentKey = KEYS[1]      -- Circular cache for recent messages
     local flushKey = KEYS[2]       -- Flush cache for database persistence
+	local counterKey = KEYS[3]	   -- Counter key for cacheID
     local message = ARGV[1]
     local maxSize = tonumber(ARGV[2])
 
+	-- Generate the cacheID
+	local cacheID = redis.call("INCR", counterKey)
+
+	-- Attach the cacheID to the message
+	local enrichedMessage = cjson.encode({cache_id = cacheID, data = cjson.decode(message)})
+
     -- Add to the recent circular cache
-    redis.call("RPUSH", recentKey, message)
+    redis.call("RPUSH", recentKey, enrichedMessage)
     redis.call("LTRIM", recentKey, -maxSize, -1)
 
     -- Add to the flush cache (no trimming)
-    redis.call("RPUSH", flushKey, message)
+    redis.call("RPUSH", flushKey, enrichedMessage)
 
-    return redis.call("LLEN", flushKey)  -- Return the size of the flush cache
+	-- Get the current size of the flush cache
+	local flushCacheSize = redis.call("LLEN", flushKey)
+
+    return {cacheID, flushCacheSize} -- Return the cacheID and size of the flush cache
 `)
 
 const maxCacheSize = 500
@@ -41,65 +51,58 @@ const cacheTTL = 24 * 60 * 60 // 24 hours in seconds
 const flushInterval = 2 * time.Minute
 
 // Caches a chat message in Valkey and triggers a DB flush if max cache size is reached
-func (m *MessageCache) CacheChatMessage(msg messages.ChatMessagePayload) {
+func (m *MessageCache) CacheChatMessage(msg messages.ChatMessagePayload) int {
+	recentCacheKey := "recent_messages"
+	flushCacheKey := "flush_messages"
+	counterKey := "cache_message_id" // Key for unique message IDs
+
+	ctx := context.Background()
+
+	// Ensure JSON serialization is successful before passing to Lua
 	jsonData, err := json.Marshal(msg)
 	if err != nil {
 		log.Printf("Failed to serialize chat message: %v", err)
-		return
+		return -1
 	}
 
-	recentCacheKey := "recent_messages"
-	flushCacheKey := "flush_messages"
-	ctx := context.Background()
-
-	// Cache the message in both caches
-	cacheSize, err := cacheMessageScript.Exec(
+	// Execute Lua script and extract both values
+	results, err := cacheMessageScript.Exec(
 		ctx,
 		m.ValkeyClient,
-		[]string{recentCacheKey, flushCacheKey},
-		[]string{string(jsonData), fmt.Sprintf("%d", maxCacheSize)},
-	).AsInt64()
+		[]string{recentCacheKey, flushCacheKey, counterKey},         // Keys
+		[]string{string(jsonData), fmt.Sprintf("%d", maxCacheSize)}, // Arguments
+	).ToArray()
 
 	if err != nil {
 		log.Printf("Failed to cache chat message with Lua script: %v", err)
-		return
+		return -1
 	}
 
-	log.Printf("Cached chat message: %s. Flush cache size: %d", msg.Message, cacheSize)
+	// Extract values
+	cacheID, err := results[0].ToInt64()
+	if err != nil {
+		log.Printf("Failed to parse cacheID: %v", err)
+		return -1
+	}
 
-	// Flush to DB if the flush cache reaches the max size
-	if cacheSize >= maxCacheSize {
+	flushCacheSize, err := results[1].ToInt64()
+	if err != nil {
+		log.Printf("Failed to parse flushCacheSize: %v", err)
+		return -1
+	}
+
+	// Attach the correct `cacheID` to the message
+	msg.CacheID = int(cacheID)
+
+	log.Printf("Cached chat message with ID %d: %s. Flush cache size: %d", cacheID, msg.Message, flushCacheSize)
+
+	// Flush to DB if the actual flush cache size reaches maxCacheSize
+	if flushCacheSize >= maxCacheSize {
 		log.Println("Flush cache size limit reached. Flushing to the database...")
 		m.FlushCacheToDB()
 	}
-}
 
-func (m *MessageCache) cacheBannedUser(userID string, hours int) {
-	ctx := context.Background()
-
-	// Convert hours to total ban duration in seconds
-	ttlSeconds := int64(hours * 3600)
-
-	// Construct a unique ban key for the user
-	banKey := fmt.Sprintf("temp_ban:%s", userID)
-
-	// Store the ban length (in hours) as the value, and set the TTL to the computed seconds
-	_, err := m.ValkeyClient.Do(
-		ctx,
-		m.ValkeyClient.B().
-			Setex().
-			Key(banKey).
-			Seconds(ttlSeconds).
-			Value(fmt.Sprintf("%d", hours)).
-			Build(),
-	).ToString()
-
-	if err != nil {
-		log.Printf("Failed to set temp ban for user %s: %v", userID, err)
-		return
-	}
-
-	log.Printf("User %s is temporarily banned for %d hour(s)", userID, hours)
+	return int(cacheID) // Correctly return cacheID
 }
 
 // Retrieves chat messages from the circular cache
@@ -119,12 +122,22 @@ func (m *MessageCache) GetCachedChatMessages() []messages.ChatMessagePayload {
 
 	var chatMessages []messages.ChatMessagePayload
 	for _, jsonData := range cachedMessages {
-		var msg messages.ChatMessagePayload
-		if err := json.Unmarshal([]byte(jsonData), &msg); err != nil {
+		// New struct to extract `cache_id` alongside the `data`
+		var cachedMsg struct {
+			CacheID int64                       `json:"cache_id"`
+			Data    messages.ChatMessagePayload `json:"data"`
+		}
+
+		// Unmarshal JSON into the new struct
+		if err := json.Unmarshal([]byte(jsonData), &cachedMsg); err != nil {
 			log.Printf("Failed to deserialize chat message: %v", err)
 			continue
 		}
-		chatMessages = append(chatMessages, msg)
+
+		// Convert int64 to int before assignment
+		cachedMsg.Data.CacheID = int(cachedMsg.CacheID)
+
+		chatMessages = append(chatMessages, cachedMsg.Data)
 	}
 
 	log.Printf("Retrieved %d messages from recent cache", len(chatMessages))
@@ -163,21 +176,29 @@ func (m *MessageCache) FlushCacheToDB() {
 	}
 	defer tx.Rollback(ctx)
 
-	const tempOwnerID = "0f5e28a8-4f8e-49be-b56d-83419ab92a36"
-
 	for _, jsonData := range cachedMessages {
-		var msg messages.ChatMessagePayload
-		if err := json.Unmarshal([]byte(jsonData), &msg); err != nil {
+		// Use a struct that matches the stored JSON format
+		var cachedMsg struct {
+			CacheID int64                       `json:"cache_id"`
+			Data    messages.ChatMessagePayload `json:"data"`
+		}
+
+		if err := json.Unmarshal([]byte(jsonData), &cachedMsg); err != nil {
 			log.Printf("Failed to deserialize chat message: %v", err)
 			continue
 		}
 
+		// Assign extracted cacheID to the payload
+		cachedMsg.Data.CacheID = int(cachedMsg.CacheID)
+
+		log.Printf("Inserting a message with the cacheID %d", cachedMsg.Data.CacheID)
+
 		_, err = tx.Exec(
 			ctx,
-			`INSERT INTO chatserver.chat_messages (owner_id, channel, message, authored_at)
-			 VALUES ($1, $2, $3, $4)
+			`INSERT INTO chatserver.chat_messages (cache_id, owner_id, channel, message, authored_at)
+			 VALUES ($1, $2, $3, $4, $5)
 			`,
-			msg.OwnerID, msg.Channel, msg.Message, msg.Sent,
+			cachedMsg.Data.CacheID, cachedMsg.Data.OwnerID, cachedMsg.Data.Channel, cachedMsg.Data.Message, cachedMsg.Data.Sent,
 		)
 
 		if err != nil {
