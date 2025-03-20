@@ -4,6 +4,7 @@ import (
 	"chatserver/internal/messages"
 	"chatserver/internal/models"
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 
@@ -11,7 +12,6 @@ import (
 )
 
 func FetchChannels(db *pgxpool.Pool) ([]models.Channel, error) {
-	// Update query to select both name and description
 	rows, err := db.Query(context.Background(), "SELECT name, description FROM chatserver.channels")
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch channels: %w", err)
@@ -21,9 +21,19 @@ func FetchChannels(db *pgxpool.Pool) ([]models.Channel, error) {
 	var channels []models.Channel
 	for rows.Next() {
 		var channel models.Channel
-		if err := rows.Scan(&channel.Name, &channel.Description); err != nil {
+		var description sql.NullString
+
+		if err := rows.Scan(&channel.Name, &description); err != nil {
 			return nil, fmt.Errorf("failed to scan channel row: %w", err)
 		}
+
+		// Convert sql.NullString to *string
+		if description.Valid {
+			channel.Description = &description.String
+		} else {
+			channel.Description = nil // Keep as nil if it was NULL in DB
+		}
+
 		channels = append(channels, channel)
 	}
 
