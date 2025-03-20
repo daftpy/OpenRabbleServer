@@ -4,15 +4,7 @@ import (
 	"chatserver/internal/models"
 )
 
-// TODO: find a home for this
-type ChannelMessageCount struct {
-	Channel      string `json:"channel"`
-	MessageCount int    `json:"message_count"`
-}
-
 const (
-	ActiveChannelsMessageType  = "active_channels"
-	MessageCountByChannelType  = "message_count_by_channel"
 	SessionActivityMessageType = "session_activity"
 	UserSearchResultType       = "user_search_result"
 	BanRecordsResultType       = "ban_records_result"
@@ -22,34 +14,6 @@ type BaseMessage struct {
 	Type    string      `json:"type"`
 	Sender  string      `json:"sender"`
 	Payload interface{} `json:"payload"`
-}
-
-type ActiveChannelsPayload struct {
-	Channels []models.Channel `json:"channels"`
-}
-
-func NewActiveChannelsMessage(channels []models.Channel) BaseMessage {
-	return BaseMessage{
-		Type:   ActiveChannelsMessageType,
-		Sender: "Server",
-		Payload: ActiveChannelsPayload{
-			Channels: channels,
-		},
-	}
-}
-
-type MessageCountByChannelPayload struct {
-	Channels []ChannelMessageCount `json:"channels"`
-}
-
-func NewMessageCountByChannelMessage(channels []ChannelMessageCount) BaseMessage {
-	return BaseMessage{
-		Type:   MessageCountByChannelType,
-		Sender: "Server",
-		Payload: MessageCountByChannelPayload{
-			Channels: channels,
-		},
-	}
 }
 
 type SessionActivityPayload struct {
