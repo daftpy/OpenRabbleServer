@@ -11,6 +11,13 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+// FetchChannels retrieves all channels from the database's `channels` table.
+// For each channel, if the `description` column is NULL, the Channel.Description
+// field will be set to nil in the returned slice. Otherwise, it contains the
+// description as a pointer to a string.
+// It returns:
+//  1. A slice of Channel models
+//  2. An error, if any
 func FetchChannels(db *pgxpool.Pool) ([]models.Channel, error) {
 	rows, err := db.Query(context.Background(), "SELECT name, description FROM chatserver.channels")
 	if err != nil {
@@ -45,6 +52,12 @@ func FetchChannels(db *pgxpool.Pool) ([]models.Channel, error) {
 	return channels, nil
 }
 
+// FetchMessageCountByChannel returns the total number of chat messages per channel.
+// It queries the `chat_messages` table, grouping by the `channel` column to produce
+// a list of channels and their respective message counts.
+// It returns:
+//  1. A slice of ChannelMessageCount, where each item contains a channel name and a message count
+//  2. An error, if the query or row scanning fails
 func FetchMessageCountByChannel(db *pgxpool.Pool) ([]messages.ChannelMessageCount, error) {
 	rows, err := db.Query(context.Background(), `
 		SELECT channel, COUNT(*) AS message_count

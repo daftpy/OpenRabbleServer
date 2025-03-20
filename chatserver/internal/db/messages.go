@@ -10,6 +10,13 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+// FetchMessages retrieves cchat messages from the database.
+// Filters can be applied via userID, channels, and keywords.
+// Pagination is controlled by 'limit' and 'offset'.
+// It returns:
+// 1) A slice of ChatMessage objects.
+// 2) A boolean indicating whether there are more results beyond this page.
+// 3) An error, if any occurred.
 func FetchMessages(db *pgxpool.Pool, userID string, channels []string, keyword string, limit, offset int) ([]models.ChatMessage, bool, error) {
 	var query string
 	var args []interface{}
@@ -29,14 +36,14 @@ func FetchMessages(db *pgxpool.Pool, userID string, channels []string, keyword s
 
 	argIndex := 1
 
-	// Add user filter if provided
+	// Filter by user if provided
 	if userID != "" {
 		conditions = append(conditions, fmt.Sprintf("m.owner_id = $%d", argIndex))
 		args = append(args, userID)
 		argIndex++
 	}
 
-	// Add channel filter if provided
+	// Filter by channels if provided
 	if len(channels) > 0 {
 		placeholders := []string{}
 		for _, channel := range channels {
@@ -47,7 +54,7 @@ func FetchMessages(db *pgxpool.Pool, userID string, channels []string, keyword s
 		conditions = append(conditions, fmt.Sprintf("m.channel IN (%s)", strings.Join(placeholders, ", ")))
 	}
 
-	// Add keyword search if provided
+	// Filter by keyword if provided
 	if keyword != "" {
 		conditions = append(conditions, fmt.Sprintf("m.search_vector @@ plainto_tsquery('english', $%d)", argIndex))
 		args = append(args, keyword)
@@ -59,13 +66,14 @@ func FetchMessages(db *pgxpool.Pool, userID string, channels []string, keyword s
 		query += " WHERE " + strings.Join(conditions, " AND ")
 	}
 
-	// Add ORDER BY, LIMIT, OFFSET
+	// Order by newest first, then apply limit and offset
 	query += fmt.Sprintf(`
 		ORDER BY m.authored_at DESC
 		LIMIT $%d OFFSET $%d;
 	`, argIndex, argIndex+1)
 
-	args = append(args, limit+1, offset) // Request one extra row
+	// Request one extra row to see if more results exist
+	args = append(args, limit+1, offset)
 
 	rows, err := db.Query(context.Background(), query, args...)
 	if err != nil {
@@ -92,6 +100,8 @@ func FetchMessages(db *pgxpool.Pool, userID string, channels []string, keyword s
 	return searchMessages, hasMore, nil
 }
 
+// RemoveMessage is currently unused.
+// TODO: remove?
 func RemoveMessage(db *pgxpool.Pool, messageID int) (bool, error) {
 	query := `DELETE FROM chatserver.chat_messages WHERE id = $1`
 
@@ -110,6 +120,12 @@ func RemoveMessage(db *pgxpool.Pool, messageID int) (bool, error) {
 	return true, nil
 }
 
+// RemoveMessages deletes multiple chat messages by their IDs.
+// Before deleting, it fetches each message's cacheID.
+// It returns:
+//  1. rowsDeleted: the number of rows actually deleted.
+//  2. cacheIDs: a list of cacheIDs associated with the deleted messages.
+//  3. An error, if any.
 func RemoveMessages(db *pgxpool.Pool, messageIDs []int) (int64, []int, error) {
 	if len(messageIDs) == 0 {
 		return 0, nil, fmt.Errorf("no message IDs provided")
@@ -117,7 +133,7 @@ func RemoveMessages(db *pgxpool.Pool, messageIDs []int) (int64, []int, error) {
 
 	ctx := context.Background()
 
-	// Step 1: Fetch cacheIDs before deletion
+	// Fetch cacheIDs before deletion so we can purgee the message cache after
 	queryCacheIDs := `SELECT cache_id FROM chatserver.chat_messages WHERE id = ANY($1)`
 	rows, err := db.Query(ctx, queryCacheIDs, messageIDs)
 	if err != nil {
@@ -139,7 +155,7 @@ func RemoveMessages(db *pgxpool.Pool, messageIDs []int) (int64, []int, error) {
 		return 0, nil, fmt.Errorf("no matching messages found for provided IDs")
 	}
 
-	// Step 2: Delete messages from the database
+	// Delete the matching rows from the database
 	queryDelete := `DELETE FROM chatserver.chat_messages WHERE id = ANY($1)`
 	cmd, err := db.Exec(ctx, queryDelete, messageIDs)
 	if err != nil {
