@@ -1,7 +1,7 @@
 package db
 
 import (
-	"chatserver/internal/messages"
+	"chatserver/internal/models"
 	"context"
 	"fmt"
 	"log"
@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func FetchMessages(db *pgxpool.Pool, userID string, channels []string, keyword string, limit, offset int) ([]messages.ChatMessagePayload, bool, error) {
+func FetchMessages(db *pgxpool.Pool, userID string, channels []string, keyword string, limit, offset int) ([]models.ChatMessage, bool, error) {
 	var query string
 	var args []interface{}
 	var conditions []string
@@ -73,9 +73,9 @@ func FetchMessages(db *pgxpool.Pool, userID string, channels []string, keyword s
 	}
 	defer rows.Close()
 
-	searchMessages := []messages.ChatMessagePayload{}
+	searchMessages := []models.ChatMessage{}
 	for rows.Next() {
-		var msg messages.ChatMessagePayload
+		var msg models.ChatMessage
 		if err := rows.Scan(&msg.ID, &msg.OwnerID, &msg.Username, &msg.Channel, &msg.Message, &msg.Sent); err != nil {
 			return nil, false, fmt.Errorf("failed to scan chat message row: %w", err)
 		}

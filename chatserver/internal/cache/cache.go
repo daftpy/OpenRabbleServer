@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"chatserver/internal/messages"
+	"chatserver/internal/models"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -51,7 +51,7 @@ const cacheTTL = 24 * 60 * 60 // 24 hours in seconds
 const flushInterval = 2 * time.Minute
 
 // Caches a chat message in Valkey and triggers a DB flush if max cache size is reached
-func (m *MessageCache) CacheChatMessage(msg messages.ChatMessagePayload) int {
+func (m *MessageCache) CacheChatMessage(msg models.ChatMessage) int {
 	recentCacheKey := "recent_messages"
 	flushCacheKey := "flush_messages"
 	counterKey := "cache_message_id" // Key for unique message IDs
@@ -106,7 +106,7 @@ func (m *MessageCache) CacheChatMessage(msg messages.ChatMessagePayload) int {
 }
 
 // Retrieves chat messages from the circular cache
-func (m *MessageCache) GetCachedChatMessages() []messages.ChatMessagePayload {
+func (m *MessageCache) GetCachedChatMessages() []models.ChatMessage {
 	recentCacheKey := "recent_messages"
 	ctx := context.Background()
 
@@ -120,12 +120,12 @@ func (m *MessageCache) GetCachedChatMessages() []messages.ChatMessagePayload {
 		return nil
 	}
 
-	var chatMessages []messages.ChatMessagePayload
+	var chatMessages []models.ChatMessage
 	for _, jsonData := range cachedMessages {
 		// New struct to extract `cache_id` alongside the `data`
 		var cachedMsg struct {
-			CacheID int64                       `json:"cache_id"`
-			Data    messages.ChatMessagePayload `json:"data"`
+			CacheID int64              `json:"cache_id"`
+			Data    models.ChatMessage `json:"data"`
 		}
 
 		// Unmarshal JSON into the new struct
@@ -179,8 +179,8 @@ func (m *MessageCache) FlushCacheToDB() {
 	for _, jsonData := range cachedMessages {
 		// Use a struct that matches the stored JSON format
 		var cachedMsg struct {
-			CacheID int64                       `json:"cache_id"`
-			Data    messages.ChatMessagePayload `json:"data"`
+			CacheID int64              `json:"cache_id"`
+			Data    models.ChatMessage `json:"data"`
 		}
 
 		if err := json.Unmarshal([]byte(jsonData), &cachedMsg); err != nil {

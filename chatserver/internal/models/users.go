@@ -2,6 +2,12 @@ package models
 
 import "time"
 
+type User struct {
+	ID       string `json:"id"`
+	Username string `json:"username"`
+	Banned   bool   `json:"is_banned"`
+}
+
 type BanRecord struct {
 	ID               string     `json:"id"`
 	OwnerID          string     `json:"owner_id"`

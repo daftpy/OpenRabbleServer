@@ -4,6 +4,7 @@ import (
 	"chatserver/internal/cache"
 	"chatserver/internal/db"
 	"chatserver/internal/messages"
+	"chatserver/internal/models"
 	"fmt"
 	"log"
 	"time"
@@ -111,7 +112,7 @@ func (h *Hub) handleMessage(msg messages.BaseMessage) {
 		log.Printf("DEBUG: msg.Payload actual type: %T", msg.Payload)
 
 		// Extract chat message payload
-		payload, ok := msg.Payload.(messages.ChatMessagePayload)
+		payload, ok := msg.Payload.(models.ChatMessage)
 		if !ok {
 			log.Println("invalid chat message payload")
 			return
@@ -143,7 +144,7 @@ func (h *Hub) handleMessage(msg messages.BaseMessage) {
 }
 
 // Retrieves chat messages from the MessageCache and returns them as a slice of ChatMessage
-func (h *Hub) GetCachedChatMessages() []messages.ChatMessagePayload {
+func (h *Hub) GetCachedChatMessages() []models.ChatMessage {
 	chatMessages := h.MessageCache.GetCachedChatMessages()
 	for i := 0; i < len(chatMessages); i++ {
 		log.Printf("Message %d: %v", i, chatMessages[i])

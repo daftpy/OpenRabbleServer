@@ -1,14 +1,14 @@
 package db
 
 import (
-	"chatserver/internal/messages"
+	"chatserver/internal/models"
 	"context"
 	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func FetchUsers(db *pgxpool.Pool, username string) ([]messages.UserSearchResult, error) {
+func FetchUsers(db *pgxpool.Pool, username string) ([]models.User, error) {
 	ctx := context.Background()
 
 	query := `
@@ -40,9 +40,9 @@ func FetchUsers(db *pgxpool.Pool, username string) ([]messages.UserSearchResult,
 	}
 	defer rows.Close()
 
-	var users []messages.UserSearchResult
+	var users []models.User
 	for rows.Next() {
-		var user messages.UserSearchResult
+		var user models.User
 		if err := rows.Scan(&user.ID, &user.Username, &user.Banned); err != nil {
 			return nil, fmt.Errorf("failed to scan user row: %w", err)
 		}
