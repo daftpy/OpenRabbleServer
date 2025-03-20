@@ -6,10 +6,7 @@ import (
 	"chatserver/internal/db"
 	"chatserver/internal/hub"
 	"chatserver/internal/messages"
-	"chatserver/internal/models"
 	"chatserver/internal/server/handlers"
-	"context"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -168,7 +165,7 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Fetch channels from the database
-	channels, err := s.getChannels()
+	channels, err := db.FetchChannels(s.db)
 	if err != nil {
 		log.Println("Failed to load channels from database:", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -225,10 +222,17 @@ func New(addr string, h hub.HubInterface, db *pgxpool.Pool, cache *cache.Message
 		db:         db,
 	}
 
+	// Register handlers
+	RegisterRoutes(srv, mux, db, cache)
+
+	return srv, nil
+}
+
+func RegisterRoutes(srv *Server, mux *http.ServeMux, db *pgxpool.Pool, cache *cache.MessageCache) {
 	// WebSocket route handled by Server struct
 	mux.HandleFunc("/ws", srv.handleConnection)
 
-	// Register handlers
+	// Register the other endpoints
 	mux.HandleFunc("/discovery", handlers.HandleDiscovery())
 	mux.HandleFunc("/channels", handlers.HandleChannels(db))
 	mux.HandleFunc("/messages", handlers.HandleMessages(db, cache))
@@ -237,42 +241,4 @@ func New(addr string, h hub.HubInterface, db *pgxpool.Pool, cache *cache.Message
 	mux.HandleFunc("/users/bans", handlers.HandleBanRecords(db))
 	mux.HandleFunc("/activity/sessions", handlers.HandleRecentActivity(db))
 	mux.HandleFunc("/activity/channels", handlers.HandleChannelActivity(db))
-
-	return srv, nil
-}
-
-func (s *Server) getChannels() ([]models.Channel, error) {
-	// Update query to select both name and description
-	rows, err := s.db.Query(context.Background(), "SELECT name, description FROM chatserver.channels")
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch channels: %w", err)
-	}
-	defer rows.Close()
-
-	var channels []models.Channel
-	for rows.Next() {
-		var channel models.Channel
-		if err := rows.Scan(&channel.Name, &channel.Description); err != nil {
-			return nil, fmt.Errorf("failed to scan channel row: %w", err)
-		}
-		channels = append(channels, channel)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("error after iterating rows: %w", err)
-	}
-
-	log.Printf("Loaded %d channels from database", len(channels))
-	return channels, nil
-}
-
-func createChannel(db *pgxpool.Pool, name string, description string) error {
-	placeholderOwner := "00000000-0000-0000-0000-000000000000"
-	query := `
-        INSERT INTO chatserver.channels (name, description, owner_id)
-        VALUES ($1, $2, $3)
-        ON CONFLICT (name) DO NOTHING
-    `
-	_, err := db.Exec(context.Background(), query, name, description, placeholderOwner)
-	return err
 }
