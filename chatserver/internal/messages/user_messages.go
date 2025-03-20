@@ -3,6 +3,7 @@ package messages
 import "chatserver/internal/models"
 
 const (
+	UserSearchResultType      = "user_search_result"
 	UserStatusMessageType     = "user_status"
 	ConnectedUsersMessageType = "connected_users"
 )
