@@ -1,5 +1,7 @@
 package messages
 
+import "chatserver/internal/models"
+
 const (
 	UserStatusMessageType     = "user_status"
 	ConnectedUsersMessageType = "connected_users"
@@ -32,5 +34,17 @@ func NewConnectedUsersMessage(users []string) BaseMessage {
 		Payload: ConnectedUsersPayload{
 			Users: users,
 		},
+	}
+}
+
+type UserSearchResultPayload struct {
+	Users []models.User `json:"users"`
+}
+
+func NewUserSearchResultMessage(payload UserSearchResultPayload) BaseMessage {
+	return BaseMessage{
+		Type:    UserSearchResultType,
+		Sender:  "server",
+		Payload: payload,
 	}
 }

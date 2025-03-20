@@ -40,3 +40,16 @@ func NewBulkChatMessages(messages []models.ChatMessage) BaseMessage {
 		},
 	}
 }
+
+type MessageSearchResultPayload struct {
+	Messages []models.ChatMessage `json:"messages"`
+	HasMore  bool                 `json:"has_more"`
+}
+
+func NewMessageSearchResultMessage(payload MessageSearchResultPayload) BaseMessage {
+	return BaseMessage{
+		Type:    MessageSearchResultType,
+		Sender:  "server",
+		Payload: payload, // Should be a single struct, not a slice
+	}
+}

@@ -25,7 +25,7 @@ func HandleUsers(db *pgxpool.Pool) http.HandlerFunc {
 			Users: users,
 		}
 
-		response := messages.NewUseerSearchResultMessage(payload)
+		response := messages.NewUserSearchResultMessage(payload)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 	}

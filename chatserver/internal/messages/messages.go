@@ -30,31 +30,6 @@ func NewSessionActivityMessage(activity []models.SessionActivity) BaseMessage {
 	}
 }
 
-type MessageSearchResultPayload struct {
-	Messages []models.ChatMessage `json:"messages"`
-	HasMore  bool                 `json:"has_more"`
-}
-
-func NewMessageSearchResultMessage(payload MessageSearchResultPayload) BaseMessage {
-	return BaseMessage{
-		Type:    MessageSearchResultType,
-		Sender:  "server",
-		Payload: payload, // Should be a single struct, not a slice
-	}
-}
-
-type UserSearchResultPayload struct {
-	Users []models.User `json:"users"`
-}
-
-func NewUseerSearchResultMessage(payload UserSearchResultPayload) BaseMessage {
-	return BaseMessage{
-		Type:    UserSearchResultType,
-		Sender:  "server",
-		Payload: payload,
-	}
-}
-
 type BanRecordsPayload struct {
 	Records []models.BanRecord `json:"records"`
 	HasMore bool               `json:"has_more"`
