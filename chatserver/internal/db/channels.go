@@ -5,8 +5,11 @@ import (
 	"chatserver/internal/models"
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -19,7 +22,7 @@ import (
 //  1. A slice of Channel models
 //  2. An error, if any
 func FetchChannels(db *pgxpool.Pool) ([]models.Channel, error) {
-	rows, err := db.Query(context.Background(), "SELECT name, description FROM chatserver.channels")
+	rows, err := db.Query(context.Background(), "SELECT id, name, description FROM chatserver.channels")
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch channels: %w", err)
 	}
@@ -30,7 +33,7 @@ func FetchChannels(db *pgxpool.Pool) ([]models.Channel, error) {
 		var channel models.Channel
 		var description sql.NullString
 
-		if err := rows.Scan(&channel.Name, &description); err != nil {
+		if err := rows.Scan(&channel.ID, &channel.Name, &description); err != nil {
 			return nil, fmt.Errorf("failed to scan channel row: %w", err)
 		}
 
@@ -50,6 +53,38 @@ func FetchChannels(db *pgxpool.Pool) ([]models.Channel, error) {
 
 	log.Printf("Loaded %d channels from database", len(channels))
 	return channels, nil
+}
+
+func UpdateChannel(db *pgxpool.Pool, ID int, name *string, description *string) error {
+	clauses := []string{}
+	params := []interface{}{}
+	paramIndex := 1
+
+	if name != nil {
+		clauses = append(clauses, "name = $"+strconv.Itoa(paramIndex))
+		params = append(params, *name)
+		paramIndex++
+	}
+
+	if description != nil {
+		clauses = append(clauses, "description = $"+strconv.Itoa(paramIndex))
+		params = append(params, *description)
+		paramIndex++
+	}
+
+	if len(clauses) == 0 {
+		return errors.New("no fields provided to update")
+	}
+
+	query := `
+        UPDATE chatserver.channels
+        SET ` + strings.Join(clauses, ", ") + ` 
+        WHERE id = $` + strconv.Itoa(paramIndex)
+
+	params = append(params, ID)
+
+	_, err := db.Exec(context.Background(), query, params...)
+	return err
 }
 
 // FetchMessageCountByChannel returns the total number of chat messages per channel.

@@ -54,6 +54,38 @@ func HandleChannels(db *pgxpool.Pool) http.HandlerFunc {
 			w.WriteHeader(http.StatusCreated)
 			json.NewEncoder(w).Encode(map[string]string{"message": "Channel created", "name": request.Name})
 
+		case http.MethodPatch:
+			var request struct {
+				ID          *int    `json:"id"`
+				Name        *string `json:"name,omitempty"`
+				Description *string `json:"description,omitempty"`
+			}
+
+			if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+				http.Error(w, "Invalid JSON request body", http.StatusBadRequest)
+				return
+			}
+
+			if request.ID == nil {
+				http.Error(w, "A Channel ID is required", http.StatusBadRequest)
+				return
+			}
+
+			if request.Name == nil && request.Description == nil {
+				http.Error(w, "Nothing to update", http.StatusBadRequest)
+				return
+			}
+
+			if err := database.UpdateChannel(db, *request.ID, request.Name, request.Description); err != nil {
+				log.Println("Failed to update channel:", err)
+				http.Error(w, "Failed to update channel", http.StatusInternalServerError)
+				return
+			}
+
+			log.Printf("Channel ID '%d' updated successfully", request.ID)
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(map[string]string{"message": "Channel updated"})
+
 		default:
 			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		}
