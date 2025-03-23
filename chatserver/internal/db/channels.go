@@ -141,3 +141,71 @@ func FetchMessageCountByChannel(db *pgxpool.Pool) ([]messages.ChannelMessageCoun
 	log.Println("Loaded message counts")
 	return counts, nil
 }
+
+// MoveChannelBefore reorders a channel to appear before another channel.
+// If beforeID is nil, it moves the channel to the end.
+func MoveChannelBefore(db *pgxpool.Pool, movedID int, beforeID *int) error {
+	ctx := context.Background()
+
+	tx, err := db.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to start tx: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	// Get current sort_order of the moved channel
+	var currentOrder int
+	err = tx.QueryRow(ctx, `SELECT sort_order FROM chatserver.channels WHERE id = $1`, movedID).Scan(&currentOrder)
+	if err != nil {
+		return fmt.Errorf("failed to get current sort_order: %w", err)
+	}
+
+	var newOrder int
+	if beforeID != nil {
+		// Get target sort_order of the channel we want to go before
+		err = tx.QueryRow(ctx, `SELECT sort_order FROM chatserver.channels WHERE id = $1`, *beforeID).Scan(&newOrder)
+		if err != nil {
+			return fmt.Errorf("failed to get target sort_order: %w", err)
+		}
+	} else {
+		// Move to the end
+		err = tx.QueryRow(ctx, `SELECT COALESCE(MAX(sort_order), 0) + 1 FROM chatserver.channels`).Scan(&newOrder)
+		if err != nil {
+			return fmt.Errorf("failed to get max sort_order: %w", err)
+		}
+	}
+
+	// Normalize the direction
+	if newOrder > currentOrder {
+		// Shift channels between current and new down by 1
+		_, err = tx.Exec(ctx, `
+			UPDATE chatserver.channels
+			SET sort_order = sort_order - 1
+			WHERE sort_order > $1 AND sort_order < $2
+		`, currentOrder, newOrder)
+	} else if newOrder < currentOrder {
+		// Shift channels between new and current up by 1
+		_, err = tx.Exec(ctx, `
+			UPDATE chatserver.channels
+			SET sort_order = sort_order + 1
+			WHERE sort_order >= $1 AND sort_order < $2
+		`, newOrder, currentOrder)
+	}
+
+	if err != nil {
+		return fmt.Errorf("failed to shift surrounding channels: %w", err)
+	}
+
+	// Set moved channel to new sort_order
+	_, err = tx.Exec(ctx, `
+		UPDATE chatserver.channels
+		SET sort_order = $1
+		WHERE id = $2
+	`, newOrder, movedID)
+
+	if err != nil {
+		return fmt.Errorf("failed to update moved channel: %w", err)
+	}
+
+	return tx.Commit(ctx)
+}

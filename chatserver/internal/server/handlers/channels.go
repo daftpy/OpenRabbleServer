@@ -58,6 +58,7 @@ func HandleChannels(db *pgxpool.Pool) http.HandlerFunc {
 				ID          *int    `json:"id"`
 				Name        *string `json:"name,omitempty"`
 				Description *string `json:"description,omitempty"`
+				BeforeID    *int    `json:"before_id,omitempty"` // New field for sorting
 			}
 
 			if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -70,6 +71,21 @@ func HandleChannels(db *pgxpool.Pool) http.HandlerFunc {
 				return
 			}
 
+			// If BeforeID is provided, perform a reorder operation
+			if request.BeforeID != nil {
+				if err := database.MoveChannelBefore(db, *request.ID, request.BeforeID); err != nil {
+					log.Println("Failed to reorder channel:", err)
+					http.Error(w, "Failed to reorder channel", http.StatusInternalServerError)
+					return
+				}
+
+				log.Printf("Channel ID '%d' moved before ID '%d'", *request.ID, *request.BeforeID)
+				w.WriteHeader(http.StatusOK)
+				json.NewEncoder(w).Encode(map[string]string{"message": "Channel reordered"})
+				return
+			}
+
+			// Otherwise, perform a regular update
 			if request.Name == nil && request.Description == nil {
 				http.Error(w, "Nothing to update", http.StatusBadRequest)
 				return
@@ -81,7 +97,7 @@ func HandleChannels(db *pgxpool.Pool) http.HandlerFunc {
 				return
 			}
 
-			log.Printf("Channel ID '%d' updated successfully", request.ID)
+			log.Printf("Channel ID '%d' updated successfully", *request.ID)
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(map[string]string{"message": "Channel updated"})
 
