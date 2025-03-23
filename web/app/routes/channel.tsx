@@ -1,20 +1,11 @@
 import type { Route } from "./+types/channel";
 import { useEffect } from "react";
+import { fetchChannels } from "~/api/fetchChannels";
 import RouteProtector from "~/components/route_protector";
 import { ChannelPage } from "~/pages/channels";
 
 export async function loader({ params }: Route.LoaderArgs) {
-  const response = await fetch("https://chat.localhost/channels");
-  if (!response.ok) {
-    throw new Response("Failed to load channels", { status: response.status });
-  }
-
-  const data = await response.json();
-  console.log(data);
-  if (data.channels == null) {
-    return [];
-  }
-  return data.channels;
+  return fetchChannels();
 }
 
 export async function clientLoader({
