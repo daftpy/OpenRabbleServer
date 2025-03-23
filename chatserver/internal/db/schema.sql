@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS chatserver.channels (
     description TEXT,
     is_private BOOLEAN DEFAULT FALSE,
     owner_id VARCHAR(36) NOT NULL,
+    sort_order INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT now(),
     updated_at TIMESTAMP DEFAULT now()
 );
