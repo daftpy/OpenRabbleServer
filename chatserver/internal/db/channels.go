@@ -14,6 +14,27 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+func CreateChannel(db *pgxpool.Pool, name string, description string) error {
+	placeholderOwner := "00000000-0000-0000-0000-000000000000"
+
+	// Get current max sort_order
+	var maxOrder int
+	err := db.QueryRow(context.Background(),
+		`SELECT COALESCE(MAX(sort_order), 0) FROM chatserver.channels`,
+	).Scan(&maxOrder)
+	if err != nil {
+		return fmt.Errorf("failed to get max sort_order: %w", err)
+	}
+
+	_, err = db.Exec(context.Background(), `
+		INSERT INTO chatserver.channels (name, description, owner_id, sort_order)
+		VALUES ($1, $2, $3, $4)
+		ON CONFLICT (name) DO NOTHING
+	`, name, description, placeholderOwner, maxOrder+1)
+
+	return err
+}
+
 // FetchChannels retrieves all channels from the database's `channels` table.
 // For each channel, if the `description` column is NULL, the Channel.Description
 // field will be set to nil in the returned slice. Otherwise, it contains the
@@ -22,7 +43,7 @@ import (
 //  1. A slice of Channel models
 //  2. An error, if any
 func FetchChannels(db *pgxpool.Pool) ([]models.Channel, error) {
-	rows, err := db.Query(context.Background(), "SELECT id, name, description FROM chatserver.channels ORDER BY id")
+	rows, err := db.Query(context.Background(), "SELECT id, name, description FROM chatserver.channels ORDER BY sort_order, id")
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch channels: %w", err)
 	}

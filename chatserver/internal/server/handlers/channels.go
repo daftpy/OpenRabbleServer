@@ -3,7 +3,6 @@ package handlers
 import (
 	database "chatserver/internal/db"
 	"chatserver/internal/models"
-	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -43,7 +42,7 @@ func HandleChannels(db *pgxpool.Pool) http.HandlerFunc {
 				return
 			}
 
-			err := createChannel(db, request.Name, request.Description)
+			err := database.CreateChannel(db, request.Name, request.Description)
 			if err != nil {
 				log.Println("Failed to create channel:", err)
 				http.Error(w, "Failed to create channel", http.StatusInternalServerError)
@@ -90,15 +89,4 @@ func HandleChannels(db *pgxpool.Pool) http.HandlerFunc {
 			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		}
 	}
-}
-
-func createChannel(db *pgxpool.Pool, name string, description string) error {
-	placeholderOwner := "00000000-0000-0000-0000-000000000000"
-	query := `
-        INSERT INTO chatserver.channels (name, description, owner_id)
-        VALUES ($1, $2, $3)
-        ON CONFLICT (name) DO NOTHING
-    `
-	_, err := db.Exec(context.Background(), query, name, description, placeholderOwner)
-	return err
 }
