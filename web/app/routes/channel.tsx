@@ -45,6 +45,31 @@ export function HydrateFallback() {
   return <div>Loading...</div>;
 }
 
+// src/routes/channels/update.ts
+export async function clientAction({ request }: Route.ActionArgs) {
+  const formData = await request.formData();
+
+  const payload = {
+    id: parseInt(formData.get("id") as string),
+    name: formData.get("name") || null,
+    description: formData.get("description") || null,
+  };
+
+  const response = await fetch("https://chat.localhost/channels", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update channel");
+  }
+
+  return await response.json();
+}
+
 export default function ChannelRoute({loaderData,}: Route.ComponentProps) {
   const {channels, channel_activity } = loaderData;
   useEffect(() => {

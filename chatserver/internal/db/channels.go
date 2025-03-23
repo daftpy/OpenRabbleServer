@@ -22,7 +22,7 @@ import (
 //  1. A slice of Channel models
 //  2. An error, if any
 func FetchChannels(db *pgxpool.Pool) ([]models.Channel, error) {
-	rows, err := db.Query(context.Background(), "SELECT id, name, description FROM chatserver.channels")
+	rows, err := db.Query(context.Background(), "SELECT id, name, description FROM chatserver.channels ORDER BY id")
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch channels: %w", err)
 	}
