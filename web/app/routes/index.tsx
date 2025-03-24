@@ -20,7 +20,7 @@ type SessionActivityResult = {
 
 
 export async function loader({ params }: Route.LoaderArgs) {
-  return fetchChannels();
+
 }
 
 export async function clientLoader({
@@ -28,7 +28,8 @@ export async function clientLoader({
   params,
 }: Route.ClientLoaderArgs) {
   
-  const serverData = await serverLoader();
+  // const serverData = await serverLoader();
+  const serverData = await fetchChannels();
 
   const activityRes = await fetch(`https://chat.localhost/activity/sessions`)
   const activityData : SessionActivityResult = await activityRes.json();

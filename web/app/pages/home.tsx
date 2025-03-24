@@ -2,8 +2,8 @@
     The home page of the admin dashboard. Landing here will display the current channels
     of the chatserver as well as connected users.
 */
-import { useState } from "react"
-import { Link, NavLink, useNavigate } from "react-router";
+import { useEffect, useState } from "react"
+import { Link, NavLink, useNavigate, useRevalidator } from "react-router";
 import ChannelInput from "~/components/channel/channel_input";
 import ChannelList from "~/components/channel/channel_list";
 
@@ -24,7 +24,6 @@ import type { SessionActivity } from "../routes/index";
 export function HomePage({ channels, session_activity }: { channels: Channel[], session_activity: SessionActivity[] }) {
   const [channelList, setChannelList] = useState<Channel[]>(channels);
   const navigate = useNavigate();
-  
   return (
     <main style={{color: "var(--primary-text-color)"}}>
       <Flex direction="column" gap={"6"} height={"100%"} maxWidth={"900px"} m={"auto"} flexGrow={"1"} px={"4"} py={"6"}>
@@ -55,9 +54,9 @@ export function HomePage({ channels, session_activity }: { channels: Channel[], 
             </Heading>
             <Text>You can add a new channel or manage your channels below.</Text>
           </div>
-          <ChannelInput channelList={channelList} setChannelList={setChannelList} />
+          <ChannelInput channelList={channels} setChannelList={setChannelList} />
           <Flex gap={"6"} direction={{initial: "column", sm: "row"}} align={{initial: "center", sm: "start"}}>
-            <ChannelList channels={channelList} />
+            <ChannelList channels={channels} />
             <UserList />
           </Flex>
         </Flex>
