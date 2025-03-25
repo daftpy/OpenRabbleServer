@@ -41,13 +41,22 @@ export async function clientAction({ request }: Route.ActionArgs) {
   const formData = await request.formData();
   const intent = formData.get("intent");
 
-  const payload: EditChannelPayload = {
-    id: parseInt(formData.get("id") as string),
-    name: formData.get("name")?.toString() ?? null,
-    description: formData.get("description")?.toString() ?? null,
-  };
+  switch (intent) {
+    case "edit": {
+      const payload: EditChannelPayload = {
+        id: parseInt(formData.get("id") as string),
+        name: formData.get("name")?.toString() ?? null,
+        description: formData.get("description")?.toString() ?? null,
+      };
 
-  return await editChannel(payload);
+      return await editChannel(payload);
+    }
+
+    default: {
+      console.log("Action not recognized");
+      return;
+    }
+  }
 }
 
 export default function ChannelRoute({loaderData,}: Route.ComponentProps) {

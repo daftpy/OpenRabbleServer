@@ -52,6 +52,7 @@ export default function ChannelList({ channels }  : { channels: Channel[] }) {
         id: String(channelId),
         name: channelName ?? "",
         description: channelDescription ?? "",
+        intent: "edit"
       },
       {
         method: "post", // Use POST here even though it's a PATCH to Go, because React Router forms only support GET/POST
