@@ -1,37 +1,82 @@
-import { CaretSortIcon, Cross2Icon, GearIcon } from "@radix-ui/react-icons";
 import { Flex, Button, Text, Box, Heading, Grid, Dialog, TextField } from "@radix-ui/themes";
-import React, { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 import { useFetcher } from "react-router";
 import ChannelRow from "./channel_list_row";
 
-export interface Channel {
+export type Channel = {
   id?: number;
   name: string;
   description: string | null;
 }
 
+// Shape of the reducer state
+type ReducerState = {
+  id: number | null;
+  name: string | null;
+  description: string | null;
+}
+
+// Initial state
+const defaultState: ReducerState = {
+  id: null,
+  name: null,
+  description: null
+}
+
+// Supported reducer actions
+export enum ChannelListActions {
+  SELECT_CHANNEL = "select_channel",
+  CLEAR_SELECTION = "clear_selection",
+  SET_NAME = "set_name",
+  SET_DESCRIPTION = "set_description"
+}
+
+export type ChannelAction =
+  | { type: ChannelListActions.SELECT_CHANNEL; id: number}
+  | { type: ChannelListActions.CLEAR_SELECTION; }
+  | { type: ChannelListActions.SET_NAME; name: string }
+  | { type: ChannelListActions.SET_DESCRIPTION; description: string | null };
+
+
+function reducer(state: ReducerState, action: ChannelAction) {
+  switch (action.type) {
+    case ChannelListActions.SELECT_CHANNEL: {
+      return { ...state, id: action.id }
+    }
+    case ChannelListActions.CLEAR_SELECTION: {
+      return { id: null, name: null, description: null }
+    }
+    case ChannelListActions.SET_NAME: {
+      return { ...state, name: action.name }
+    }
+    case ChannelListActions.SET_DESCRIPTION: {
+      return { ...state, description: action.description }
+    }
+    default: {
+      throw Error("Unknown action");
+    }
+  }
+}
+
 export default function ChannelList({ channels }  : { channels: Channel[] }) {
-  const [channelId, setChannelId] = useState<number | null>(null);
-  const [channelName, setChannelName] = useState<string | null>(null);
-  const [channelDescription, setChannelDescription] = useState<string | null>(null);
-  const selectedChannel = channels.find(c => c.id === channelId);
+  const [state, dispatch] = useReducer(reducer, defaultState);
+  const selectedChannel = channels.find(c => c.id === state.id);
   const channelFetcher = useFetcher();
 
+  // Reset selection if channels change
   useEffect(() => {
-    // Reset selection if channels change
-    setChannelId(null);
-    setChannelName(null);
-    setChannelDescription(null);
+    dispatch({ type: ChannelListActions.CLEAR_SELECTION });
   }, [channels]);
 
+  // Submit updated channel to the server
   const update = () => {
-    if (channelId == null) return;
+    if (state.id == null) return;
   
     channelFetcher.submit(
       {
-        id: String(channelId),
-        name: channelName ?? "",
-        description: channelDescription ?? "",
+        id: String(state.id),
+        name: state.name ?? "",
+        description: state.description ?? "",
         intent: "edit"
       },
       {
@@ -42,22 +87,21 @@ export default function ChannelList({ channels }  : { channels: Channel[] }) {
     );
   };
 
+  // Populate the inputs when a channel is selected
   useEffect(() => {
     if (selectedChannel) {
-      setChannelName(selectedChannel.name);
-      setChannelDescription(selectedChannel.description ?? "");
+      dispatch({type: ChannelListActions.SET_NAME, name: selectedChannel.name });
+      dispatch({type: ChannelListActions.SET_DESCRIPTION, description: selectedChannel.description });
     }
   }, [selectedChannel]);
   
   return (
     <Box flexGrow={"1"} width={"100%"}>
       <Dialog.Root
-        open={channelId !== null}
+        open={state.id !== null}
         onOpenChange={(open) => {
           if (!open) {
-            setChannelId(null);
-            setChannelName(null);
-            setChannelDescription(null);
+            dispatch({ type: ChannelListActions.CLEAR_SELECTION });
           }
         }}
       >
@@ -70,15 +114,15 @@ export default function ChannelList({ channels }  : { channels: Channel[] }) {
             <Box>
               <Box pb="1"><Text>Name</Text></Box>
               <TextField.Root
-                value={channelName ?? ""}
-                onChange={(e) => setChannelName(e.target.value)}
+                value={state.name ?? ""}
+                onChange={(e) => dispatch({type: ChannelListActions.SET_NAME, name: e.target.value })}
               />
             </Box>
             <Box>
               <Box pb="1"><Text>Description</Text></Box>
               <TextField.Root
-                value={channelDescription ?? ""}
-                onChange={(e) => setChannelDescription(e.target.value)}
+                value={state.description ?? ""}
+                onChange={(e) => dispatch({type: ChannelListActions.SET_DESCRIPTION, description: e.target.value })}
               />
             </Box>
             <Flex>
@@ -93,7 +137,7 @@ export default function ChannelList({ channels }  : { channels: Channel[] }) {
         <Heading size={"3"} style={{color: "var(--subheading-color)"}}>Channels</Heading>
         <Heading size={"3"} style={{color: "var(--subheading-color)"}}>Description</Heading>
         { channels && channels.map((channel, index) => (
-          <ChannelRow key={index} channel={channel} isLast={index == channels.length -1} setId={setChannelId} />
+          <ChannelRow key={index} channel={channel} isLast={index == channels.length -1} dispatch={dispatch} />
         ))}
       </Grid>
     </Box>
