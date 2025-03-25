@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Text } from "@radix-ui/themes";
 import React from "react";
-import { ChannelListActions, type Channel, type ChannelAction } from "./channel_list";
+import { ChannelListActions, ChannelListDialogs, type Channel, type ChannelAction } from "./channel_list";
 import { CaretSortIcon, Cross2Icon, GearIcon } from "@radix-ui/react-icons";
 
 type props = {
@@ -21,9 +21,11 @@ const ChannelRow = ({ channel, isLast, dispatch } : props) => {
       <Flex flexGrow={"1"} gap={"4"} overflow={"hidden"} style={{borderBottom: isLast ? noLine : line}}  py={"2"}> 
         <Text truncate size={"2"}>{ channel.description }</Text>
         <Flex gap={"2"} flexGrow={"1"} justify={"end"}>
-          <Button color="iris" size={"1"} radius="full" style={{ boxShadow: "var(--shadow-1)", height: "20px", width: "20px"}}><Box><CaretSortIcon style={{width: "14px", height: "14px"}} /></Box></Button>
+          <Button color="iris" size={"1"} radius="full" style={{ boxShadow: "var(--shadow-1)", height: "20px", width: "20px"}}
+            onClick={() => channel.id !== undefined && dispatch({type: ChannelListActions.SELECT_CHANNEL, id: channel.id, dialog: ChannelListDialogs.REORDER_CHANNEL})}>
+            <Box><CaretSortIcon style={{width: "14px", height: "14px"}} /></Box></Button>
           <Button color="blue" size={"1"} radius="full" style={{ boxShadow: "var(--shadow-1)", height: "20px", width: "20px"}} 
-            onClick={() => channel.id !== undefined && dispatch({ type: ChannelListActions.SELECT_CHANNEL, id: channel.id })}>
+            onClick={() => channel.id !== undefined && dispatch({ type: ChannelListActions.SELECT_CHANNEL, id: channel.id, dialog: ChannelListDialogs.EDIT_CHANNEL })}>
             <Box><GearIcon style={{width: "14px", height: "14px"}} /></Box>
           </Button>
           <Button color="red" size={"1"} radius="full" style={{ boxShadow: "var(--shadow-1)", height: "20px", width: "20px"}}><Box><Cross2Icon style={{width: "14px", height: "14px"}} /></Box></Button>

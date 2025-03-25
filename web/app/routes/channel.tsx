@@ -1,6 +1,6 @@
 import type { Route } from "./+types/channel";
 import { useEffect } from "react";
-import { editChannel, fetchChannels, type EditChannelPayload } from "~/api/channels";
+import { editChannel, fetchChannels, redorderChannel, type EditChannelPayload, type ReorderChannelPayload } from "~/api/channels";
 import RouteProtector from "~/components/route_protector";
 import { ChannelPage } from "~/pages/channels";
 
@@ -49,6 +49,14 @@ export async function clientAction({ request }: Route.ActionArgs) {
       };
 
       return await editChannel(payload);
+    }
+    case "reorder": {
+      const payload: ReorderChannelPayload = {
+        id: parseInt(formData.get("id") as string),
+        before_id: parseInt(formData.get("beforeId") as string)
+      }
+
+      return await redorderChannel(payload);
     }
 
     default: {

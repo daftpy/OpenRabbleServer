@@ -3,6 +3,7 @@ import { useEffect, useReducer } from "react";
 import { useFetcher } from "react-router";
 import ChannelRow from "./channel_list_row";
 import EditChannelDialog from "./edit_channel_dialog";
+import { ReorderChannelDialog } from "./reorder_channel_dialog";
 
 export type Channel = {
   id?: number;
@@ -15,13 +16,15 @@ export type ChannelReducerState = {
   id: number | null;
   name: string | null;
   description: string | null;
+  dialog: ChannelListDialogs | null;
 }
 
 // Initial state
 const defaultState: ChannelReducerState = {
   id: null,
   name: null,
-  description: null
+  description: null,
+  dialog: null
 }
 
 // Supported reducer actions
@@ -32,8 +35,13 @@ export enum ChannelListActions {
   SET_DESCRIPTION = "set_description"
 }
 
+export enum ChannelListDialogs {
+  EDIT_CHANNEL = "edit",
+  REORDER_CHANNEL = "reorder"
+}
+
 export type ChannelAction =
-  | { type: ChannelListActions.SELECT_CHANNEL; id: number}
+  | { type: ChannelListActions.SELECT_CHANNEL; id: number; dialog: ChannelListDialogs}
   | { type: ChannelListActions.CLEAR_SELECTION; }
   | { type: ChannelListActions.SET_NAME; name: string }
   | { type: ChannelListActions.SET_DESCRIPTION; description: string | null };
@@ -42,10 +50,10 @@ export type ChannelAction =
 function reducer(state: ChannelReducerState, action: ChannelAction) {
   switch (action.type) {
     case ChannelListActions.SELECT_CHANNEL: {
-      return { ...state, id: action.id }
+      return { ...state, id: action.id, dialog: action.dialog }
     }
     case ChannelListActions.CLEAR_SELECTION: {
-      return { id: null, name: null, description: null }
+      return { id: null, name: null, description: null, dialog: null }
     }
     case ChannelListActions.SET_NAME: {
       return { ...state, name: action.name }
@@ -88,6 +96,24 @@ export default function ChannelList({ channels }  : { channels: Channel[] }) {
     );
   };
 
+  const reorder = (beforeId: number) => {
+    if (state.id == null) return;
+    console.log("REORDER", beforeId);
+
+    channelFetcher.submit(
+      {
+        id: state.id,
+        beforeId: beforeId,
+        intent: "reorder"
+      },
+      {
+        method: "post",
+        action: "/channels",
+        encType: "application/x-www-form-urlencoded"
+      }
+    )
+  }
+
   // Populate the inputs when a channel is selected
   useEffect(() => {
     if (selectedChannel) {
@@ -99,6 +125,7 @@ export default function ChannelList({ channels }  : { channels: Channel[] }) {
   return (
     <Box flexGrow={"1"} width={"100%"}>
       <EditChannelDialog state={state} dispatch={dispatch} update={update} />
+      <ReorderChannelDialog channels={channels} selectedChannel={selectedChannel} state={state} dispatch={dispatch} reorder={reorder} />
       <Grid columns="1fr 3fr" width={"100%"} gapY={"2"} pt={"2"}>
         <Heading size={"3"} style={{color: "var(--subheading-color)"}}>Channels</Heading>
         <Heading size={"3"} style={{color: "var(--subheading-color)"}}>Description</Heading>

@@ -1,6 +1,6 @@
 import { Box, Button, Dialog, Flex, Text, TextField } from "@radix-ui/themes";
 import type React from "react";
-import { ChannelListActions, type ChannelAction, type ChannelReducerState } from "./channel_list";
+import { ChannelListActions, ChannelListDialogs, type ChannelAction, type ChannelReducerState } from "./channel_list";
 
 type props = {
   state: ChannelReducerState
@@ -11,7 +11,7 @@ type props = {
 const EditChannelDialog = ({state, dispatch, update} : props) => {
   return (
     <Dialog.Root
-        open={state.id !== null}
+        open={state.dialog == ChannelListDialogs.EDIT_CHANNEL && state.id !== null}
         onOpenChange={(open) => {
           if (!open) {
             dispatch({ type: ChannelListActions.CLEAR_SELECTION });
