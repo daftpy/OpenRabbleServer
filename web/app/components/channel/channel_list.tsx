@@ -2,32 +2,12 @@ import { CaretSortIcon, Cross2Icon, GearIcon } from "@radix-ui/react-icons";
 import { Flex, Button, Text, Box, Heading, Grid, Dialog, TextField } from "@radix-ui/themes";
 import React, { useEffect, useState } from "react";
 import { useFetcher } from "react-router";
+import ChannelRow from "./channel_list_row";
 
 export interface Channel {
   id?: number;
   name: string;
   description: string | null;
-}
-
-const ChannelRow = ({ channel, isLast, setId } : { channel : Channel, isLast: boolean, setId: (id: number) => void; }) => {
-  const noLine = "none";
-  const line = "1px solid var(--indigo-4)";
-  
-  return (
-    <React.Fragment>
-      <Box style={{borderBottom: isLast ? noLine : line}} pr={"2"} py={"2"}>
-        <Text style={{color: "var(--indigo-12)"}} weight={"bold"} size={"2"}>{ channel.name }</Text>
-      </Box>
-      <Flex flexGrow={"1"} gap={"4"} overflow={"hidden"} style={{borderBottom: isLast ? noLine : line}}  py={"2"}> 
-        <Text truncate size={"2"}>{ channel.description }</Text>
-        <Flex gap={"2"} flexGrow={"1"} justify={"end"}>
-          <Button color="iris" size={"1"} radius="full" style={{ boxShadow: "var(--shadow-1)", height: "20px", width: "20px"}}><Box><CaretSortIcon style={{width: "14px", height: "14px"}} /></Box></Button>
-          <Button color="blue" size={"1"} radius="full" style={{ boxShadow: "var(--shadow-1)", height: "20px", width: "20px"}} onClick={() => channel.id !== undefined && setId(channel.id)}><Box><GearIcon style={{width: "14px", height: "14px"}} /></Box></Button>
-          <Button color="red" size={"1"} radius="full" style={{ boxShadow: "var(--shadow-1)", height: "20px", width: "20px"}}><Box><Cross2Icon style={{width: "14px", height: "14px"}} /></Box></Button>
-        </Flex>
-      </Flex>
-    </React.Fragment>
-  )
 }
 
 export default function ChannelList({ channels }  : { channels: Channel[] }) {
@@ -38,7 +18,7 @@ export default function ChannelList({ channels }  : { channels: Channel[] }) {
   const channelFetcher = useFetcher();
 
   useEffect(() => {
-    // This closes the dialog box because of revalidation after fetcher update()
+    // Reset selection if channels change
     setChannelId(null);
     setChannelName(null);
     setChannelDescription(null);
@@ -55,8 +35,8 @@ export default function ChannelList({ channels }  : { channels: Channel[] }) {
         intent: "edit"
       },
       {
-        method: "post", // Use POST here even though it's a PATCH to Go, because React Router forms only support GET/POST
-        action: "/channels", // this matches your clientAction route
+        method: "post",
+        action: "/channels",
         encType: "application/x-www-form-urlencoded",
       }
     );

@@ -36,7 +36,6 @@ export function HydrateFallback() {
   return <div>Loading...</div>;
 }
 
-// src/routes/channels/update.ts
 export async function clientAction({ request }: Route.ActionArgs) {
   const formData = await request.formData();
   const intent = formData.get("intent");
