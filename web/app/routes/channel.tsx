@@ -1,6 +1,6 @@
 import type { Route } from "./+types/channel";
 import { useEffect } from "react";
-import { fetchChannels } from "~/api/fetchChannels";
+import { editChannel, fetchChannels, type EditChannelPayload } from "~/api/channels";
 import RouteProtector from "~/components/route_protector";
 import { ChannelPage } from "~/pages/channels";
 
@@ -39,26 +39,15 @@ export function HydrateFallback() {
 // src/routes/channels/update.ts
 export async function clientAction({ request }: Route.ActionArgs) {
   const formData = await request.formData();
+  const intent = formData.get("intent");
 
-  const payload = {
+  const payload: EditChannelPayload = {
     id: parseInt(formData.get("id") as string),
-    name: formData.get("name") || null,
-    description: formData.get("description") || null,
+    name: formData.get("name")?.toString() ?? null,
+    description: formData.get("description")?.toString() ?? null,
   };
 
-  const response = await fetch("https://chat.localhost/channels", {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to update channel");
-  }
-
-  return await response.json();
+  return await editChannel(payload);
 }
 
 export default function ChannelRoute({loaderData,}: Route.ComponentProps) {

@@ -1,6 +1,6 @@
 import type { Route } from "./+types/index";
 import { useEffect } from "react";
-import { fetchChannels } from "~/api/fetchChannels";
+import { fetchChannels } from "~/api/channels";
 import RouteProtector from "~/components/route_protector";
 import { HomePage } from "~/pages/home";
 
