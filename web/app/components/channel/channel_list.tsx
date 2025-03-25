@@ -1,7 +1,8 @@
-import { Flex, Button, Text, Box, Heading, Grid, Dialog, TextField } from "@radix-ui/themes";
+import { Box, Heading, Grid } from "@radix-ui/themes";
 import { useEffect, useReducer } from "react";
 import { useFetcher } from "react-router";
 import ChannelRow from "./channel_list_row";
+import EditChannelDialog from "./edit_channel_dialog";
 
 export type Channel = {
   id?: number;
@@ -10,14 +11,14 @@ export type Channel = {
 }
 
 // Shape of the reducer state
-type ReducerState = {
+export type ChannelReducerState = {
   id: number | null;
   name: string | null;
   description: string | null;
 }
 
 // Initial state
-const defaultState: ReducerState = {
+const defaultState: ChannelReducerState = {
   id: null,
   name: null,
   description: null
@@ -38,7 +39,7 @@ export type ChannelAction =
   | { type: ChannelListActions.SET_DESCRIPTION; description: string | null };
 
 
-function reducer(state: ReducerState, action: ChannelAction) {
+function reducer(state: ChannelReducerState, action: ChannelAction) {
   switch (action.type) {
     case ChannelListActions.SELECT_CHANNEL: {
       return { ...state, id: action.id }
@@ -97,42 +98,7 @@ export default function ChannelList({ channels }  : { channels: Channel[] }) {
   
   return (
     <Box flexGrow={"1"} width={"100%"}>
-      <Dialog.Root
-        open={state.id !== null}
-        onOpenChange={(open) => {
-          if (!open) {
-            dispatch({ type: ChannelListActions.CLEAR_SELECTION });
-          }
-        }}
-      >
-        <Dialog.Content>
-          <Dialog.Title align="center">Update Channel</Dialog.Title>
-          <Dialog.Description align={"center"}>
-            Update the channel name and description below.
-          </Dialog.Description>
-          <Flex direction={"column"} gap={"6"} pt={"4"}>
-            <Box>
-              <Box pb="1"><Text>Name</Text></Box>
-              <TextField.Root
-                value={state.name ?? ""}
-                onChange={(e) => dispatch({type: ChannelListActions.SET_NAME, name: e.target.value })}
-              />
-            </Box>
-            <Box>
-              <Box pb="1"><Text>Description</Text></Box>
-              <TextField.Root
-                value={state.description ?? ""}
-                onChange={(e) => dispatch({type: ChannelListActions.SET_DESCRIPTION, description: e.target.value })}
-              />
-            </Box>
-            <Flex>
-              <Button style={{ flexGrow: "1" }} onClick={() => update()}>
-                Update
-              </Button>
-            </Flex>
-          </Flex>
-        </Dialog.Content>
-      </Dialog.Root>
+      <EditChannelDialog state={state} dispatch={dispatch} update={update} />
       <Grid columns="1fr 3fr" width={"100%"} gapY={"2"} pt={"2"}>
         <Heading size={"3"} style={{color: "var(--subheading-color)"}}>Channels</Heading>
         <Heading size={"3"} style={{color: "var(--subheading-color)"}}>Description</Heading>
