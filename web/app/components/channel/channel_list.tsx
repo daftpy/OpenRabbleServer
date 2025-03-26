@@ -1,9 +1,10 @@
 import { Box, Heading, Grid } from "@radix-ui/themes";
 import { useEffect, useReducer } from "react";
 import { useFetcher } from "react-router";
-import ChannelRow from "./channel_list_row";
 import EditChannelDialog from "./edit_channel_dialog";
 import { ReorderChannelDialog } from "./reorder_channel_dialog";
+import { DeleteChannelDialog } from "./delete_channel_dialog";
+import { ChannelRow } from "./channel_list_row";
 
 export type Channel = {
   id?: number;
@@ -37,7 +38,8 @@ export enum ChannelListActions {
 
 export enum ChannelListDialogs {
   EDIT_CHANNEL = "edit",
-  REORDER_CHANNEL = "reorder"
+  REORDER_CHANNEL = "reorder",
+  DELETE_CHANNEL = "delete"
 }
 
 export type ChannelAction =
@@ -126,6 +128,7 @@ export default function ChannelList({ channels }  : { channels: Channel[] }) {
     <Box flexGrow={"1"} width={"100%"}>
       <EditChannelDialog state={state} dispatch={dispatch} update={update} />
       <ReorderChannelDialog channels={channels} selectedChannel={selectedChannel} state={state} dispatch={dispatch} reorder={reorder} />
+      <DeleteChannelDialog state={state} dispatch={dispatch} />
       <Grid columns="1fr 3fr" width={"100%"} gapY={"2"} pt={"2"}>
         <Heading size={"3"} style={{color: "var(--subheading-color)"}}>Channels</Heading>
         <Heading size={"3"} style={{color: "var(--subheading-color)"}}>Description</Heading>

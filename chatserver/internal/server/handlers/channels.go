@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -104,6 +105,8 @@ func HandleChannels(db *pgxpool.Pool) http.HandlerFunc {
 
 		case http.MethodDelete:
 			idParam := r.URL.Query().Get("id")
+			purgeParam := r.URL.Query().Get("purge")
+
 			if idParam == "" {
 				http.Error(w, "Channel ID is required", http.StatusBadRequest)
 				return
@@ -115,13 +118,18 @@ func HandleChannels(db *pgxpool.Pool) http.HandlerFunc {
 				return
 			}
 
-			if err := database.RemoveChannelByID(db, id); err != nil {
+			purge := purgeParam == "1" || strings.ToLower(purgeParam) == "true"
+			if purge {
+				log.Println("Purge is true, purging messages")
+			}
+
+			if err := database.RemoveChannelByID(db, id, purge); err != nil {
 				log.Println("Failed to delete channel:", err)
 				http.Error(w, "Failed to delete channel", http.StatusInternalServerError)
 				return
 			}
 
-			log.Printf("Channel ID '%d' deleted successfully", id)
+			log.Printf("Channel ID '%d' deleted successfully (purge: %v)", id, purge)
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(map[string]string{"message": "Channel deleted"})
 

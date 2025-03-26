@@ -9,7 +9,7 @@ type props = {
   dispatch: React.Dispatch<ChannelAction>;
 }
 
-const ChannelRow = ({ channel, isLast, dispatch } : props) => {
+export function ChannelRow({ channel, isLast, dispatch } : props) {
   const noLine = "none";
   const line = "1px solid var(--indigo-4)";
   
@@ -28,11 +28,10 @@ const ChannelRow = ({ channel, isLast, dispatch } : props) => {
             onClick={() => channel.id !== undefined && dispatch({ type: ChannelListActions.SELECT_CHANNEL, id: channel.id, dialog: ChannelListDialogs.EDIT_CHANNEL })}>
             <Box><GearIcon style={{width: "14px", height: "14px"}} /></Box>
           </Button>
-          <Button color="red" size={"1"} radius="full" style={{ boxShadow: "var(--shadow-1)", height: "20px", width: "20px"}}><Box><Cross2Icon style={{width: "14px", height: "14px"}} /></Box></Button>
+          <Button color="red" size={"1"} radius="full" style={{ boxShadow: "var(--shadow-1)", height: "20px", width: "20px"}}
+            onClick={() => channel.id !== undefined && dispatch({ type: ChannelListActions.SELECT_CHANNEL, id: channel.id, dialog: ChannelListDialogs.DELETE_CHANNEL })}><Box><Cross2Icon style={{width: "14px", height: "14px"}} /></Box></Button>
         </Flex>
       </Flex>
     </React.Fragment>
   )
 }
-
-export default ChannelRow;

@@ -38,7 +38,7 @@ export function ReorderChannelDialog({ channels, selectedChannel, state, dispatc
               <Select.Trigger />
               <Select.Content>
                 {channels && channels.map(channel => (
-                  <Select.Item value={channel.id ? channel.id.toString() : channel.name}>{channel.name}</Select.Item>
+                  <Select.Item key={channel.name} value={channel.id ? channel.id.toString() : channel.name}>{channel.name}</Select.Item>
                 ))}
               </Select.Content>
             </Select.Root>

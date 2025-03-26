@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -212,7 +213,7 @@ func MoveChannelBefore(db *pgxpool.Pool, movedID int, beforeID *int) error {
 	return tx.Commit(ctx)
 }
 
-func RemoveChannelByID(db *pgxpool.Pool, channelID int) error {
+func RemoveChannelByID(db *pgxpool.Pool, channelID int, purgeMessages bool) error {
 	ctx := context.Background()
 
 	tx, err := db.Begin(ctx)
@@ -221,7 +222,16 @@ func RemoveChannelByID(db *pgxpool.Pool, channelID int) error {
 	}
 	defer tx.Rollback(ctx)
 
-	// Delete the channel
+	// Step 1: Get the channel name (needed for message deletion)
+	var channelName string
+	err = tx.QueryRow(ctx, `
+		SELECT name FROM chatserver.channels WHERE id = $1
+	`, channelID).Scan(&channelName)
+	if err != nil {
+		return fmt.Errorf("failed to fetch channel name: %w", err)
+	}
+
+	// Step 2: Delete the channel row
 	_, err = tx.Exec(ctx, `
 		DELETE FROM chatserver.channels
 		WHERE id = $1
@@ -230,7 +240,15 @@ func RemoveChannelByID(db *pgxpool.Pool, channelID int) error {
 		return fmt.Errorf("failed to delete channel: %w", err)
 	}
 
-	// Fetch remaining channels to renumber sort_order
+	// Step 3: Optionally purge messages
+	if purgeMessages {
+		_, err := removeMessagesByChannelTx(tx, channelName)
+		if err != nil {
+			return fmt.Errorf("failed to purge messages: %w", err)
+		}
+	}
+
+	// Step 4: Renumber sort_order
 	rows, err := tx.Query(ctx, `
 		SELECT id FROM chatserver.channels ORDER BY sort_order, id
 	`)
@@ -248,7 +266,6 @@ func RemoveChannelByID(db *pgxpool.Pool, channelID int) error {
 		ids = append(ids, id)
 	}
 
-	// Reassign sort_order to keep sequence dense
 	for i, id := range ids {
 		_, err := tx.Exec(ctx, `
 			UPDATE chatserver.channels
@@ -261,4 +278,16 @@ func RemoveChannelByID(db *pgxpool.Pool, channelID int) error {
 	}
 
 	return tx.Commit(ctx)
+}
+
+// Called inside RemoveChannelByID, already in a tx
+func removeMessagesByChannelTx(tx pgx.Tx, channelName string) (int64, error) {
+	cmd, err := tx.Exec(context.Background(), `
+		DELETE FROM chatserver.chat_messages
+		WHERE channel = $1
+	`, channelName)
+	if err != nil {
+		return 0, fmt.Errorf("failed to delete messages for channel '%s': %w", channelName, err)
+	}
+	return cmd.RowsAffected(), nil
 }

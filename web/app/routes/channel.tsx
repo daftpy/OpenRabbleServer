@@ -59,6 +59,17 @@ export async function clientAction({ request }: Route.ActionArgs) {
       return await redorderChannel(payload);
     }
 
+    case "delete": {
+      const id = parseInt(formData.get("id") as string)
+      const purge = parseInt(formData.get("purge") as string)
+
+      if (id < 0) {
+        throw new Response("Channel ID cannot be negative.");
+      }
+
+      return await fetch(`https://chat.localhost/channels?id=${id}&purge=${purge}`, {method: "DELETE"});
+    }
+
     default: {
       console.log("Action not recognized");
       return;
