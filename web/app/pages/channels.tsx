@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { MessagesPerChannel } from "~/components/analysis/messages_per_channel";
 import ChannelInput from "~/components/channel/channel_input";
 import type { Channel } from "~/components/channel/channel_list";
@@ -9,12 +8,6 @@ import { Link } from "react-router";
 import type { ChannelMessageCount } from "~/messages";
 
 export function ChannelPage({ channels, channelActivity }: { channels: Channel[], channelActivity: ChannelMessageCount[] }) {
-  const [channelList, setChannelList] = useState<Channel[]>(channels);
-  useEffect(() => {
-    console.log("setting channels", channels);
-    setChannelList(channels);
-  }, [channels])
-
   return (
     <Container className="min-h-full" p={"6"}>
       <Heading size={"8"} weight={"bold"} className="text-xl pb-1" style={{ color: "var(--slate-12)" }}>
@@ -26,8 +19,8 @@ export function ChannelPage({ channels, channelActivity }: { channels: Channel[]
       </Box>
       <Flex direction={"column"} gap={"6"} pt={"6"}>
         <Flex direction={"column"} gap={"2"}>
-          <ChannelInput channelList={channelList} setChannelList={setChannelList} />
-          <ChannelList channels={channelList} />
+          <ChannelInput />
+          <ChannelList channels={channels} />
         </Flex>
           <MessagesPerChannel channelData={channelActivity}  />
       </Flex>

@@ -1,5 +1,4 @@
-import { CheckIcon, Cross2Icon, MagicWandIcon } from "@radix-ui/react-icons";
-import { Box, Button, Container, DropdownMenu, Flex, Heading, Text } from "@radix-ui/themes";
+import { Box, Button, Container, Flex, Heading, Text } from "@radix-ui/themes";
 import { Link } from "react-router";
 import { MessageList } from "~/components/message/message_list";
 import { MessageSearchInput } from "~/components/message/search_input";

@@ -1,5 +1,5 @@
 import { CircleBackslashIcon, CrossCircledIcon, PersonIcon, TimerIcon } from "@radix-ui/react-icons";
-import { Box, Button, Container, Dialog, DropdownMenu, Flex, Heading, ScrollArea, Text, TextField } from "@radix-ui/themes";
+import { Box, Button, Container, Dialog, DropdownMenu, Flex, Heading, Text, TextField } from "@radix-ui/themes";
 import { Link, useFetcher } from "react-router";
 import { RecentActivity } from "~/components/analysis/recent_activity";
 import { MessageList } from "~/components/message/message_list";
