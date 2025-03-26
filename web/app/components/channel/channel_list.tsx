@@ -4,20 +4,8 @@ import { EditChannelDialog } from "./dialog/edit_channel_dialog";
 import { ReorderChannelDialog } from "./dialog/reorder_channel_dialog";
 import { DeleteChannelDialog } from "./dialog/delete_channel_dialog";
 import { ChannelRow } from "./channel_list_row";
-
-export type Channel = {
-  id?: number;
-  name: string;
-  description: string | null;
-}
-
-// Shape of the reducer state
-export type ChannelReducerState = {
-  id: number | null;
-  name: string | null;
-  description: string | null;
-  dialog: ChannelListDialogs | null;
-}
+import type { Channel, ChannelListDialogs } from "~/types/components/channel";
+import { ChannelListActions, type ChannelListAction, type ChannelReducerState } from "~/types/reducers/channelReducer";
 
 // Initial state
 const defaultState: ChannelReducerState = {
@@ -27,28 +15,7 @@ const defaultState: ChannelReducerState = {
   dialog: null
 }
 
-// Supported reducer actions
-export enum ChannelListActions {
-  SELECT_CHANNEL = "select_channel",
-  CLEAR_SELECTION = "clear_selection",
-  SET_NAME = "set_name",
-  SET_DESCRIPTION = "set_description"
-}
-
-export enum ChannelListDialogs {
-  EDIT_CHANNEL = "edit",
-  REORDER_CHANNEL = "reorder",
-  DELETE_CHANNEL = "delete"
-}
-
-export type ChannelAction =
-  | { type: ChannelListActions.SELECT_CHANNEL; id: number; dialog: ChannelListDialogs}
-  | { type: ChannelListActions.CLEAR_SELECTION; }
-  | { type: ChannelListActions.SET_NAME; name: string }
-  | { type: ChannelListActions.SET_DESCRIPTION; description: string | null };
-
-
-function reducer(state: ChannelReducerState, action: ChannelAction) {
+function reducer(state: ChannelReducerState, action: ChannelListAction) {
   switch (action.type) {
     case ChannelListActions.SELECT_CHANNEL: {
       return { ...state, id: action.id, dialog: action.dialog }

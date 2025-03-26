@@ -1,11 +1,11 @@
 import { MessagesPerChannel } from "~/components/analysis/messages_per_channel";
 import ChannelInput from "~/components/channel/channel_input";
-import type { Channel } from "~/components/channel/channel_list";
 import ChannelList from "~/components/channel/channel_list";
 import "chart.js/auto"
 import { Box, Container, Flex, Heading, Text } from "@radix-ui/themes";
 import { Link } from "react-router";
 import type { ChannelMessageCount } from "~/messages";
+import type { Channel } from "~/types/components/channel";
 
 export function ChannelPage({ channels, channelActivity }: { channels: Channel[], channelActivity: ChannelMessageCount[] }) {
   return (

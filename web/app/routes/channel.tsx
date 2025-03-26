@@ -1,8 +1,9 @@
 import type { Route } from "./+types/channel";
 import { useEffect } from "react";
-import { editChannel, fetchChannels, redorderChannel, type EditChannelPayload, type ReorderChannelPayload } from "~/api/channels";
+import { addChannel, deleteChannel, editChannel, fetchChannels, redorderChannel } from "~/api/channels";
 import RouteProtector from "~/components/route_protector";
 import { ChannelPage } from "~/pages/channels";
+import type { AddChannelPayload, EditChannelPayload, ReorderChannelPayload } from "~/types/api/channel";
 
 export async function loader({ params }: Route.LoaderArgs) {
   return fetchChannels();
@@ -40,66 +41,52 @@ export async function clientAction({ request }: Route.ActionArgs) {
   const formData = await request.formData();
   const intent = formData.get("intent");
 
+  const id = parseInt(formData.get("id") as string);
+  const name = formData.get("name")?.toString().trim();
+  const description = formData.get("description")?.toString().trim();
+  const beforeId = parseInt(formData.get("beforeId") as string);
+  const purge = parseInt(formData.get("purge") as string);
+
   switch (intent) {
     case "edit": {
       const payload: EditChannelPayload = {
-        id: parseInt(formData.get("id") as string),
-        name: formData.get("name")?.toString() ?? null,
-        description: formData.get("description")?.toString() ?? null,
+        id,
+        name: name || null,
+        description: description || null,
       };
-
       return await editChannel(payload);
     }
+
     case "reorder": {
       const payload: ReorderChannelPayload = {
-        id: parseInt(formData.get("id") as string),
-        before_id: parseInt(formData.get("beforeId") as string)
+        id,
+        before_id: beforeId,
       }
-      console.log("SENDING REORDER PAYLOAD", payload);
       return await redorderChannel(payload);
     }
 
     case "delete": {
-      const id = parseInt(formData.get("id") as string)
-      const purge = parseInt(formData.get("purge") as string)
-
-      if (id < 0) {
-        throw new Response("Channel ID cannot be negative.");
+      if (id < 0 || ![0, 1].includes(purge)) {
+        throw new Response("Invalid request for deletion", { status: 400 });
       }
-
-      return await fetch(`https://chat.localhost/channels?id=${id}&purge=${purge}`, {method: "DELETE"});
+      return await deleteChannel(id, purge);
     }
 
     case "add": {
-      const name = formData.get("name") as string;
-      const description = formData.get("description") as string;
-
-      if (!name || name.trim() === "") {
+      if (!name) {
         throw new Response("Channel name is required", { status: 400 });
       }
 
-      const payload = {
-        name: name.trim(),
-        description: description.trim() === "" ? null : description.trim(),
-      };
-
-      const response = await fetch(`https://chat.localhost/channels`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-    
-      if (!response.ok) {
-        throw new Response("Failed to create channel", { status: response.status });
+      const payload: AddChannelPayload = {
+        name,
+        description: description || null,
       }
-    
-      return await response.json();
+      return await addChannel(payload);
     }
 
-    default: {
-      console.log("Action not recognized");
-      return;
-    }
+    default:
+      console.warn("Unrecognized action:", intent);
+      return new Response("Invalid intent", { status: 400 });
   }
 }
 

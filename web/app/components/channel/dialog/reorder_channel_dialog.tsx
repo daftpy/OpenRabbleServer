@@ -1,14 +1,15 @@
 import { Button, Dialog, Flex, Select, Text } from "@radix-ui/themes";
-import { ChannelListActions, ChannelListDialogs, type Channel, type ChannelAction, type ChannelReducerState } from "../channel_list";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { useFetcher } from "react-router";
+import { ChannelListDialogs, type Channel } from "~/types/components/channel";
+import { ChannelListActions, type ChannelListAction, type ChannelReducerState } from "~/types/reducers/channelReducer";
 
 type props = {
   channels: Channel[];
   // selectedChannel: Channel | undefined;
   state: ChannelReducerState;
-  dispatch: React.Dispatch<ChannelAction>;
+  dispatch: React.Dispatch<ChannelListAction>;
 }
 
 export function ReorderChannelDialog({ channels, state, dispatch } : props) {

@@ -1,31 +1,19 @@
 // const hostname = import.meta.env.VITE_HOSTNAME;
 
-export async function fetchChannels() {
+import type { AddChannelPayload, AddChannelResponse, ChannelResponse, EditChannelResponse, FetchChannelsResponse, ReorderChannelResponse } from "~/types/api/channel";
+import type { EditChannelPayload, ReorderChannelPayload } from "~/types/api/channel";
+
+export async function fetchChannels(): Promise<ChannelResponse[]> {
   const response = await fetch("https://chat.localhost/channels");
   if (!response.ok) {
     throw new Response("Failed too load channels", { status: response.status });
   }
 
-  const data = await response.json();
-  if (data.channels == null) {
-    return [];
-  }
-
-  return data.channels;
+  const data: FetchChannelsResponse = await response.json();
+  return data.channels ?? [];
 }
 
-export type EditChannelPayload = {
-  id: number;
-  name: string | null;
-  description: string | null;
-}
-
-export type ReorderChannelPayload = {
-  id: number,
-  before_id: number
-}
-
-export async function editChannel(payload : EditChannelPayload) {
+export async function editChannel(payload : EditChannelPayload): Promise<string> {
   const response = await fetch("https://chat.localhost/channels", {
     method: "PATCH",
     headers: {
@@ -38,10 +26,11 @@ export async function editChannel(payload : EditChannelPayload) {
     throw new Error("Failed to update channel");
   }
 
-  return await response.json();
+  const data : EditChannelResponse = await response.json()
+  return data.message;
 }
 
-export const redorderChannel = async (payload: ReorderChannelPayload) => {
+export const redorderChannel = async (payload: ReorderChannelPayload): Promise<string> => {
   const response = await fetch("https://chat.localhost/channels", {
     method: "PATCH",
     headers: {
@@ -49,12 +38,33 @@ export const redorderChannel = async (payload: ReorderChannelPayload) => {
     },
     body: JSON.stringify(payload)
   });
-  console.log("CHANNEL REORDER PAYLOAD", payload)
 
   if (!response.ok) {
     console.log(response);
     throw new Error("Failed to reorder the channel");
   }
+  const data: ReorderChannelResponse = await response.json();
+  return data.message;
+}
 
-  return await response.json();
+export const deleteChannel = async (id: number, purge: number) => {
+  if (![0, 1].includes(purge)) {
+    throw new Error("Invalid purge value - must be 0 or 1");
+  }
+  return await fetch(`https://chat.localhost/channels?id=${id}&purge=${purge}`, {method: "DELETE"});
+}
+
+export const addChannel = async (payload: AddChannelPayload): Promise<AddChannelResponse> => {
+  const response = await fetch(`https://chat.localhost/channels`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Response("Failed to create channel", { status: response.status });
+  }
+
+  const data : AddChannelResponse = await response.json();
+  return { message: data.message, name: data.name };
 }

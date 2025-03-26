@@ -1,12 +1,13 @@
 import { Box, Button, Flex, Text } from "@radix-ui/themes";
 import React from "react";
-import { ChannelListActions, ChannelListDialogs, type Channel, type ChannelAction } from "./channel_list";
 import { CaretSortIcon, Cross2Icon, GearIcon } from "@radix-ui/react-icons";
+import { ChannelListDialogs, type Channel } from "~/types/components/channel";
+import { ChannelListActions, type ChannelListAction } from "~/types/reducers/channelReducer";
 
 type props = {
   channel: Channel;
   isLast: boolean;
-  dispatch: React.Dispatch<ChannelAction>;
+  dispatch: React.Dispatch<ChannelListAction>;
 }
 
 export function ChannelRow({ channel, isLast, dispatch } : props) {

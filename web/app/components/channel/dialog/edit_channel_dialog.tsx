@@ -1,11 +1,12 @@
 import { Box, Button, Dialog, Flex, Text, TextField } from "@radix-ui/themes";
 import type React from "react";
-import { ChannelListActions, ChannelListDialogs, type ChannelAction, type ChannelReducerState } from "../channel_list";
 import { useFetcher } from "react-router";
+import { ChannelListActions, type ChannelListAction, type ChannelReducerState } from "~/types/reducers/channelReducer";
+import { ChannelListDialogs } from "~/types/components/channel";
 
 type props = {
-  state: ChannelReducerState
-  dispatch: React.Dispatch<ChannelAction>
+  state: ChannelReducerState;
+  dispatch: React.Dispatch<ChannelListAction>;
 }
 
 export function EditChannelDialog({state, dispatch} : props) {

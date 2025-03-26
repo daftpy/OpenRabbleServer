@@ -7,7 +7,6 @@ import ChannelInput from "~/components/channel/channel_input";
 import ChannelList from "~/components/channel/channel_list";
 
 import { Box, Button, Flex, Heading, Text } from "@radix-ui/themes";
-import type { Channel } from "~/components/channel/channel_list";
 
 import { GearIcon, LockClosedIcon, MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons";
 import "chart.js/auto"
@@ -15,6 +14,7 @@ import { RecentActivity } from "~/components/analysis/recent_activity";
 import { LiveView } from "~/components/message/live_view";
 import type { SessionActivity } from "../routes/index";
 import UserList from "~/components/user/user_list";
+import type { Channel } from "~/types/components/channel";
 
 
 /*
