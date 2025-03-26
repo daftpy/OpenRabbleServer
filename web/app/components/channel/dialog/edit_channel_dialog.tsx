@@ -1,14 +1,35 @@
 import { Box, Button, Dialog, Flex, Text, TextField } from "@radix-ui/themes";
 import type React from "react";
-import { ChannelListActions, ChannelListDialogs, type ChannelAction, type ChannelReducerState } from "./channel_list";
+import { ChannelListActions, ChannelListDialogs, type ChannelAction, type ChannelReducerState } from "../channel_list";
+import { useFetcher } from "react-router";
 
 type props = {
   state: ChannelReducerState
   dispatch: React.Dispatch<ChannelAction>
-  update: () => void;
 }
 
-const EditChannelDialog = ({state, dispatch, update} : props) => {
+const EditChannelDialog = ({state, dispatch} : props) => {
+  const channelFetcher = useFetcher();
+
+  // Submit updated channel to the server
+  const update = () => {
+    if (state.id == null) return;
+  
+    channelFetcher.submit(
+      {
+        id: String(state.id),
+        name: state.name ?? "",
+        description: state.description ?? "",
+        intent: "edit"
+      },
+      {
+        method: "post",
+        action: "/channels",
+        encType: "application/x-www-form-urlencoded",
+      }
+    );
+  };
+  
   return (
     <Dialog.Root
         open={state.dialog == ChannelListDialogs.EDIT_CHANNEL && state.id !== null}

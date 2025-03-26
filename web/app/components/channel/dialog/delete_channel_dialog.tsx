@@ -1,6 +1,6 @@
 import { Box, Button, Dialog, Flex, Switch, Text } from "@radix-ui/themes";
 import { useFetcher } from "react-router";
-import { ChannelListActions, ChannelListDialogs, type ChannelAction, type ChannelReducerState } from "./channel_list";
+import { ChannelListActions, ChannelListDialogs, type ChannelAction, type ChannelReducerState } from "../channel_list";
 import { useState } from "react";
 
 type props = {

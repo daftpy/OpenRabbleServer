@@ -1,9 +1,9 @@
 import { Box, Heading, Grid } from "@radix-ui/themes";
 import { useEffect, useReducer } from "react";
 import { useFetcher } from "react-router";
-import EditChannelDialog from "./edit_channel_dialog";
-import { ReorderChannelDialog } from "./reorder_channel_dialog";
-import { DeleteChannelDialog } from "./delete_channel_dialog";
+import EditChannelDialog from "./dialog/edit_channel_dialog";
+import { ReorderChannelDialog } from "./dialog/reorder_channel_dialog";
+import { DeleteChannelDialog } from "./dialog/delete_channel_dialog";
 import { ChannelRow } from "./channel_list_row";
 
 export type Channel = {
@@ -72,49 +72,11 @@ function reducer(state: ChannelReducerState, action: ChannelAction) {
 export default function ChannelList({ channels }  : { channels: Channel[] }) {
   const [state, dispatch] = useReducer(reducer, defaultState);
   const selectedChannel = channels.find(c => c.id === state.id);
-  const channelFetcher = useFetcher();
 
   // Reset selection if channels change
   useEffect(() => {
     dispatch({ type: ChannelListActions.CLEAR_SELECTION });
   }, [channels]);
-
-  // Submit updated channel to the server
-  const update = () => {
-    if (state.id == null) return;
-  
-    channelFetcher.submit(
-      {
-        id: String(state.id),
-        name: state.name ?? "",
-        description: state.description ?? "",
-        intent: "edit"
-      },
-      {
-        method: "post",
-        action: "/channels",
-        encType: "application/x-www-form-urlencoded",
-      }
-    );
-  };
-
-  const reorder = (beforeId: number) => {
-    if (state.id == null) return;
-    console.log("REORDER", beforeId);
-
-    channelFetcher.submit(
-      {
-        id: state.id,
-        beforeId: beforeId,
-        intent: "reorder"
-      },
-      {
-        method: "post",
-        action: "/channels",
-        encType: "application/x-www-form-urlencoded"
-      }
-    )
-  }
 
   // Populate the inputs when a channel is selected
   useEffect(() => {
@@ -126,8 +88,8 @@ export default function ChannelList({ channels }  : { channels: Channel[] }) {
   
   return (
     <Box flexGrow={"1"} width={"100%"}>
-      <EditChannelDialog state={state} dispatch={dispatch} update={update} />
-      <ReorderChannelDialog channels={channels} selectedChannel={selectedChannel} state={state} dispatch={dispatch} reorder={reorder} />
+      <EditChannelDialog state={state} dispatch={dispatch} />
+      <ReorderChannelDialog channels={channels} state={state} dispatch={dispatch} />
       <DeleteChannelDialog state={state} dispatch={dispatch} />
       <Grid columns="1fr 3fr" width={"100%"} gapY={"2"} pt={"2"}>
         <Heading size={"3"} style={{color: "var(--subheading-color)"}}>Channels</Heading>
