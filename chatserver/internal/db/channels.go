@@ -211,3 +211,54 @@ func MoveChannelBefore(db *pgxpool.Pool, movedID int, beforeID *int) error {
 
 	return tx.Commit(ctx)
 }
+
+func RemoveChannelByID(db *pgxpool.Pool, channelID int) error {
+	ctx := context.Background()
+
+	tx, err := db.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin tx: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	// Delete the channel
+	_, err = tx.Exec(ctx, `
+		DELETE FROM chatserver.channels
+		WHERE id = $1
+	`, channelID)
+	if err != nil {
+		return fmt.Errorf("failed to delete channel: %w", err)
+	}
+
+	// Fetch remaining channels to renumber sort_order
+	rows, err := tx.Query(ctx, `
+		SELECT id FROM chatserver.channels ORDER BY sort_order, id
+	`)
+	if err != nil {
+		return fmt.Errorf("failed to fetch remaining channels: %w", err)
+	}
+	defer rows.Close()
+
+	var ids []int
+	for rows.Next() {
+		var id int
+		if err := rows.Scan(&id); err != nil {
+			return fmt.Errorf("failed to scan remaining channel ID: %w", err)
+		}
+		ids = append(ids, id)
+	}
+
+	// Reassign sort_order to keep sequence dense
+	for i, id := range ids {
+		_, err := tx.Exec(ctx, `
+			UPDATE chatserver.channels
+			SET sort_order = $1
+			WHERE id = $2
+		`, i+1, id)
+		if err != nil {
+			return fmt.Errorf("failed to renumber sort_order: %w", err)
+		}
+	}
+
+	return tx.Commit(ctx)
+}

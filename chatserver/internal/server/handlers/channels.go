@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -100,6 +101,29 @@ func HandleChannels(db *pgxpool.Pool) http.HandlerFunc {
 			log.Printf("Channel ID '%d' updated successfully", *request.ID)
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(map[string]string{"message": "Channel updated"})
+
+		case http.MethodDelete:
+			idParam := r.URL.Query().Get("id")
+			if idParam == "" {
+				http.Error(w, "Channel ID is required", http.StatusBadRequest)
+				return
+			}
+
+			id, err := strconv.Atoi(idParam)
+			if err != nil {
+				http.Error(w, "Invalid channel ID", http.StatusBadRequest)
+				return
+			}
+
+			if err := database.RemoveChannelByID(db, id); err != nil {
+				log.Println("Failed to delete channel:", err)
+				http.Error(w, "Failed to delete channel", http.StatusInternalServerError)
+				return
+			}
+
+			log.Printf("Channel ID '%d' deleted successfully", id)
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(map[string]string{"message": "Channel deleted"})
 
 		default:
 			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
