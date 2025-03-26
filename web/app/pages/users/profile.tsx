@@ -1,40 +1,32 @@
 import { CircleBackslashIcon, CrossCircledIcon, PersonIcon, TimerIcon } from "@radix-ui/react-icons";
-import { Box, Button, Container, Dialog, DropdownMenu, Flex, Heading, Text, TextField } from "@radix-ui/themes";
-import { Link, useFetcher } from "react-router";
+import { Box, Button, Container, DropdownMenu, Flex, Heading, Text } from "@radix-ui/themes";
+import { Link } from "react-router";
 import { RecentActivity } from "~/components/analysis/recent_activity";
 import { MessageList } from "~/components/message/message_list";
 import { MessageSearchInput } from "~/components/message/search_input";
 import "chart.js/auto"
 import type { SessionActivity } from "~/routes/index";
 import { useMessageSearch } from "~/hooks/useMessageSearch";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { TempBanDialog } from "~/components/user/temp_ban_dialog";
+import { PermBanDialog } from "~/components/user/perm_ban_dialog";
+
+// Ban dialog types that can appear
+export enum BanDialog {
+  PermaBan,
+  TempBan
+}
 
 export function UserPage({ username, id, isBanned, messages, hasMore, session_activity } : { username: string, id: string, isBanned: boolean, messages: any, hasMore: boolean, session_activity: SessionActivity[] }) {
-  console.log("HAS MORE?", hasMore);
-  type banState = "temp" | "perm";
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [banState, setBanState] = useState<banState>("temp");
-  const [banDuration, setBanDuration] = useState<string>("");
-  const [banReason, setBanReason] = useState<string>("");
   const { state, messageFetcher, dispatch, nextPage, prevPage } = useMessageSearch({ messages, userId: id, hasMore: hasMore });
-  const fetcher = useFetcher();
-  
+  const [dialog, setDialog] = useState<BanDialog | null>(null); // Whether temp or perm ban forms appear
 
-  const handleBanUser = (duration? : string) => {
-    const formData = new FormData();
-    formData.append("banishedId", id);
-    if (banReason.trim().length != 0) {
-      formData.append("reason", banReason);
-    }
+  // Reset the dialog when ban status changes
+  useEffect(() => {
+    setDialog(null);
+  }, [isBanned])
 
-    if (duration !== undefined) {
-      formData.append("duration", duration.toString());
-    }
-
-    fetcher.submit(formData, { method: "POST" });
-  };
-
-  const banButton = () => {
+  const banButton = useMemo(() => {
     if (isBanned) {
       return (
         <Button color="red">Unban</Button>
@@ -46,56 +38,20 @@ export function UserPage({ username, id, isBanned, messages, hasMore, session_ac
           <Button color="red">Ban</Button>
         </DropdownMenu.Trigger>
         <DropdownMenu.Content>
-            <DropdownMenu.Item onClick={() => {
-              setIsOpen(true);
-              setBanState("perm");
-            }}>
-              <CircleBackslashIcon /> Permanent
-            </DropdownMenu.Item>
-            <DropdownMenu.Item onClick={() => {
-              setIsOpen(true);
-              setBanState("temp");
-            }}>
-              <TimerIcon /> Temporary
-            </DropdownMenu.Item>
+          <DropdownMenu.Item onClick={() => {
+            setDialog(BanDialog.PermaBan);
+          }}>
+            <CircleBackslashIcon /> Permanent
+          </DropdownMenu.Item>
+          <DropdownMenu.Item onClick={() => {
+            setDialog(BanDialog.TempBan);
+          }}>
+            <TimerIcon /> Temporary
+          </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu.Root>
     )
-  }
-
-  const tempForm = () => {
-    return (
-      <Dialog.Content>
-        <Flex direction={"column"} py={"6"} gap={"6"}>
-          <Flex direction={"column"} gap={"2"}>
-            <Text align={"center"} weight={"bold"}>Temporary Ban</Text>
-            <Text size={"2"}>Reason</Text>
-            <TextField.Root placeholder="Reason" />
-          </Flex>
-          <Flex direction={"column"} gap={"2"}>
-            <Text size={"2"}>Time (in hours):</Text>
-            <TextField.Root placeholder={"e.g. 3"} onChange={(e) => setBanDuration(e.target.value)} />
-          </Flex>
-          <Button color="red" onClick={() => {handleBanUser(banDuration); setIsOpen(false);}}>Ban</Button>
-        </Flex>
-      </Dialog.Content>
-    )
-  }
-
-  const permForm = () => {
-    return (
-      <Dialog.Content>
-        <Flex direction={"column"} py={"6"} gap={"6"}>
-          <Flex direction={"column"} gap={"2"}>
-            <Text align={"center"} weight={"bold"}>Permanent Ban</Text>
-            <Text size={"2"}>Reason</Text>
-            <TextField.Root placeholder="Reason" />
-          </Flex>
-          <Button color="red" onClick={() => {handleBanUser(); setIsOpen(false);}}>Ban</Button>
-        </Flex>
-      </Dialog.Content>
-    )
-  }
+  }, [isBanned])
 
   return (
     <Container p={"6"}>
@@ -107,9 +63,8 @@ export function UserPage({ username, id, isBanned, messages, hasMore, session_ac
           <Heading style={{color: "var(--indigo-10)"}} size={"7"}>User Information</Heading>
           <Text>Here you can set a users roles, inspect their activity, and ban them from the chatserver if needed.</Text>
         </Box>
-        <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
-          {banState == "temp" ? tempForm() : permForm()}
-        </Dialog.Root>
+        <TempBanDialog id={id} username={username} dialog={dialog?? undefined} setDialog={setDialog} />
+        <PermBanDialog id={id} username={username} dialog={dialog?? undefined} setDialog={setDialog}/>
         <Flex align={"center"} gap={"4"}>
           <Flex direction={"column"} gap={"3"} flexGrow={"1"}>
             <Flex align={"center"} gap={"2"}>
@@ -124,7 +79,7 @@ export function UserPage({ username, id, isBanned, messages, hasMore, session_ac
               <Text size={"2"} style={{color: "var(--muted-text-color)"}}>{ id }</Text>
             </Flex>
           </Flex>
-          { banButton() }
+          { banButton }
         </Flex>
         <Box pt={"2"}>
           <Box pb={"4"}>
