@@ -70,6 +70,32 @@ export async function clientAction({ request }: Route.ActionArgs) {
       return await fetch(`https://chat.localhost/channels?id=${id}&purge=${purge}`, {method: "DELETE"});
     }
 
+    case "add": {
+      const name = formData.get("name") as string;
+      const description = formData.get("description") as string;
+
+      if (!name || name.trim() === "") {
+        throw new Response("Channel name is required", { status: 400 });
+      }
+
+      const payload = {
+        name: name.trim(),
+        description: description.trim() === "" ? null : description.trim(),
+      };
+
+      const response = await fetch(`https://chat.localhost/channels`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    
+      if (!response.ok) {
+        throw new Response("Failed to create channel", { status: response.status });
+      }
+    
+      return await response.json();
+    }
+
     default: {
       console.log("Action not recognized");
       return;

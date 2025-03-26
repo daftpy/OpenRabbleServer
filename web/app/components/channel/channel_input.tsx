@@ -1,45 +1,32 @@
 import { Button, Flex, TextField } from "@radix-ui/themes"
-import React, { useState } from "react"
-import type { Channel } from "./channel_list";
+import { useState } from "react"
 import { PlusIcon } from "@radix-ui/react-icons";
+import { useFetcher } from "react-router";
 
-interface props {
-  channelList: Channel[];
-  setChannelList: React.Dispatch<React.SetStateAction<Channel[]>>;
-}
-
-export default function ChannelInput({ channelList, setChannelList } : props) {
+export default function ChannelInput() {
   const [newChannel, setNewChannel] = useState(""); // Input field state
   const [newDescription, setNewDescription] = useState("");
-
-  const hostname = import.meta.env.VITE_HOSTNAME;
+  const channelFetcher = useFetcher();
 
   // Function to handle adding a new channel
   const addChannel = async () => {
-    if (!newChannel.trim()) return; 
+    if (!newChannel.trim()) return;
 
-    try {
-      const response = await fetch(`https://chat.${hostname}/channels`, {
+    channelFetcher.submit(
+      {
+        name: newChannel,
+        description: newDescription,
+        intent: "add"
+      },
+      {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newChannel.trim(), description: newDescription.trim() }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create channel");
+        action: "/channels"
       }
+    );
 
-      const newChannelObj: Channel = {
-        name: newChannel.trim(),
-        description: newDescription.trim() || null,
-      };
-
-      setChannelList([...channelList, newChannelObj]); 
-      setNewChannel(""); 
-      setNewDescription("");
-    } catch (error) {
-      console.error("Error creating channel:", error);
-    }
+    // Clear the inputs
+    setNewChannel("");
+    setNewDescription("");
   };
 
   return (
@@ -57,7 +44,7 @@ export default function ChannelInput({ channelList, setChannelList } : props) {
             className="flex-grow"
           >
           </TextField.Root>
-          <Button onClick={addChannel} style={{ boxShadow: "var(--shadow-3)" }} color="jade"><PlusIcon/>Add</Button> {/* ✅ Calls addChannel */}
+          <Button onClick={addChannel} style={{ boxShadow: "var(--shadow-3)" }} color="jade"><PlusIcon/>Add</Button>
         </Flex>
     </>
   )

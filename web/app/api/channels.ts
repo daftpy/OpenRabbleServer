@@ -1,3 +1,5 @@
+// const hostname = import.meta.env.VITE_HOSTNAME;
+
 export async function fetchChannels() {
   const response = await fetch("https://chat.localhost/channels");
   if (!response.ok) {

@@ -2,8 +2,7 @@
     The home page of the admin dashboard. Landing here will display the current channels
     of the chatserver as well as connected users.
 */
-import { useEffect, useState } from "react"
-import { Link, NavLink, useNavigate, useRevalidator } from "react-router";
+import { Link, NavLink, useNavigate } from "react-router";
 import ChannelInput from "~/components/channel/channel_input";
 import ChannelList from "~/components/channel/channel_list";
 
@@ -22,7 +21,6 @@ import type { SessionActivity } from "../routes/index";
   and does not accidentally trigger a refresh of the auth provider. Perfect!
 */
 export function HomePage({ channels, session_activity }: { channels: Channel[], session_activity: SessionActivity[] }) {
-  const [channelList, setChannelList] = useState<Channel[]>(channels);
   const navigate = useNavigate();
   return (
     <main style={{color: "var(--primary-text-color)"}}>
@@ -54,7 +52,7 @@ export function HomePage({ channels, session_activity }: { channels: Channel[], 
             </Heading>
             <Text>You can add a new channel or manage your channels below.</Text>
           </div>
-          <ChannelInput channelList={channels} setChannelList={setChannelList} />
+          <ChannelInput />
           <Flex gap={"6"} direction={{initial: "column", sm: "row"}} align={{initial: "center", sm: "start"}}>
             <ChannelList channels={channels} />
             <UserList />
