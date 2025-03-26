@@ -8,7 +8,7 @@ type props = {
   dispatch: React.Dispatch<ChannelAction>
 }
 
-const EditChannelDialog = ({state, dispatch} : props) => {
+export function EditChannelDialog({state, dispatch} : props) {
   const channelFetcher = useFetcher();
 
   // Submit updated channel to the server
@@ -69,5 +69,3 @@ const EditChannelDialog = ({state, dispatch} : props) => {
       </Dialog.Root>
   )
 }
-
-export default EditChannelDialog;

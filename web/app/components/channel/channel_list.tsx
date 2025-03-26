@@ -1,7 +1,6 @@
 import { Box, Heading, Grid } from "@radix-ui/themes";
 import { useEffect, useReducer } from "react";
-import { useFetcher } from "react-router";
-import EditChannelDialog from "./dialog/edit_channel_dialog";
+import { EditChannelDialog } from "./dialog/edit_channel_dialog";
 import { ReorderChannelDialog } from "./dialog/reorder_channel_dialog";
 import { DeleteChannelDialog } from "./dialog/delete_channel_dialog";
 import { ChannelRow } from "./channel_list_row";
