@@ -55,7 +55,7 @@ export async function clientAction({ request }: Route.ActionArgs) {
         id: parseInt(formData.get("id") as string),
         before_id: parseInt(formData.get("beforeId") as string)
       }
-
+      console.log("SENDING REORDER PAYLOAD", payload);
       return await redorderChannel(payload);
     }
 

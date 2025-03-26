@@ -147,64 +147,66 @@ func FetchMessageCountByChannel(db *pgxpool.Pool) ([]messages.ChannelMessageCoun
 func MoveChannelBefore(db *pgxpool.Pool, movedID int, beforeID *int) error {
 	ctx := context.Background()
 
+	if beforeID != nil && *beforeID == movedID {
+		return nil
+	}
+
 	tx, err := db.Begin(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to start tx: %w", err)
+		return fmt.Errorf("failed to begin tx: %w", err)
 	}
 	defer tx.Rollback(ctx)
 
-	// Get current sort_order of the moved channel
-	var currentOrder int
-	err = tx.QueryRow(ctx, `SELECT sort_order FROM chatserver.channels WHERE id = $1`, movedID).Scan(&currentOrder)
+	// Step 1: Fetch current ordered list of channel IDs
+	rows, err := tx.Query(ctx, `SELECT id FROM chatserver.channels ORDER BY sort_order, id`)
 	if err != nil {
-		return fmt.Errorf("failed to get current sort_order: %w", err)
+		return fmt.Errorf("failed to fetch channel order: %w", err)
+	}
+	defer rows.Close()
+
+	var ordered []int
+	for rows.Next() {
+		var id int
+		if err := rows.Scan(&id); err != nil {
+			return fmt.Errorf("failed to scan channel ID: %w", err)
+		}
+		ordered = append(ordered, id)
 	}
 
-	var newOrder int
+	// Step 2: Remove movedID from the list
+	newOrder := make([]int, 0, len(ordered))
+	for _, id := range ordered {
+		if id != movedID {
+			newOrder = append(newOrder, id)
+		}
+	}
+
+	// Step 3: Insert movedID before target or at end
+	inserted := false
 	if beforeID != nil {
-		// Get target sort_order of the channel we want to go before
-		err = tx.QueryRow(ctx, `SELECT sort_order FROM chatserver.channels WHERE id = $1`, *beforeID).Scan(&newOrder)
-		if err != nil {
-			return fmt.Errorf("failed to get target sort_order: %w", err)
-		}
-	} else {
-		// Move to the end
-		err = tx.QueryRow(ctx, `SELECT COALESCE(MAX(sort_order), 0) + 1 FROM chatserver.channels`).Scan(&newOrder)
-		if err != nil {
-			return fmt.Errorf("failed to get max sort_order: %w", err)
+		for i, id := range newOrder {
+			if id == *beforeID {
+				// insert movedID before this index
+				newOrder = append(newOrder[:i], append([]int{movedID}, newOrder[i:]...)...)
+				inserted = true
+				break
+			}
 		}
 	}
-
-	// Normalize the direction
-	if newOrder > currentOrder {
-		// Shift channels between current and new down by 1
-		_, err = tx.Exec(ctx, `
-			UPDATE chatserver.channels
-			SET sort_order = sort_order - 1
-			WHERE sort_order > $1 AND sort_order < $2
-		`, currentOrder, newOrder)
-	} else if newOrder < currentOrder {
-		// Shift channels between new and current up by 1
-		_, err = tx.Exec(ctx, `
-			UPDATE chatserver.channels
-			SET sort_order = sort_order + 1
-			WHERE sort_order >= $1 AND sort_order < $2
-		`, newOrder, currentOrder)
+	if !inserted {
+		newOrder = append(newOrder, movedID)
 	}
 
-	if err != nil {
-		return fmt.Errorf("failed to shift surrounding channels: %w", err)
-	}
-
-	// Set moved channel to new sort_order
-	_, err = tx.Exec(ctx, `
-		UPDATE chatserver.channels
-		SET sort_order = $1
-		WHERE id = $2
-	`, newOrder, movedID)
-
-	if err != nil {
-		return fmt.Errorf("failed to update moved channel: %w", err)
+	// Step 4: Reassign sort_order based on new list
+	for index, id := range newOrder {
+		_, err := tx.Exec(ctx, `
+			UPDATE chatserver.channels
+			SET sort_order = $1
+			WHERE id = $2
+		`, index+1, id)
+		if err != nil {
+			return fmt.Errorf("failed to update sort_order for id %d: %w", id, err)
+		}
 	}
 
 	return tx.Commit(ctx)

@@ -1,7 +1,7 @@
 import { Button, Dialog, Flex, Select, Text } from "@radix-ui/themes";
 import { ChannelListActions, ChannelListDialogs, type Channel, type ChannelAction, type ChannelReducerState } from "./channel_list";
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type props = {
   channels: Channel[];
@@ -13,6 +13,9 @@ type props = {
 
 export function ReorderChannelDialog({ channels, selectedChannel, state, dispatch, reorder } : props) {
   const [selected, setSelected] = useState<string>("");
+  useEffect(() => {
+    setSelected(selectedChannel?.id?.toString()?? "");
+  }, [selectedChannel])
   return (
     <Dialog.Root open={state.dialog == ChannelListDialogs.REORDER_CHANNEL && state.id !== null} onOpenChange={(open) => {
       if (!open) {
