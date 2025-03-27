@@ -3,6 +3,7 @@ import { Message, type MessageType } from "./message";
 import { useReducer, memo } from "react";
 import { CheckIcon, Cross2Icon } from "@radix-ui/react-icons";
 import { useFetcher } from "react-router";
+import { MessageSelectActions, type MessageSelectAction, type MessageSelectState } from "~/types/reducers/messageSelectReducer";
 
 export type MessageListType = Omit<MessageType, "isLast">;
 
@@ -11,22 +12,14 @@ type Props = {
   hidePermaLink: boolean;
 };
 
-type MessageSelectState = {
-  selected: number[];
-};
-
-type Action =
-  | { type: "select_message"; id: number }
-  | { type: "select_messages"; ids: number[] };
-
-function reducer(state: MessageSelectState, action: Action) {
+function reducer(state: MessageSelectState, action: MessageSelectAction) {
   switch (action.type) {
-    case "select_message":
+    case MessageSelectActions.SELECT_MESSAGE:
       // Example: toggling selection if already selected, otherwise adding it
       return state.selected.includes(action.id)
         ? { ...state, selected: state.selected.filter(x => x !== action.id) }
         : { ...state, selected: [...state.selected, action.id] };
-    case "select_messages":
+    case MessageSelectActions.SELECT_MESSAGES:
       return {...state, selected: [...state.selected, ...action.ids]}
 
     default:
@@ -39,13 +32,13 @@ export const MessageList = memo(({ messages, hidePermaLink }: Props) => {
   const messageFetcher = useFetcher({key: "my-key"});
 
   const selectMessage = (id: number) => {
-    dispatch({ type: "select_message", id });
+    dispatch({ type: MessageSelectActions.SELECT_MESSAGE, id });
   };
 
   const selectAllMessages = () => {
     const ids = messages.map((msg) => msg.id);
     
-    dispatch({ type: "select_messages", ids });
+    dispatch({ type: MessageSelectActions.SELECT_MESSAGES, ids });
   };
 
   const deleteMessages = () => {
