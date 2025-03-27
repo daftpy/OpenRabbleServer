@@ -2,8 +2,8 @@ import { Cross1Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { Badge, Button, DropdownMenu, Flex, Text, TextField } from "@radix-ui/themes";
 import { useEffect, useMemo } from "react";
 import { useFetcher } from "react-router";
-import { MessageSearchActionType, type MessageSearchAction, type MessageSearchState } from "~/hooks/useMessageSearch";
 import type { Channel } from "~/types/components/channel";
+import { MessageSearchActions, type MessageSearchAction, type MessageSearchState } from "~/types/reducers/messageSearchReducer";
 
 export function MessageSearchInput({
   state,
@@ -35,7 +35,7 @@ export function MessageSearchInput({
             placeholder="keyword"
             className="grow"
             value={state.temporaryKeyword}
-            onChange={(e) => dispatch({ type: MessageSearchActionType.SetTemporaryKeyword, keyword: e.target.value })}
+            onChange={(e) => dispatch({ type: MessageSearchActions.SetTemporaryKeyword, keyword: e.target.value })}
           />
           <DropdownMenu.Root>
             <DropdownMenu.Trigger>
@@ -43,18 +43,18 @@ export function MessageSearchInput({
             </DropdownMenu.Trigger>
             <DropdownMenu.Content>
               {filters.length > 0 && filters.map((filter: string) => (
-                <DropdownMenu.Item key={filter} onClick={() => dispatch({ type: MessageSearchActionType.AddFilter, filter })}>
+                <DropdownMenu.Item key={filter} onClick={() => dispatch({ type: MessageSearchActions.AddFilter, filter })}>
                   { filter }
                 </DropdownMenu.Item>
               ))}
             </DropdownMenu.Content>
           </DropdownMenu.Root>
-          <Button color="blue" onClick={() => dispatch({type: MessageSearchActionType.ExecuteSearch})}><MagnifyingGlassIcon />Search</Button>
+          <Button color="blue" onClick={() => dispatch({type: MessageSearchActions.ExecuteSearch})}><MagnifyingGlassIcon />Search</Button>
       </Flex>
       <Flex gap={"2"} align={"baseline"}>
         <Text weight={"bold"} style={{ color: "var(--indigo-12)" }}>Filters: </Text>
         {state.activeFilters && state.activeFilters.map((filter: string) => (
-          <Badge key={filter} size={"2"} color="tomato" onClick={(e) => dispatch({type: MessageSearchActionType.RemoveFilter, filter: filter})}>
+          <Badge key={filter} size={"2"} color="tomato" onClick={(e) => dispatch({type: MessageSearchActions.RemoveFilter, filter: filter})}>
             {filter} <Cross1Icon />
           </Badge>
         ))}
