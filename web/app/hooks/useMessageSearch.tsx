@@ -1,70 +1,29 @@
-import { useCallback, useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useReducer } from "react";
 import { useFetcher } from "react-router";
-
-// An enumeration of possible action types
-export enum MessageSearchActionType {
-  SetKeyword,
-  SetTemporaryKeyword,
-  AddFilter,
-  RemoveFilter,
-  SetMessages,
-  NextPage,
-  PrevPage,
-  ExecuteSearch,
-  SearchFinished
-}
-
-/*
-  The search state is simple. It contains a keyword and activeFilters collection.
-  If the keyword is present (not, ""), it is used as a search term. If activeFilters
-  is not empty, the filters are used to further filter messages by channel.
-*/
-export type MessageSearchState = {
-  activeFilters: string[]
-  keyword: string;
-  temporaryKeyword: string;
-  availableFilters: string[];
-  messages: any;
-  hasMore: boolean;
-  page: number;
-  searching: boolean;
-}
-
-// The actions that can be performed.
-type SetKeywordAction = { type: MessageSearchActionType.SetKeyword; keyword: string };
-type SetTemporaryKeywordAction = {type: MessageSearchActionType.SetTemporaryKeyword; keyword: string}
-type AddFilterAction = { type: MessageSearchActionType.AddFilter; filter: string };
-type RemoveFilterAction = { type: MessageSearchActionType.RemoveFilter; filter: string };
-type SetMessagesAction = { type: MessageSearchActionType.SetMessages; messages: any, hasMore: boolean };
-type NextPageAction = { type: MessageSearchActionType.NextPage; }
-type PrevPageAction = { type: MessageSearchActionType.PrevPage; }
-type ExecuteSearchAction = {type: MessageSearchActionType.ExecuteSearch };
-type SearchFinished = {type: MessageSearchActionType.SearchFinished };
-
-export type MessageSearchAction = SetKeywordAction | SetTemporaryKeywordAction | AddFilterAction | RemoveFilterAction | SetMessagesAction | NextPageAction | PrevPageAction | ExecuteSearchAction | SearchFinished;
+import { MessageSearchActions, type MessageSearchAction, type MessageSearchState } from "~/types/reducers/messageSearchReducer";
 
 function reducer(state: MessageSearchState, action: MessageSearchAction) {
   switch (action.type)  {
-    case MessageSearchActionType.SetKeyword: 
+    case MessageSearchActions.SetKeyword: 
       return { ...state, keyword: action.keyword, page: 0 };
-    case MessageSearchActionType.SetTemporaryKeyword:
+    case MessageSearchActions.SetTemporaryKeyword:
       return { ...state, temporaryKeyword: action.keyword }
-    case MessageSearchActionType.AddFilter:
+    case MessageSearchActions.AddFilter:
       if (!state.activeFilters.includes(action.filter)) {
         return { ...state, activeFilters: [...state.activeFilters, action.filter]};
       }
       return state;
-    case MessageSearchActionType.RemoveFilter:
+    case MessageSearchActions.RemoveFilter:
       return { ...state, activeFilters: state.activeFilters.filter((filter: string) => filter !== action.filter) };
-    case MessageSearchActionType.SetMessages:
+    case MessageSearchActions.SetMessages:
       return { ...state, messages: action.messages, hasMore: action.hasMore }
-    case MessageSearchActionType.NextPage:
+    case MessageSearchActions.NextPage:
       return { ...state, page: state.page + 1, searching: true };
-    case MessageSearchActionType.PrevPage:
+    case MessageSearchActions.PrevPage:
       return { ...state, page: state.page - 1, searching: true };
-    case MessageSearchActionType.ExecuteSearch:
+    case MessageSearchActions.ExecuteSearch:
       return { ...state, keyword: state.temporaryKeyword, page: 0, searching: true };
-    case MessageSearchActionType.SearchFinished: 
+    case MessageSearchActions.SearchFinished: 
       return { ...state, searching: false};
     default:
       return state;
@@ -104,23 +63,23 @@ export function useMessageSearch({userId, messages, hasMore } : {userId?: string
     // If data was received, update the messages
     if (messageFetcher.data?.messages) {
       console.log("Messages fetched?");
-      dispatch({ type: MessageSearchActionType.SetMessages, messages: messageFetcher.data.messages, hasMore: messageFetcher.data.hasMore });
+      dispatch({ type: MessageSearchActions.SetMessages, messages: messageFetcher.data.messages, hasMore: messageFetcher.data.hasMore });
     }
   }, [messageFetcher.data]);
 
   const nextPage = useCallback(() => {
-    dispatch({ type: MessageSearchActionType.NextPage });
+    dispatch({ type: MessageSearchActions.NextPage });
   }, []);
 
   const prevPage = useCallback(() => {
-    dispatch({ type: MessageSearchActionType.PrevPage });
+    dispatch({ type: MessageSearchActions.PrevPage });
   }, []);
 
   // When the page or keyword changes, execute a search
   useEffect(() => {
     if (state.searching) {
       searchMessages(10, state.page * 10);
-      dispatch({type: MessageSearchActionType.SearchFinished});
+      dispatch({type: MessageSearchActions.SearchFinished});
     }
   }, [state.searching]);
 
