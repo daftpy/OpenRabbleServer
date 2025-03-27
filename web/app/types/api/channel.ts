@@ -1,3 +1,4 @@
+import type { Channel } from "../components/channel";
 
 export type AddChannelPayload = {
     name: string;
@@ -15,14 +16,8 @@ export type ReorderChannelPayload = {
   before_id: number
 }
 
-export type ChannelResponse = {
-    id: number;
-    name: string;
-    description: string | null;
-};
-
 export type FetchChannelsResponse = {
-    channels: ChannelResponse[];
+    channels: Channel[];
 };
 
 export type EditChannelResponse = {

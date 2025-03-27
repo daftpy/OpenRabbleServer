@@ -43,9 +43,9 @@ func HandleBanUser(db *pgxpool.Pool) http.HandlerFunc {
 		ownerID := "ace4e8be-d2a2-46d7-9c9e-57f04f915835"
 
 		var request struct {
-			BanishedID string `json:"banished_id"` // The user being banned
-			Reason     string `json:"reason"`      // Reason for the ban
-			Duration   *int   `json:"duration"`    // Duration in hours (optional, nil means permanent)
+			BanishedID string  `json:"banished_id"` // The user being banned
+			Reason     *string `json:"reason"`      // Reason for the ban (optional)
+			Duration   *int    `json:"duration"`    // Duration in hours (optional, nil = permanent)
 		}
 
 		// Parse request body
@@ -62,22 +62,28 @@ func HandleBanUser(db *pgxpool.Pool) http.HandlerFunc {
 			return
 		}
 
-		// Determine duration (default to 0 for permanent bans)
+		// Unwrap duration
 		duration := 0
 		if request.Duration != nil {
 			duration = *request.Duration
 		}
 
-		// Call the `BanUser` function from your database package
-		err := database.BanUser(db, ownerID, request.BanishedID, request.Reason, duration)
+		// Unwrap reason
+		reason := ""
+		if request.Reason != nil {
+			reason = *request.Reason
+		}
+
+		// Ban the user
+		err := database.BanUser(db, ownerID, request.BanishedID, reason, duration)
 		if err != nil {
 			log.Printf("Failed to ban user: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 
-		log.Printf("User %s banned by %s. Reason: %s, Duration: %s",
-			request.BanishedID, ownerID, request.Reason,
+		log.Printf("User %s banned by %s. Reason: %v, Duration: %s",
+			request.BanishedID, ownerID, reason,
 			func() string {
 				if duration == 0 {
 					return "Permanent"
@@ -91,7 +97,7 @@ func HandleBanUser(db *pgxpool.Pool) http.HandlerFunc {
 		json.NewEncoder(w).Encode(map[string]string{
 			"message":  "User banned successfully",
 			"banished": request.BanishedID,
-			"reason":   request.Reason,
+			"reason":   reason,
 			"duration": func() string {
 				if duration == 0 {
 					return "Permanent"

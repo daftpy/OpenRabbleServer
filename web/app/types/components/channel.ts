@@ -1,5 +1,5 @@
 export type Channel = {
-  id?: number;
+  id: number;
   name: string;
   description: string | null;
 }

@@ -1,24 +1,14 @@
 import RouteProtector from "~/components/route_protector";
 import { BansPage } from "~/pages/users/bans";
 import type { Route } from "./+types/bans";
+import { fetchBans } from "~/api/users";
 
 export async function loader({ params }: Route.LoaderArgs) {
-  const response = await fetch("https://chat.localhost/users/bans");
-  if (!response.ok) {
-    throw new Response("Failed to load users", { status: response.status });
-  }
-
-  const data : any = await response.json();
-  console.log("BANS DATA", data);
-  if (data.payload == null) {
-    return [];
-  }
-  return data.payload;
+  return await fetchBans();
 }
 
 export default function BansRoute({loaderData,} : Route.ComponentProps) {
-  const {records} = loaderData;
-  console.log("RECORDS:", records);
+  const { records } = loaderData;
   return (
     <RouteProtector>
       <BansPage records={records} />

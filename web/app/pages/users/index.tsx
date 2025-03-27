@@ -1,7 +1,7 @@
 import { CrossCircledIcon, MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons";
 import { Box, Button, Container, DropdownMenu, Flex, Heading, Text, TextField } from "@radix-ui/themes";
 import { Link, useNavigate } from "react-router";
-import type { User } from "~/routes/users";
+import type { User } from "~/types/components/users";
 
 type props = {
   users: User[];

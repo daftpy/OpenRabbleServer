@@ -1,9 +1,10 @@
 // const hostname = import.meta.env.VITE_HOSTNAME;
 
-import type { AddChannelPayload, AddChannelResponse, ChannelResponse, EditChannelResponse, FetchChannelsResponse, ReorderChannelResponse } from "~/types/api/channel";
+import type { AddChannelPayload, AddChannelResponse, EditChannelResponse, FetchChannelsResponse, ReorderChannelResponse } from "~/types/api/channel";
 import type { EditChannelPayload, ReorderChannelPayload } from "~/types/api/channel";
+import type { Channel } from "~/types/components/channel";
 
-export async function fetchChannels(): Promise<ChannelResponse[]> {
+export async function fetchChannels(): Promise<Channel[]> {
   const response = await fetch("https://chat.localhost/channels");
   if (!response.ok) {
     throw new Response("Failed too load channels", { status: response.status });

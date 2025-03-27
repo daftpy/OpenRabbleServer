@@ -1,9 +1,13 @@
 import { PersonIcon } from "@radix-ui/react-icons";
 import { Button, Flex, Heading, Table, Text } from "@radix-ui/themes";
 import { formatDistance, parseISO } from "date-fns";
+import type { BanRecord } from "~/types/components/users";
 
+type props = {
+  records: BanRecord[]
+}
 
-export function BansPage({records} : any) {
+export function BansPage(props : props) {
   return (
     <Flex direction={"column"}>
       <Heading color="indigo">Bans</Heading>
@@ -21,7 +25,7 @@ export function BansPage({records} : any) {
         </Table.Header>
 
         <Table.Body>
-          {records.length > 0 && records.map((record : any) => (
+          {props.records.length > 0 && props.records.map((record : BanRecord) => (
             <Table.Row align={"center"} key={record.id}>
               <Table.RowHeaderCell maxWidth={"120px"}>
                 <Flex gap={"2"} align={"center"} justify={"start"}>

@@ -1,20 +1,11 @@
 import RouteProtector from "~/components/route_protector";
 import { UserPage } from "~/pages/users/profile";
 import type { Route } from "./+types/profile";
-import { useLoaderData } from "react-router";
+import { banUser, fetchUser } from "~/api/users";
 
-// Get the users information by username. Here we need the userID
+// Get the users information by username.
 export async function loader({ params }: Route.LoaderArgs) {
-  const response = await fetch(`https://chat.localhost/users?username=${params.userId}`);
-  if (!response.ok) {
-    throw new Response("Failed to load users", { status: response.status });
-  }
-
-  const data = await response.json();
-  if (data.payload.users.length == 0) {
-    return [];
-  }
-  return data.payload.users[0];
+  return await fetchUser(params.userId); // userId is actually username
 }
 
 // Use the userID to retrieve the users meessages
@@ -46,38 +37,23 @@ export async function clientAction({ params, request }: Route.ActionArgs) {
   if (request.method !== "POST") {
     return new Response("Method Not Allowed", { status: 405 });
   }
-
+  // Get the formdata
   const formData = await request.formData();
-  const reason = formData.get("reason");
-  const duration = formData.get("duration");
-  console.log("formDuration", duration);
 
-  let data = {
-    banished_id: formData.get("banishedId"),
-    reason: reason,
-    duration: 0
+  // Check for banishedId
+  const banishedId = formData.get("banishedId")?.toString().trim();
+  if (!banishedId) {
+    throw new Response("Missing required field: banishedId", { status: 400 });
   }
 
-  if (duration) {
-    data.duration = parseInt(duration.toString(), 10);
-    console.log("Duration", duration);
-  }
-  
-  const banResponse = await fetch("https://chat.localhost/users/ban", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
+  // Get the reason or null
+  const reason = formData.get("reason")?.toString().trim() || null;
 
-  if (!banResponse.ok) {
-    return new Response("Failed to ban user", { status: 500 });
-  }
-  console.log("User banned");
+  // Get the duration
+  const duration = formData.get("duration")?.toString().trim() || null;
+  const parsedDuration = duration ? parseInt(duration, 10) : null;
 
-  return new Response(
-    JSON.stringify({ message: "User banned successfully" }),
-    { status: 200 }
-  );
+  return await banUser({ banished_id: banishedId, reason, duration: parsedDuration });
 }
 
 export default function UserRoute({loaderData,} : Route.ComponentProps) {
