@@ -2,8 +2,8 @@ import { useEffect } from "react";
 import type { Route } from "./+types/search_messages";
 import { SearchMessagesPage } from "~/pages/search_messages"
 import { useLoaderData, type ShouldRevalidateFunctionArgs } from "react-router";
-import { fetchMessagesFromAPI } from "~/api/fetchMessages";
-import { deleteMessagesFromAPI } from "~/api/deleteMessages";
+import { fetchMessagesFromAPI } from "~/api/messages";
+import { deleteMessagesFromAPI } from "~/api/messages";
 
 // TODO the default limit is hardcoded twice here and again in the SearchMessagesPage
 // It is currently fragile and should possibly be refactored
