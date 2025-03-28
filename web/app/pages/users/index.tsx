@@ -1,4 +1,4 @@
-import { CrossCircledIcon, MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons";
+import { ArchiveIcon, CrossCircledIcon, MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons";
 import { Box, Button, Container, DropdownMenu, Flex, Heading, Text, TextField } from "@radix-ui/themes";
 import { Link, useNavigate } from "react-router";
 import type { User } from "~/types/components/users";
@@ -11,9 +11,10 @@ export function UsersPage({ users } : props) {
   const navigate = useNavigate();
   return (
     <>
-      <Box>
-      <Heading style={{color: "var(--indigo-9)"}}>User Management</Heading>
-      <Text>Manage your users here. You can ban users, manage their roles, or inspect their activity.</Text>
+      <Box py={"1"}>
+        <Heading style={{color: "var(--indigo-9)"}}>User Management</Heading>
+        <Text>Manage your users here. You can ban users, manage their roles, or inspect their activity.</Text>
+      </Box>
       <Flex pt={"2"} gap={"4"}>
         <TextField.Root placeholder="username" className="grow" />
         <DropdownMenu.Root>
@@ -31,10 +32,10 @@ export function UsersPage({ users } : props) {
         </DropdownMenu.Root>
         <Button color={"blue"}><MagnifyingGlassIcon />Search</Button>
       </Flex>
-      <Flex pt={"2"} gap={"2"}>
+      <Flex pt={"3"} gap={"2"}>
         <Text weight={"bold"} size={"1"}>Searching by: </Text><Text color="amber" size="1">username</Text>
       </Flex>
-      </Box>
+      <Flex pt={"4"}><Button size={"1"} color="red" onClick={() => navigate("bans")}><ArchiveIcon /> Ban Records</Button></Flex>
       <Flex direction={"column"} pt={"4"}>
         {users.map((user: User, index: number) => (
           <Flex align={"center"} key={index}
