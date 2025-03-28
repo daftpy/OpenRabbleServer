@@ -1,6 +1,7 @@
 import type { SessionActivity } from "./routes/index";
 import type { ChatMessageType } from "./components/message/live_view";
 import type { Channel } from "./types/components/channel";
+import type { ChannelMessageCount } from "./types/api/activity";
 
 // Base message interface
 export interface Message {
@@ -42,11 +43,6 @@ export interface BulkChatMessages extends Message {
   payload: {
     messages: ChatMessageType[];
   }
-}
-
-export type ChannelMessageCount = {
-  channel: string;
-  message_count: number;
 }
 
 export interface MessageCountByChannelMessage extends Message {

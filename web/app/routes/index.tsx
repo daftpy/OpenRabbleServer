@@ -1,23 +1,16 @@
+import { fetchSessionsActivity } from "~/api/activity";
 import type { Route } from "./+types/index";
 import { useEffect } from "react";
 import { fetchChannels } from "~/api/channels";
 import RouteProtector from "~/components/route_protector";
 import { HomePage } from "~/pages/home";
+import type { SessionActivityResult } from "~/types/api/activity";
 
 export type SessionActivity = {
   session_date: string; // e.g., "2025-02-23"
   session_count: number; // Number of sessions for that day
   total_duration: string; // e.g., "15 hours 30 minutes"
 };
-
-type SessionActivityResult = {
-  type: string;
-  sender: string;
-  payload: {
-    session_activity: SessionActivity[];
-  };
-};
-
 
 export async function loader({ params }: Route.LoaderArgs) {
 
@@ -28,14 +21,11 @@ export async function clientLoader({
   params,
 }: Route.ClientLoaderArgs) {
   
-  // const serverData = await serverLoader();
   const serverData = await fetchChannels();
 
-  const activityRes = await fetch(`https://chat.localhost/activity/sessions`)
-  const activityData : SessionActivityResult = await activityRes.json();
-  console.log("ACTIVITY: ", serverData);
+  const activityData = await fetchSessionsActivity()
 
-  return { channels: serverData, ...activityData.payload };
+  return { channels: serverData, session_activity: activityData.session_activity };
 }
 
 // force the client loader to run during hydration

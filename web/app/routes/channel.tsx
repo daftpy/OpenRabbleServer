@@ -1,3 +1,4 @@
+import { fetchChannelsActivity } from "~/api/activity";
 import type { Route } from "./+types/channel";
 import { useEffect } from "react";
 import { addChannel, deleteChannel, editChannel, fetchChannels, redorderChannel } from "~/api/channels";
@@ -16,11 +17,9 @@ export async function clientLoader({
   
   const serverData = await serverLoader();
 
-  const activityRes = await fetch(`https://chat.localhost/activity/channels`)
-  const activityData = await activityRes.json();
-  console.log("ACTIVITY: ", serverData);
+  const activityData = await fetchChannelsActivity();
 
-  return { channels: serverData, channel_activity: activityData.payload.channels };
+  return { channels: serverData, channel_activity: activityData };
 }
 
 export function meta({}: Route.MetaArgs) {
