@@ -57,7 +57,7 @@ export function UserPage({ username, id, isBanned, messages, hasMore, session_ac
     <>
       <Flex direction="column" gap={"6"}>
         <Box>
-          <Heading style={{color: "var(--indigo-10)"}} size={"7"}>User Information</Heading>
+          <Heading color="indigo" size={"7"}>User Information</Heading>
           <Text>Here you can set a users roles, inspect their activity, and ban them from the chatserver if needed.</Text>
         </Box>
         <TempBanDialog id={id} username={username} dialog={dialog?? undefined} setDialog={setDialog} />

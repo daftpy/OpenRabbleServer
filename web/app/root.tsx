@@ -44,7 +44,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           {children}
           <ScrollRestoration />
           <Scripts />
-          {/* <ThemePanel /> */}
+          <ThemePanel />
         </Theme>
       </body>
     </html>

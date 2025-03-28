@@ -31,7 +31,7 @@ export function MessageRow(props : props) {
     <Flex direction="column" gap="1" style={{borderBottom: borderStyle}} py={"2"}> 
       <Flex direction={"column"} px={"1"}>
         <Flex gap={"1"} align={"center"}>
-          <Text size="1" weight={"bold"} color="indigo">{ props.meessage.channel } #</Text>
+          <Text size="1" weight={"bold"} color="teal">{ props.meessage.channel } #</Text>
           <Flex align={"center"} justify={"between"} flexGrow={"1"}>
             <Flex gap={"1"} align={"center"}><PersonIcon />
               <Heading size="1" style={{color: "var(--link-color)"}}>

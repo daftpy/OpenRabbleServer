@@ -11,7 +11,7 @@ export function ChannelPage({ channels, channelActivity }: { channels: Channel[]
   return (
     <>
       <Box>
-        <Heading style={{color: "var(--indigo-10)"}}>Channel Management</Heading>
+        <Heading color="indigo">Channel Management</Heading>
         <Text>Manage your channels here. You can add and remove channels, change their names, or set role based access.</Text>
       </Box>
       <Flex direction={"column"} gap={"6"} pt={"6"}>

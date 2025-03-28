@@ -11,7 +11,7 @@ export function SearchMessagesPage({ messages, hasMore }: {messages: any, hasMor
     <>
       <Flex direction={"column"} gap={"4"}>
         <Box>
-          <Heading style={{color: "var(--indigo-10)"}}>Search</Heading>
+          <Heading color="indigo">Search</Heading>
           <Text>Search messages stored in your cache or database. Filter by <strong style={{ color: "var(--link-color)" }}>channel </strong>or <strong style={{ color: "var(--link-color)" }}>keyword</strong>.</Text>
           {/* Search Input & Filters */}
           <MessageSearchInput state={state} dispatch={dispatch} />

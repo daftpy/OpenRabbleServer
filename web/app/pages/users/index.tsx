@@ -12,7 +12,7 @@ export function UsersPage({ users } : props) {
   return (
     <>
       <Box py={"1"}>
-        <Heading style={{color: "var(--indigo-9)"}}>User Management</Heading>
+        <Heading color="indigo">User Management</Heading>
         <Text>Manage your users here. You can ban users, manage their roles, or inspect their activity.</Text>
       </Box>
       <Flex pt={"2"} gap={"4"}>
