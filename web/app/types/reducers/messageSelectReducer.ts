@@ -1,3 +1,5 @@
+// This reducer allows messages to be selected for batch deletion
+
 export type MessageSelectState = {
   selected: number[];
 };

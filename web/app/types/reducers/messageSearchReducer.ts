@@ -1,3 +1,10 @@
+/*
+  This reducer allows the user to build different search parameters
+  with which the chat server can be queried.
+
+  It allows the user to filter by channels or keyword.
+*/
+
 // An enumeration of possible action types
 export enum MessageSearchActions {
   SetKeyword,

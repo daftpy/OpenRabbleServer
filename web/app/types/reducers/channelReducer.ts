@@ -1,4 +1,9 @@
 import type { ChannelListDialogs } from "../components/channel";
+/*
+  The channel reducer allows channels to be selected so that different
+  actions can be carried out on them, such as editing, reordering, or 
+  deletion.
+*/
 
 // Shape of the reducer state
 export type ChannelReducerState = {
