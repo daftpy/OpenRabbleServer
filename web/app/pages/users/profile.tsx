@@ -98,7 +98,7 @@ export function UserPage({ username, id, isBanned, messages, hasMore, session_ac
               Previous Page
             </Button>
             <Button 
-              disabled={!state.hasMore}
+              disabled={!state.has_more}
               onClick={() => nextPage()}
             >
               Next Page

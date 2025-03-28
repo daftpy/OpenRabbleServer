@@ -1,15 +1,8 @@
-import { Cross1Icon, Link1Icon, PersonIcon, TimerIcon } from "@radix-ui/react-icons";
+import { Link1Icon, PersonIcon, TimerIcon } from "@radix-ui/react-icons";
 import { Box, Checkbox, Flex, Heading, Text } from "@radix-ui/themes";
-import { Link, useFetcher, useRevalidator } from "react-router";
+import { Link, useFetcher } from "react-router";
 import { formatDistance, parseISO } from "date-fns";
-
-export type MessageType = {
-  username: string;
-  channel: string;
-  message: string;
-  authored_at: string;
-  id: number;
-}
+import type { MessageType } from "~/types/components/message";
 
 type props = {
   meessage: MessageType;

@@ -1,14 +1,13 @@
 import { Box, Button, DropdownMenu, Flex, Text } from "@radix-ui/themes";
-import { Message, type MessageType } from "./message";
 import { useReducer, memo } from "react";
 import { CheckIcon, Cross2Icon } from "@radix-ui/react-icons";
 import { useFetcher } from "react-router";
 import { MessageSelectActions, type MessageSelectAction, type MessageSelectState } from "~/types/reducers/messageSelectReducer";
-
-export type MessageListType = Omit<MessageType, "isLast">;
+import type { MessageType } from "~/types/components/message";
+import { Message } from "./message";
 
 type Props = {
-  messages: MessageListType[];
+  messages: MessageType[];
   hidePermaLink: boolean;
 };
 
@@ -36,7 +35,7 @@ export const MessageList = memo(({ messages, hidePermaLink }: Props) => {
   };
 
   const selectAllMessages = () => {
-    const ids = messages.map((msg) => msg.id);
+    const ids = messages.map((msg : MessageType) => msg.id);
     
     dispatch({ type: MessageSelectActions.SELECT_MESSAGES, ids });
   };

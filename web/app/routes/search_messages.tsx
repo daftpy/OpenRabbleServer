@@ -1,7 +1,6 @@
-import { useEffect } from "react";
 import type { Route } from "./+types/search_messages";
 import { SearchMessagesPage } from "~/pages/search_messages"
-import { useLoaderData, type ShouldRevalidateFunctionArgs } from "react-router";
+import { useLoaderData } from "react-router";
 import { fetchMessagesFromAPI } from "~/api/messages";
 import { deleteMessagesFromAPI } from "~/api/messages";
 
@@ -58,8 +57,8 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function About({loaderData,}: Route.ComponentProps) {
-  const { messages, hasMore } = useLoaderData() as { messages: any[], hasMore: boolean };
+  const { messages, has_more } = useLoaderData() as { messages: any[], has_more: boolean };
   return (
-    <SearchMessagesPage messages={messages} hasMore={hasMore} />
+    <SearchMessagesPage messages={messages} hasMore={has_more} />
   )
 }

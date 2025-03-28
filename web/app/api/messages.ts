@@ -1,4 +1,7 @@
-export async function fetchMessagesFromAPI(params: { keyword?: string; channels?: string[]; user_id?: string; limit?: string; offset?: string }) {
+import type { FetchMessagesResponse } from "~/types/api/message";
+
+export async function fetchMessagesFromAPI(params: { keyword?: string; channels?: string[]; user_id?: string; limit?: string; offset?: string }) 
+  : Promise<FetchMessagesResponse["payload"]> {
   const { keyword = "", channels = [], user_id, limit = "10", offset = "0" } = params;
 
   const queryParams = new URLSearchParams();
@@ -14,12 +17,12 @@ export async function fetchMessagesFromAPI(params: { keyword?: string; channels?
     const response = await fetch(`https://chat.localhost/messages?${queryParams.toString()}`);
     if (!response.ok) throw new Response("Failed to fetch messages", { status: response.status });
 
-    const messageData = await response.json();
+    const messageData : FetchMessagesResponse = await response.json();
     if (!messageData.payload || !Array.isArray(messageData.payload.messages)) {
       console.error("Unexpected response format:", messageData);
       throw new Response("Invalid response format", { status: 500 });
     }
-    return { messages: messageData.payload.messages ?? [], hasMore: messageData.payload.has_more };
+    return { messages: messageData.payload.messages ?? [], has_more: messageData.payload.has_more };
   } catch (error) {
     throw new Response("Error fetching messages", { status: 500 });
   }

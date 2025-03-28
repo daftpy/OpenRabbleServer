@@ -35,7 +35,7 @@ export type MessageSearchState = {
   temporaryKeyword: string;
   availableFilters: string[];
   messages: any;
-  hasMore: boolean;
+  has_more: boolean;
   page: number;
   searching: boolean;
 }

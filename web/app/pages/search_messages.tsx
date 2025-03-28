@@ -6,7 +6,7 @@ import { useMessageSearch } from "~/hooks/useMessageSearch";
 
 export function SearchMessagesPage({ messages, hasMore }: {messages: any, hasMore: boolean}) {
   const { state, messageFetcher, dispatch, nextPage, prevPage } = useMessageSearch({ messages, hasMore });
-  console.log("SearchMessagesPage says hello");
+  console.log("SearchMessagesPage says hello", hasMore);
   return (
     <Container px={"4"} py={"6"}>
       <Heading size={"8"} weight={"bold"} className="text-xl pb-1" style={{ color: "var(--slate-12)" }}>
@@ -32,7 +32,7 @@ export function SearchMessagesPage({ messages, hasMore }: {messages: any, hasMor
             Previous Page
           </Button>
           <Button 
-            disabled={!state.hasMore}
+            disabled={!state.has_more}
             onClick={() => nextPage()}
           >
             Next Page

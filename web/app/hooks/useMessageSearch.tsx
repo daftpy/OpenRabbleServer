@@ -16,7 +16,7 @@ function reducer(state: MessageSearchState, action: MessageSearchAction) {
     case MessageSearchActions.RemoveFilter:
       return { ...state, activeFilters: state.activeFilters.filter((filter: string) => filter !== action.filter) };
     case MessageSearchActions.SetMessages:
-      return { ...state, messages: action.messages, hasMore: action.hasMore }
+      return { ...state, messages: action.messages, has_more: action.hasMore }
     case MessageSearchActions.NextPage:
       return { ...state, page: state.page + 1, searching: true };
     case MessageSearchActions.PrevPage:
@@ -31,7 +31,7 @@ function reducer(state: MessageSearchState, action: MessageSearchAction) {
 }
 
 export function useMessageSearch({userId, messages, hasMore } : {userId?: string, messages: any, hasMore: boolean}) {
-  const [state, dispatch] = useReducer(reducer, { keyword: "", temporaryKeyword: "", activeFilters: [], availableFilters: [], messages: messages, hasMore: hasMore, page: 0, searching: false });
+  const [state, dispatch] = useReducer(reducer, { keyword: "", temporaryKeyword: "", activeFilters: [], availableFilters: [], messages: messages, has_more: hasMore, page: 0, searching: false });
   // Used to fetch messages
   const messageFetcher = useFetcher({key: "my-key"});
 
@@ -63,7 +63,7 @@ export function useMessageSearch({userId, messages, hasMore } : {userId?: string
     // If data was received, update the messages
     if (messageFetcher.data?.messages) {
       console.log("Messages fetched?");
-      dispatch({ type: MessageSearchActions.SetMessages, messages: messageFetcher.data.messages, hasMore: messageFetcher.data.hasMore });
+      dispatch({ type: MessageSearchActions.SetMessages, messages: messageFetcher.data.messages, hasMore: messageFetcher.data.has_more });
     }
   }, [messageFetcher.data]);
 
