@@ -2,13 +2,11 @@
     The home page of the admin dashboard. Landing here will display the current channels
     of the chatserver as well as connected users.
 */
-import { Link, NavLink, useNavigate } from "react-router";
+import { Link, NavLink } from "react-router";
 import ChannelInput from "~/components/channel/channel_input";
 import ChannelList from "~/components/channel/channel_list";
 
-import { Box, Button, Flex, Heading, Text } from "@radix-ui/themes";
-
-import { GearIcon, LockClosedIcon, MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons";
+import { Box, Flex, Heading, Text } from "@radix-ui/themes";
 import "chart.js/auto"
 import { RecentActivity } from "~/components/analysis/recent_activity";
 import { LiveView } from "~/components/message/live_view";
@@ -16,13 +14,7 @@ import type { SessionActivity } from "../routes/index";
 import UserList from "~/components/user/user_list";
 import type { Channel } from "~/types/components/channel";
 
-
-/*
-  TODO: Added a test navigate button here to move between pages. It works properly
-  and does not accidentally trigger a refresh of the auth provider. Perfect!
-*/
 export function HomePage({ channels, session_activity }: { channels: Channel[], session_activity: SessionActivity[] }) {
-  const navigate = useNavigate();
   return (
     <main style={{color: "var(--primary-text-color)"}}>
       <Flex direction="column" gap={"6"} height={"100%"} m={"auto"} flexGrow={"1"}>
@@ -36,13 +28,6 @@ export function HomePage({ channels, session_activity }: { channels: Channel[], 
         </Flex>
 
         <LiveView />
-
-        <Flex gap={"3"} direction={{initial: "column", sm: "row"}}>
-          <Button onClick={() => navigate("/users")}><PersonIcon /> User Management</Button>
-          <Button onClick={() => navigate("/messages")}><MagnifyingGlassIcon /> Messages</Button>
-          <Button onClick={() => navigate("/about")}><GearIcon /> Settings</Button>
-          <Button onClick={() => navigate("/about")}><LockClosedIcon /> Keycloak</Button>
-        </Flex>
 
         <Flex direction={"column"} gap={"2"}>
           <div>
@@ -64,7 +49,6 @@ export function HomePage({ channels, session_activity }: { channels: Channel[], 
         </Box>
 
         <RecentActivity session_activity={session_activity} />
-
       </Flex>
     </main>   
   )
