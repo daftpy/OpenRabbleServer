@@ -4,56 +4,27 @@ import { CheckIcon, Cross2Icon } from "@radix-ui/react-icons";
 import { useFetcher } from "react-router";
 import { MessageSelectActions, type MessageSelectAction, type MessageSelectState } from "~/types/reducers/messageSelectReducer";
 import type { Message } from "~/types/components/message";
-import { MessageRow } from "./message_row";
+import { MessageRow, type UnifiedMessage } from "./message_row";
+import { useMessageSelection } from "~/hooks/useMessageSelection";
+import type { ChatMessageType } from "./live_view";
 
 type Props = {
-  messages: Message[];
+  // messages: Message[] | ChatMessageType[];
+  messages: UnifiedMessage[];
   hidePermaLink: boolean;
 };
 
-function reducer(state: MessageSelectState, action: MessageSelectAction) {
-  switch (action.type) {
-    case MessageSelectActions.SELECT_MESSAGE:
-      // Example: toggling selection if already selected, otherwise adding it
-      return state.selected.includes(action.id)
-        ? { ...state, selected: state.selected.filter(x => x !== action.id) }
-        : { ...state, selected: [...state.selected, action.id] };
-    case MessageSelectActions.SELECT_MESSAGES:
-      return {...state, selected: [...state.selected, ...action.ids]}
-
-    default:
-      return state;
-  }
+export const MessageList = memo(({ messages, hidePermaLink }: Props) => {
+// 1) Define a user-defined type guard in the same file or a shared utils file
+function isMessage(m: UnifiedMessage): m is Message {
+  return m.id !== undefined;
 }
 
-export const MessageList = memo(({ messages, hidePermaLink }: Props) => {
-  const [state, dispatch] = useReducer(reducer, { selected: [] });
-  const messageFetcher = useFetcher({key: "my-key"});
+// 2) Use this type guard when filtering your messages
+const messagesWithId = messages.filter(isMessage); // now typed as Message[]
 
-  const selectMessage = (id: number) => {
-    dispatch({ type: MessageSelectActions.SELECT_MESSAGE, id });
-  };
-
-  const selectAllMessages = () => {
-    const ids = messages.map((msg : Message) => msg.id);
-    
-    dispatch({ type: MessageSelectActions.SELECT_MESSAGES, ids });
-  };
-
-  const deleteMessages = () => {
-    if (state.selected.length === 0) {
-      return; // nothing to delete
-    }
-  
-    // Submit the selected IDs as a JSON string in a form field
-    messageFetcher.submit(
-      { ids: JSON.stringify(state.selected) },
-      {
-        method: "delete",
-        action: "/messages",
-      }
-    );
-  };
+const { selected, selectMessage, selectAllMessages, deleteMessages } = 
+  useMessageSelection(messagesWithId);
 
   return (
     <Box>
@@ -75,15 +46,15 @@ export const MessageList = memo(({ messages, hidePermaLink }: Props) => {
         </Flex>
       )}
 
-      {messages.length > 0 ? (messages.map((message, index) => (
+      {messages.length > 0 && messages ? (messages.map((message, index) => (
         <MessageRow
           key={index}
           isLast={index === messages.length - 1}
           meessage={message}
           hidePermaLink={hidePermaLink}
           // Pass a boolean to indicate whether this message is in the selected array
-          isSelected={state.selected.includes(message.id)}
-          onSelect={() => selectMessage(message.id)}
+          isSelected={selected.includes(message.id?? 0)}
+          onSelect={() => selectMessage(message.id?? 0)}
         />
       ))) : (
         <Box py={"4"} key="none">

@@ -3,14 +3,25 @@ import { Box, Checkbox, Flex, Heading, Text } from "@radix-ui/themes";
 import { Link } from "react-router";
 import { formatDistance, parseISO } from "date-fns";
 import type { Message } from "~/types/components/message";
+import type { ChatMessageType } from "./live_view";
 
 type props = {
-  meessage: Message;
+  meessage: UnifiedMessage;
   isLast: boolean;
   hidePermaLink: boolean;
   isSelected: boolean;
   onSelect: (id: number) => void;
 }
+
+export type UnifiedMessage = {
+  channel: string;
+  username: string;
+  message: string;
+  authored_at: string;
+  owner_id?: string;
+  // ...
+  id?: number; // Make id optional
+};
 
 export function MessageRow(props : props) {
   const borderStyle = props.isLast ? "none" : "2px solid var(--indigo-3)"
@@ -29,7 +40,7 @@ export function MessageRow(props : props) {
             </Flex>
             {props.hidePermaLink ? (
               // <><Cross1Icon onClick={() => deleteMe()} /></>
-              <Checkbox checked={props.isSelected ? true : false} onCheckedChange={() => props.onSelect(props.meessage.id)} />
+              <Checkbox checked={props.isSelected ? true : false} onCheckedChange={() => props.onSelect(props.meessage.id?? -1)} />
             ) : (
               <Box>
                 <Link to={`/messages`}><Link1Icon style={{color: "var(--gray-10)", width: "12px", height: "12px", cursor: "pointer"}} /></Link>
