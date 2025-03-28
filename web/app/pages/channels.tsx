@@ -9,11 +9,8 @@ import type { Channel } from "~/types/components/channel";
 
 export function ChannelPage({ channels, channelActivity }: { channels: Channel[], channelActivity: ChannelMessageCount[] }) {
   return (
-    <Container className="min-h-full" p={"6"}>
-      <Heading size={"8"} weight={"bold"} className="text-xl pb-1" style={{ color: "var(--slate-12)" }}>
-        <Link to="/">Your OnRabble Server</Link>
-      </Heading>
-      <Box pt={"4"}>
+    <>
+      <Box>
         <Heading style={{color: "var(--indigo-10)"}}>Channel Management</Heading>
         <Text>Manage your channels here. You can add and remove channels, change their names, or set role based access.</Text>
       </Box>
@@ -24,6 +21,6 @@ export function ChannelPage({ channels, channelActivity }: { channels: Channel[]
         </Flex>
           <MessagesPerChannel channelData={channelActivity}  />
       </Flex>
-  </Container>
+  </>
   )
 }

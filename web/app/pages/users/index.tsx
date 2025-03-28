@@ -10,11 +10,8 @@ type props = {
 export function UsersPage({ users } : props) {
   const navigate = useNavigate();
   return (
-    <Container p={"6"}>
-      <Heading size={"8"} weight={"bold"} className="text-xl pb-1" style={{ color: "var(--slate-12)" }}>
-        <Link to="/">Your OnRabble Server</Link>
-      </Heading>
-      <Box pt={"4"}>
+    <>
+      <Box>
       <Heading style={{color: "var(--indigo-9)"}}>User Management</Heading>
       <Text>Manage your users here. You can ban users, manage their roles, or inspect their activity.</Text>
       <Flex pt={"2"} gap={"4"}>
@@ -59,6 +56,6 @@ export function UsersPage({ users } : props) {
           </Flex>
         ))}
       </Flex>
-    </Container>
+    </>
   )
 }

@@ -54,11 +54,8 @@ export function UserPage({ username, id, isBanned, messages, hasMore, session_ac
   }, [isBanned])
 
   return (
-    <Container p={"6"}>
-      <Heading size={"8"} weight={"bold"} className="text-xl pb-1" style={{ color: "var(--slate-12)" }}>
-        <Link to="/">OnRabble Server</Link>
-      </Heading>
-      <Flex direction="column" pt={"4"} gap={"6"}>
+    <>
+      <Flex direction="column" gap={"6"}>
         <Box>
           <Heading style={{color: "var(--indigo-10)"}} size={"7"}>User Information</Heading>
           <Text>Here you can set a users roles, inspect their activity, and ban them from the chatserver if needed.</Text>
@@ -111,6 +108,6 @@ export function UserPage({ username, id, isBanned, messages, hasMore, session_ac
         </Box>
         <RecentActivity session_activity={session_activity} />
       </Flex>
-    </Container>
+    </>
   )
 }
