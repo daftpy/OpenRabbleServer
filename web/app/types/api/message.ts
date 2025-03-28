@@ -1,10 +1,10 @@
-import type { MessageType } from "../components/message";
+import type { Message } from "../components/message";
 
 export type FetchMessagesResponse = {
     type: string;
     sender: string;
     payload: {
-        messages: MessageType[];
+        messages: Message[];
         has_more: boolean;
     }
 }

@@ -9,7 +9,8 @@ export interface ChatMessageType {
   channel: string;
   message: string;
   authored_at: string;
-  id: number;
+  id: number; // These do not actually exist on the ChatMessageType (live messages) needs a serious refactor
+  owner_id: string; // These do not actually exist on the ChatMessageType (live messages) needs a serious refactor
 }
 
 export function LiveView() {

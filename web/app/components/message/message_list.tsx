@@ -3,11 +3,11 @@ import { useReducer, memo } from "react";
 import { CheckIcon, Cross2Icon } from "@radix-ui/react-icons";
 import { useFetcher } from "react-router";
 import { MessageSelectActions, type MessageSelectAction, type MessageSelectState } from "~/types/reducers/messageSelectReducer";
-import type { MessageType } from "~/types/components/message";
-import { Message } from "./message";
+import type { Message } from "~/types/components/message";
+import { MessageRow } from "./message_row";
 
 type Props = {
-  messages: MessageType[];
+  messages: Message[];
   hidePermaLink: boolean;
 };
 
@@ -35,7 +35,7 @@ export const MessageList = memo(({ messages, hidePermaLink }: Props) => {
   };
 
   const selectAllMessages = () => {
-    const ids = messages.map((msg : MessageType) => msg.id);
+    const ids = messages.map((msg : Message) => msg.id);
     
     dispatch({ type: MessageSelectActions.SELECT_MESSAGES, ids });
   };
@@ -76,7 +76,7 @@ export const MessageList = memo(({ messages, hidePermaLink }: Props) => {
       )}
 
       {messages.length > 0 ? (messages.map((message, index) => (
-        <Message
+        <MessageRow
           key={index}
           isLast={index === messages.length - 1}
           meessage={message}

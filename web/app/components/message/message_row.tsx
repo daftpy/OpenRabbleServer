@@ -1,29 +1,21 @@
 import { Link1Icon, PersonIcon, TimerIcon } from "@radix-ui/react-icons";
 import { Box, Checkbox, Flex, Heading, Text } from "@radix-ui/themes";
-import { Link, useFetcher } from "react-router";
+import { Link } from "react-router";
 import { formatDistance, parseISO } from "date-fns";
-import type { MessageType } from "~/types/components/message";
+import type { Message } from "~/types/components/message";
 
 type props = {
-  meessage: MessageType;
+  meessage: Message;
   isLast: boolean;
   hidePermaLink: boolean;
   isSelected: boolean;
   onSelect: (id: number) => void;
 }
 
-export function Message(props : props) {
+export function MessageRow(props : props) {
   const borderStyle = props.isLast ? "none" : "2px solid var(--indigo-3)"
   const sent = formatDistance(parseISO(props.meessage.authored_at), new Date(), { addSuffix: true });
-  const messageFetcher = useFetcher();
 
-  const deleteMe = () => {
-
-    messageFetcher.submit(
-      { id: props.meessage.id },
-      { method: "DELETE", action: "/messages" } // Calls the action in the route
-    );
-  }
   return (
     <Flex direction="column" gap="1" style={{borderBottom: borderStyle}} py={"2"}> 
       <Flex direction={"column"} px={"1"}>
