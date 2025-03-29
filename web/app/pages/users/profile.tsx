@@ -102,7 +102,7 @@ export function UserPage({ username, id, isBanned, messages, hasMore, session_ac
           </Flex>
         </Box>
         <Box>
-          <Heading style={{color: "var(--subheading-color)"}}>Session Activity</Heading>
+          <Heading color="indigo">Session Activity</Heading>
           <Text>You can review a users session activity, showing you when sessions begin, end, and their duration.</Text>
         </Box>
         <RecentActivity session_activity={session_activity} />

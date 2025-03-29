@@ -14,15 +14,17 @@ body {
 .dark {
   --primary-text-color: #c8cee3; 
   --secondary-button-color: var(--indigo-2);
-  --subheading-color: var(--indigo-11);
+  --subheading-color: var(--indigo-9);
   --subheading2-color: var(--indigo-8);
   --highlighted-color: var(--blue-10);
-  --muted-text-color: var(--blue-9);
+  --muted-text-color: var(--indigo-11);
+  --menu-button: var(--indigo-3);
 }
 
 .light {
   --primary-text-color: #0a0d33;
   --secondary-button-color: #42467a;
+  --menu-button: var(--indigo-9);
   --subheading-color:rgb(60, 65, 165);
   --subheading2-color: rgb(20, 25, 121);
   --highlighted-color: var(--crimson-9);

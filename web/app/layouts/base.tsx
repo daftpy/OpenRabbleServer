@@ -11,10 +11,10 @@ export default function BaseLayout() {
           <Link to="/">OnRabble Server</Link>
         </Heading>
         <Flex gap={"3"} direction={{initial: "column", sm: "row"}} pt={"4"}>
-          <Button onClick={() => navigate("/users")}><PersonIcon /> User Management</Button>
-          <Button onClick={() => navigate("/messages")}><MagnifyingGlassIcon /> Messages</Button>
-          <Button onClick={() => navigate("/about")}><GearIcon /> Settings</Button>
-          <Button onClick={() => navigate("/about")}><LockClosedIcon /> Keycloak</Button>
+          <Button onClick={() => navigate("/users")} style={{backgroundColor: "var(--menu-button)"}}><PersonIcon /> User Management</Button>
+          <Button onClick={() => navigate("/messages")} style={{backgroundColor: "var(--menu-button)"}}><MagnifyingGlassIcon /> Messages</Button>
+          <Button onClick={() => navigate("/about")} style={{backgroundColor: "var(--menu-button)"}}><GearIcon /> Settings</Button>
+          <Button onClick={() => navigate("/about")} style={{backgroundColor: "var(--menu-button)"}}><LockClosedIcon /> Keycloak</Button>
         </Flex>
       </Box>
       <Outlet />

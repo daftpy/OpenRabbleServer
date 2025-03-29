@@ -54,7 +54,7 @@ export function RecentActivity({ session_activity } : props) {
   return (
     <Box>
       <Flex justify={"between"} pb={"2"}>
-        <Heading color="indigo">Recent Activity</Heading>
+        <Heading style={{color: "var(--subheading-color)"}}>Recent Activity</Heading>
         <Flex  gap={"2"}>
           <Button size="2"><LapTimerIcon /> Sessions</Button>
           <Button size="2" color="gray" style={buttonStyle}><ChatBubbleIcon /> Messages</Button>
