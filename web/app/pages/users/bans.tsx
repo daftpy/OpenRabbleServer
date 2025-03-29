@@ -1,6 +1,7 @@
 import { PersonIcon } from "@radix-ui/react-icons";
 import { Button, Flex, Heading, Table, Text } from "@radix-ui/themes";
 import { formatDistance, parseISO } from "date-fns";
+import { Link, useFetcher } from "react-router";
 import type { BanRecord } from "~/types/components/users";
 
 type props = {
@@ -8,6 +9,21 @@ type props = {
 }
 
 export function BansPage(props : props) {
+  const fetcher = useFetcher();
+
+  const pardon = (record: BanRecord) => {
+    console.log("initiating pardoon");
+    fetcher.submit(
+      {
+        banId: record.id,
+        intent: "pardon"
+      },
+      {
+        method: "POST",
+        action: `/users/profile/${record.banished_username}`,
+      }
+    )
+  }
   return (
     <Flex direction={"column"}>
       <Heading color="indigo">Bans</Heading>
@@ -31,7 +47,7 @@ export function BansPage(props : props) {
                 <Flex gap={"2"} align={"center"} justify={"start"}>
                   <PersonIcon style={{flexShrink: "0"}} />
                   <Text wrap={"nowrap"} weight={"bold"} truncate>
-                    {record.banished_username}
+                    <Link to={`/users/profile/${record.banished_username}`}>{record.banished_username}</Link>
                   </Text>
                 </Flex>
               </Table.RowHeaderCell>
@@ -63,7 +79,8 @@ export function BansPage(props : props) {
                 )}
               </Table.Cell>
               <Table.Cell style={{width: "30px"}} align="right">
-                <Button color="red" size={"1"} disabled={record.end !== null && new Date(record.end) <= new Date()}>
+                <Button color="red" size={"1"} disabled={record.end !== null && new Date(record.end) <= new Date() || record.pardoned}
+                  onClick={() => pardon(record)}>
                   Pardon
                 </Button>
               </Table.Cell>

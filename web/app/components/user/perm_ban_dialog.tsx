@@ -18,7 +18,8 @@ export function PermBanDialog(props: props) {
     userFetcher.submit(
       {
         reason: reason,
-        banishedId: props.id
+        banishedId: props.id,
+        intent: "ban"
       },
       {
         method: "POST",

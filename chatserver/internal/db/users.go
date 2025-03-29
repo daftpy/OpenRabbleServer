@@ -16,13 +16,16 @@ func FetchUsers(db *pgxpool.Pool, username string) ([]models.User, error) {
 			u.id, 
 			u.username,
 			CASE 
-				WHEN b.banished_id IS NOT NULL THEN TRUE 
+				WHEN b.id IS NOT NULL THEN TRUE 
 				ELSE FALSE 
 			END AS banned
 		FROM keycloak.public.user_entity u
 		LEFT JOIN chatserver.bans b 
 			ON u.id = b.banished_id 
-			AND (b.end_time IS NULL OR b.end_time > NOW())
+			AND b.pardoned = FALSE
+			AND (
+				b.end_time IS NULL OR b.end_time > NOW()
+			)
 	`
 
 	var args []interface{}
@@ -31,7 +34,6 @@ func FetchUsers(db *pgxpool.Pool, username string) ([]models.User, error) {
 		args = append(args, username)
 	}
 
-	// Ensure ORDER BY always comes after WHERE
 	query += " ORDER BY u.id, b.start_time DESC"
 
 	rows, err := db.Query(ctx, query, args...)

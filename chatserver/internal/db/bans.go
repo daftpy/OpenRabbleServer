@@ -44,6 +44,16 @@ func BanUser(db *pgxpool.Pool, ownerID, banishedID, reason string, duration int)
 	return nil
 }
 
+func PardonUser(db *pgxpool.Pool, banishedID int) error {
+	query := `
+		UPDATE chatserver.bans
+		SET pardoned = TRUE
+		WHERE id = $1;
+	`
+	_, err := db.Exec(context.Background(), query, banishedID)
+	return err
+}
+
 func IsUserBanned(db *pgxpool.Pool, banishedID string) (bool, error) {
 	ctx := context.Background()
 

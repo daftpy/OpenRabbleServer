@@ -20,7 +20,8 @@ export function TempBanDialog(props: props) {
       {
         reason: reason,
         duration: duration,
-        banishedId: props.id
+        banishedId: props.id,
+        intent: "ban"
       },
       {
         method: "POST",

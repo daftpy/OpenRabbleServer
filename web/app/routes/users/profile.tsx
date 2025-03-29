@@ -1,7 +1,7 @@
 import RouteProtector from "~/components/route_protector";
 import { UserPage } from "~/pages/users/profile";
 import type { Route } from "./+types/profile";
-import { banUser, fetchUser } from "~/api/users";
+import { banUser, fetchUser, pardonUser } from "~/api/users";
 
 // Get the users information by username.
 export async function loader({ params }: Route.LoaderArgs) {
@@ -34,26 +34,40 @@ export function HydrateFallback() {
 }
 
 export async function clientAction({ params, request }: Route.ActionArgs) {
-  if (request.method !== "POST") {
-    return new Response("Method Not Allowed", { status: 405 });
-  }
-  // Get the formdata
   const formData = await request.formData();
+  const intent = formData.get("intent")?.toString();
 
-  // Check for banishedId
-  const banishedId = formData.get("banishedId")?.toString().trim();
-  if (!banishedId) {
-    throw new Response("Missing required field: banishedId", { status: 400 });
+  switch (intent) {
+    case "ban": {
+      const banishedId = formData.get("banishedId")?.toString().trim();
+      if (!banishedId) {
+        throw new Response("Missing required field: banishedId", { status: 400 });
+      }
+
+      const reason = formData.get("reason")?.toString().trim() || null;
+      const duration = formData.get("duration")?.toString().trim() || null;
+      const parsedDuration = duration ? parseInt(duration, 10) : null;
+
+      return await banUser({ banished_id: banishedId, reason, duration: parsedDuration });
+    }
+
+    case "pardon": {
+      const banIdRaw = formData.get("banId")?.toString().trim();
+      if (!banIdRaw) {
+        throw new Response("Missing required field: banId", { status: 400 });
+      }
+
+      const banId = parseInt(banIdRaw, 10);
+      if (isNaN(banId)) {
+        throw new Response("Invalid banId", { status: 400 });
+      }
+
+      return await pardonUser(banId);
+    }
+
+    default:
+      return new Response("Invalid intent", { status: 400 });
   }
-
-  // Get the reason or null
-  const reason = formData.get("reason")?.toString().trim() || null;
-
-  // Get the duration
-  const duration = formData.get("duration")?.toString().trim() || null;
-  const parsedDuration = duration ? parseInt(duration, 10) : null;
-
-  return await banUser({ banished_id: banishedId, reason, duration: parsedDuration });
 }
 
 export default function UserRoute({loaderData,} : Route.ComponentProps) {

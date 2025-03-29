@@ -56,3 +56,16 @@ export async function banUser(payload: BanUserPayload) : Promise<BanUserResponse
 
   return { message: "User banned succesfully" };
 }
+
+export async function pardonUser(banId: number): Promise<{ message: string }> {
+  const response = await fetch(`https://chat.localhost/users/ban?ban_id=${banId}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Response("Failed to pardon user", { status: response.status });
+  }
+  console.log(response);
+
+  return { message: "User pardoned successfully" };
+}
