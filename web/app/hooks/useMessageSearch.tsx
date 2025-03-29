@@ -20,6 +20,7 @@ function reducer(state: MessageSearchState, action: MessageSearchAction) {
     case MessageSearchActions.NextPage:
       return { ...state, page: state.page + 1, searching: true };
     case MessageSearchActions.PrevPage:
+      if (state.page <= 0) return state; // Return if already at page 0
       return { ...state, page: state.page - 1, searching: true };
     case MessageSearchActions.ExecuteSearch:
       return { ...state, keyword: state.temporaryKeyword, page: 0, searching: true };
@@ -33,7 +34,7 @@ function reducer(state: MessageSearchState, action: MessageSearchAction) {
 export function useMessageSearch({userId, messages, hasMore } : {userId?: string, messages: any, hasMore: boolean}) {
   const [state, dispatch] = useReducer(reducer, { keyword: "", temporaryKeyword: "", activeFilters: [], availableFilters: [], messages: messages, has_more: hasMore, page: 0, searching: false });
   // Used to fetch messages
-  const messageFetcher = useFetcher({key: "my-key"});
+  const messageFetcher = useFetcher({key: "my"});
 
   // Perform the search
   const searchMessages = useCallback((limit = 10, offset = state.page * limit) => {
@@ -63,7 +64,16 @@ export function useMessageSearch({userId, messages, hasMore } : {userId?: string
     // If data was received, update the messages
     if (messageFetcher.data?.messages) {
       console.log("Messages fetched?");
-      dispatch({ type: MessageSearchActions.SetMessages, messages: messageFetcher.data.messages, hasMore: messageFetcher.data.has_more });
+      const newMessages = messageFetcher.data.messages;
+      const hasMore = messageFetcher.data.has_more;
+
+      // If no messages and we're not on page 0, go back a page
+      if (newMessages.length === 0 && state.page > 0) {
+        dispatch({ type: MessageSearchActions.PrevPage });
+        return;
+      }
+
+      dispatch({ type: MessageSearchActions.SetMessages, messages: newMessages, hasMore: hasMore });
     }
   }, [messageFetcher.data]);
 
