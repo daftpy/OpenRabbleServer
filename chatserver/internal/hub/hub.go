@@ -115,11 +115,17 @@ func (h *Hub) handleMessage(msg messages.BaseMessage) {
 		payload, ok := msg.Payload.(models.ChatMessage)
 		if !ok {
 			log.Println("invalid chat message payload")
-			return
+			break
 		}
 
 		// Get cacheID from CacheChatMessage
-		cacheID := h.MessageCache.CacheChatMessage(payload)
+		cacheID, err := h.MessageCache.AttemptCacheWithRateLimit(payload.OwnerID, payload)
+		if err != nil {
+			// The user is blocked by rate limit or something else went wrong
+			log.Printf("Rate limited or error: %v", err)
+			// Possibly send a “rate limit exceeded” message back to the client
+			break
+		}
 
 		// Attach cacheID to msg.Payload for broadcasting
 		payload.CacheID = cacheID
