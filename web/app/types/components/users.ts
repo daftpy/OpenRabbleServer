@@ -17,6 +17,7 @@ export type BanRecord = {
   owner_id: string;
   banished_id: string;
   banished_username: string;
+  reason: string;
   start: string;    // ISO timestamp
   end: string;      // ISO timestamp
   duration: string; // "HH:MM:SS.ssssss"

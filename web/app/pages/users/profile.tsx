@@ -9,6 +9,7 @@ import { useMessageSearch } from "~/hooks/useMessageSearch";
 import { useEffect, useMemo, useState } from "react";
 import { TempBanDialog } from "~/components/user/temp_ban_dialog";
 import { PermBanDialog } from "~/components/user/perm_ban_dialog";
+import { useNavigate } from "react-router";
 
 // Ban dialog types that can appear
 export enum BanDialog {
@@ -19,6 +20,7 @@ export enum BanDialog {
 export function UserPage({ username, id, isBanned, messages, hasMore, session_activity } : { username: string, id: string, isBanned: boolean, messages: any, hasMore: boolean, session_activity: SessionActivity[] }) {
   const { state, messageFetcher, dispatch, nextPage, prevPage } = useMessageSearch({ messages, userId: id, hasMore: hasMore });
   const [dialog, setDialog] = useState<BanDialog | null>(null); // Whether temp or perm ban forms appear
+  const navigate = useNavigate();
 
   // Reset the dialog when ban status changes
   useEffect(() => {
@@ -28,7 +30,7 @@ export function UserPage({ username, id, isBanned, messages, hasMore, session_ac
   const banButton = useMemo(() => {
     if (isBanned) {
       return (
-        <Button color="red">Unban</Button>
+        <Button color="red" onClick={() => navigate("/users/bans")}>Unban</Button>
       )
     }
     return (

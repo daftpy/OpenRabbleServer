@@ -44,16 +44,16 @@ export function BansPage(props : props) {
           {props.records.length > 0 && props.records.map((record : BanRecord) => (
             <Table.Row align={"center"} key={record.id}>
               <Table.RowHeaderCell maxWidth={"120px"}>
-                <Flex gap={"2"} align={"center"} justify={"start"}>
+                <Flex gap={"2"} align={"center"} justify={"start"} >
                   <PersonIcon style={{flexShrink: "0"}} />
                   <Text wrap={"nowrap"} weight={"bold"} truncate>
-                    <Link to={`/users/profile/${record.banished_username}`}>{record.banished_username}</Link>
+                    <Link to={`/users/profile/${record.banished_username}`} style={{color: "var(--ruby-9)"}}>{record.banished_username}</Link>
                   </Text>
                 </Flex>
               </Table.RowHeaderCell>
               <Table.Cell style={{maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis"}}>
                 <Text wrap={"nowrap"} style={{textOverflow: "ellipsis"}}>
-                  This is a really long reason hahahahaha This is a really long reason hahahahaha
+                  { record.reason }
                 </Text>
               </Table.Cell>
               <Table.Cell  style={{width: "50px", textWrap: "nowrap"}}>
