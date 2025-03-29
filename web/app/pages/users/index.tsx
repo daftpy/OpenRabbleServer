@@ -1,5 +1,5 @@
 import { ArchiveIcon, CrossCircledIcon, MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons";
-import { Box, Button, Container, DropdownMenu, Flex, Heading, Text, TextField } from "@radix-ui/themes";
+import { Box, Button, DropdownMenu, Flex, Heading, Text, TextField } from "@radix-ui/themes";
 import { Link, useNavigate } from "react-router";
 import type { User } from "~/types/components/users";
 

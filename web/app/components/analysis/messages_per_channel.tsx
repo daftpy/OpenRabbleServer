@@ -1,8 +1,7 @@
 import { Box, Heading } from "@radix-ui/themes";
-import { useEffect, useState, useMemo } from "react";
-import type { ChannelMessageCount, ServerMessage } from "~/messages";
-import { emitter } from "~/root";
+import { useEffect, useState } from "react";
 import { BarChart } from "../charts/bar_chart";
+import type { ChannelMessageCount } from "~/types/api/activity";
 
 export function MessagesPerChannel({ channelData } : {channelData : ChannelMessageCount[]}) {
   // const [channelData, setChannelData] = useState<ChannelMessageCount[]>([]);
@@ -11,9 +10,8 @@ export function MessagesPerChannel({ channelData } : {channelData : ChannelMessa
   useEffect(() => {
     // Use memo to prevent rerenders when data does not change
     if (channelData) {
-      console.log("CHANNEL DATA", channelData);
-      const labels = channelData.map((channel : any) => channel.channel);
-      const data = channelData.map((channel : any) => channel.message_count);
+      const labels = channelData.map((channel : ChannelMessageCount) => channel.channel);
+      const data = channelData.map((channel : ChannelMessageCount) => channel.message_count);
 
       // Data for the bar chart, use memo here too
       setChartData({

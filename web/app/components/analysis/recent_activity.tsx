@@ -1,8 +1,6 @@
 import { Box, Button, Dialog, Flex, Heading, useThemeContext } from "@radix-ui/themes"
 import { LineChart } from "../charts/line_chart"
-import { emitter } from "~/root";
 import { useEffect, useState } from "react";
-import type { RecentActivityMessage, ServerMessage } from "~/messages";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
 import { ChatBubbleIcon, LapTimerIcon } from "@radix-ui/react-icons";

@@ -1,12 +1,9 @@
 import { Box, Button, DropdownMenu, Flex, Text } from "@radix-ui/themes";
-import { useReducer, memo } from "react";
+import { memo } from "react";
 import { CheckIcon, Cross2Icon } from "@radix-ui/react-icons";
-import { useFetcher } from "react-router";
-import { MessageSelectActions, type MessageSelectAction, type MessageSelectState } from "~/types/reducers/messageSelectReducer";
 import type { Message } from "~/types/components/message";
 import { MessageRow, type UnifiedMessage } from "./message_row";
 import { useMessageSelection } from "~/hooks/useMessageSelection";
-import type { ChatMessageType } from "./live_view";
 
 type Props = {
   // messages: Message[] | ChatMessageType[];
@@ -15,16 +12,16 @@ type Props = {
 };
 
 export const MessageList = memo(({ messages, hidePermaLink }: Props) => {
-// 1) Define a user-defined type guard in the same file or a shared utils file
-function isMessage(m: UnifiedMessage): m is Message {
-  return m.id !== undefined;
-}
+  // 1) A type guard to determine if Message or ChatMessageType (live messages)
+  function isMessage(m: UnifiedMessage): m is Message {
+    return m.id !== undefined;
+  }
 
-// 2) Use this type guard when filtering your messages
-const messagesWithId = messages.filter(isMessage); // now typed as Message[]
+  // 2) Filter the messages with the id (Message type)
+  const messagesWithId = messages.filter(isMessage); // now typed as Message[]
 
-const { selected, selectMessage, selectAllMessages, deleteMessages } = 
-  useMessageSelection(messagesWithId);
+  const { selected, selectMessage, selectAllMessages, deleteMessages } = 
+    useMessageSelection(messagesWithId);
 
   return (
     <Box>

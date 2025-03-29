@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { fetchChannels } from "~/api/channels";
 import RouteProtector from "~/components/route_protector";
 import { HomePage } from "~/pages/home";
-import type { SessionActivityResult } from "~/types/api/activity";
 
 export type SessionActivity = {
   session_date: string; // e.g., "2025-02-23"

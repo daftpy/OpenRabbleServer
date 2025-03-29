@@ -32,19 +32,19 @@ export default function ChannelInput() {
   return (
     <>
       <Flex direction="row" gap="4">
-          <TextField.Root 
-            placeholder="Channel Name"
-            value={newChannel}
-            onChange={(e) => setNewChannel(e.target.value)}
-          />
-          <TextField.Root
-            placeholder="description"
-            value={newDescription}
-            onChange={(e) => setNewDescription(e.target.value)}
-            className="flex-grow"
-          >
-          </TextField.Root>
-          <Button onClick={addChannel} style={{ boxShadow: "var(--shadow-3)" }} color="jade"><PlusIcon/>Add</Button>
+        <TextField.Root 
+          placeholder="Channel Name"
+          value={newChannel}
+          onChange={(e) => setNewChannel(e.target.value)}
+        />
+        <TextField.Root
+          placeholder="description"
+          value={newDescription}
+          onChange={(e) => setNewDescription(e.target.value)}
+          className="flex-grow"
+        >
+        </TextField.Root>
+        <Button onClick={addChannel} style={{ boxShadow: "var(--shadow-3)" }} color="jade"><PlusIcon/>Add</Button>
         </Flex>
     </>
   )

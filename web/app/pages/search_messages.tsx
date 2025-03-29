@@ -1,5 +1,4 @@
-import { Box, Button, Container, Flex, Heading, Text } from "@radix-ui/themes";
-import { Link } from "react-router";
+import { Box, Button, Flex, Heading, Text } from "@radix-ui/themes";
 import { MessageList } from "~/components/message/message_list";
 import { MessageSearchInput } from "~/components/message/search_input";
 import { useMessageSearch } from "~/hooks/useMessageSearch";

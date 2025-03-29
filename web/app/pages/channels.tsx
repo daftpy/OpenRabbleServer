@@ -2,8 +2,7 @@ import { MessagesPerChannel } from "~/components/analysis/messages_per_channel";
 import ChannelInput from "~/components/channel/channel_input";
 import ChannelList from "~/components/channel/channel_list";
 import "chart.js/auto"
-import { Box, Container, Flex, Heading, Text } from "@radix-ui/themes";
-import { Link } from "react-router";
+import { Box, Flex, Heading, Text } from "@radix-ui/themes";
 import type { Channel } from "~/types/components/channel";
 import type { ChannelMessageCount } from "~/types/api/activity";
 

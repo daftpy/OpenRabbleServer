@@ -2,8 +2,6 @@ import { Link1Icon, PersonIcon, TimerIcon } from "@radix-ui/react-icons";
 import { Box, Checkbox, Flex, Heading, Text } from "@radix-ui/themes";
 import { Link } from "react-router";
 import { formatDistance, parseISO } from "date-fns";
-import type { Message } from "~/types/components/message";
-import type { ChatMessageType } from "./live_view";
 
 type props = {
   meessage: UnifiedMessage;
@@ -13,13 +11,14 @@ type props = {
   onSelect: (id: number) => void;
 }
 
+// Unifies the live ChatMessageType and Message types.
+// TODO: Refactor this out and fix the live types.
 export type UnifiedMessage = {
   channel: string;
   username: string;
   message: string;
   authored_at: string;
-  owner_id?: string;
-  // ...
+  owner_id?: string; // make owner_id optional
   id?: number; // Make id optional
 };
 
