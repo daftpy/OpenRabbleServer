@@ -17,6 +17,9 @@ type MessageCache struct {
 	ValkeyClient valkey.Client
 	DB           *pgxpool.Pool
 	flushMutex   sync.Mutex // Syncrhonize flush operations
+
+	WindowSeconds int
+	MessageLimit  int
 }
 
 // Lua script to handle both circular and flush caches
@@ -195,4 +198,10 @@ func (m *MessageCache) DeleteCachedMessage(cacheID int) bool {
 
 	log.Printf("Message with cacheID %d not found in cache.", cacheID)
 	return false
+}
+
+func (m *MessageCache) UpdateRateLimitSettings(limit int, window int) {
+	log.Printf("Updating rate limit: limit=%d, window=%ds", limit, window)
+	m.MessageLimit = limit
+	m.WindowSeconds = window
 }

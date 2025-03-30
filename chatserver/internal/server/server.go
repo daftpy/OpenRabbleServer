@@ -4,6 +4,7 @@ import (
 	"chatserver/internal/cache"
 	"chatserver/internal/client"
 	"chatserver/internal/db"
+	database "chatserver/internal/db"
 	"chatserver/internal/hub"
 	"chatserver/internal/messages"
 	"chatserver/internal/server/handlers"
@@ -137,7 +138,7 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 	// If webclient (admin dash), send analytics
 	if clientID == "WebClient" {
 		// Send the channel message count analytics
-		counts, err := db.FetchMessageCountByChannel(s.db)
+		counts, err := database.FetchMessageCountByChannel(s.db)
 		if err != nil {
 			log.Printf("Failed to get channel message counts")
 		}
@@ -145,7 +146,7 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 		client.SendMessage(analyticsMsg)
 
 		// Send the activity analytics
-		activity, err := db.FetchSessionActivity(s.db, "")
+		activity, err := database.FetchSessionActivity(s.db, "")
 		if err != nil {
 			log.Printf("Failed to get recent activity: %v", err)
 		}
@@ -222,6 +223,13 @@ func New(addr string, h hub.HubInterface, db *pgxpool.Pool, cache *cache.Message
 		db:         db,
 	}
 
+	// Set the rate limiter
+	rl, err := database.GetRateLimiterByID(db, 1)
+	if err != nil {
+		return nil, err
+	}
+	cache.UpdateRateLimitSettings(rl.MessageLimit, rl.WindowSeconds)
+
 	// Register handlers
 	RegisterRoutes(srv, mux, db, cache)
 
@@ -241,5 +249,5 @@ func RegisterRoutes(srv *Server, mux *http.ServeMux, db *pgxpool.Pool, cache *ca
 	mux.HandleFunc("/users/bans", handlers.HandleBanRecords(db))
 	mux.HandleFunc("/activity/sessions", handlers.HandleRecentActivity(db))
 	mux.HandleFunc("/activity/channels", handlers.HandleChannelActivity(db))
-	mux.HandleFunc("/ratelimits", handlers.HandleRateLimiter(db))
+	mux.HandleFunc("/ratelimits", handlers.HandleRateLimiter(db, cache))
 }

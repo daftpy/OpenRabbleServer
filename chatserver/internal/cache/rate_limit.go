@@ -54,7 +54,7 @@ func (m *MessageCache) CheckRateLimitValkey(userID string, limit int, ttlSeconds
 
 func (m *MessageCache) AttemptCacheWithRateLimit(userID string, msg models.ChatMessage) (int, error) {
 	// Allow 10 messages per 60s
-	allowed, err := m.CheckRateLimitValkey(userID, 10, 60)
+	allowed, err := m.CheckRateLimitValkey(userID, m.MessageLimit, m.WindowSeconds)
 	if err != nil {
 		return -1, fmt.Errorf("rate limit check failed: %v", err)
 	}

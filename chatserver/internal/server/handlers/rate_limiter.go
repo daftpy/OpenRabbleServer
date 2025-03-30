@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"chatserver/internal/cache"
 	database "chatserver/internal/db"
 	"chatserver/internal/models"
 	"encoding/json"
@@ -10,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func HandleRateLimiter(db *pgxpool.Pool) http.HandlerFunc {
+func HandleRateLimiter(db *pgxpool.Pool, cache *cache.MessageCache) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
@@ -45,6 +46,8 @@ func HandleRateLimiter(db *pgxpool.Pool) http.HandlerFunc {
 				http.Error(w, fmt.Sprintf("Failed to update rate limiter: %v", err), http.StatusInternalServerError)
 				return
 			}
+
+			cache.UpdateRateLimitSettings(payload.MessageLimit, payload.WindowSeconds)
 
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(map[string]string{"message": "Rate limit updated"})
