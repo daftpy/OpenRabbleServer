@@ -14,7 +14,7 @@ body {
 .dark {
   --primary-text-color: #c8cee3; 
   --secondary-button-color: var(--indigo-2);
-  --subheading-color: var(--indigo-9);
+  --subheading-color: var(--iris-9);
   --subheading2-color: var(--indigo-8);
   --highlighted-color: var(--blue-10);
   --muted-text-color: var(--indigo-11);

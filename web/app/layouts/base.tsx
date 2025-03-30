@@ -13,8 +13,12 @@ export default function BaseLayout() {
         <Flex gap={"3"} direction={{initial: "column", sm: "row"}} pt={"4"}>
           <Button onClick={() => navigate("/users")} style={{backgroundColor: "var(--menu-button)"}}><PersonIcon /> User Management</Button>
           <Button onClick={() => navigate("/messages")} style={{backgroundColor: "var(--menu-button)"}}><MagnifyingGlassIcon /> Messages</Button>
-          <Button onClick={() => navigate("/about")} style={{backgroundColor: "var(--menu-button)"}}><GearIcon /> Settings</Button>
-          <Button onClick={() => navigate("/about")} style={{backgroundColor: "var(--menu-button)"}}><LockClosedIcon /> Keycloak</Button>
+          <Button onClick={() => navigate("/settings")} style={{backgroundColor: "var(--menu-button)"}}><GearIcon /> Settings</Button>
+          <Button asChild>
+            <a href="https://keycloak.localhost/" target="_blank" rel="noopener noreferrer" style={{backgroundColor: "var(--menu-button)", display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px 16px', borderRadius: '4px'}}>
+              <LockClosedIcon /> Keycloak
+            </a>
+          </Button>        
         </Flex>
       </Box>
       <Outlet />

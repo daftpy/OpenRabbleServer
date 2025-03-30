@@ -9,12 +9,11 @@ export interface ChatMessageType {
   channel: string;
   message: string;
   authored_at: string;
-  id: number; // These do not actually exist on the ChatMessageType (live messages) needs a serious refactor
-  owner_id: string; // These do not actually exist on the ChatMessageType (live messages) needs a serious refactor
+  // id: number; // These do not actually exist on the ChatMessageType (live messages) needs a serious refactor
+  owner_id: string;
 }
 
 export function LiveView() {
-  // const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const { messages } = useWebSocket();
   // Track whether messages have been hydrated
   const [isHydrated, setIsHydrated] = useState(false);

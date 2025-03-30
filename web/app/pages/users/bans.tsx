@@ -65,15 +65,15 @@ export function BansPage(props : props) {
                 <Text>{record.end != null ? <>{formatDistance(parseISO(record.end), record.start).replace("about", "")}</> : <>Forever</>}</Text>
               </Table.Cell>
               <Table.Cell>
-                {record.end == null ? (
+                {record.pardoned ? (
+                  <>Pardoned</>
+                ) : record.end == null ? (
                   // If there is no 'end' property, the ban is permanent
                   <>Forever</>
                 ) : new Date(record.end) > new Date() ? (
-
                   // If the 'end' date has not passed, format how long until the ban expires
                   <Text wrap={"nowrap"}>{formatDistance(parseISO(record.end), new Date())}</Text>
                 ) : (
-
                   // If the 'end' date has passed, the ban has expired
                   <>Expired</>
                 )}

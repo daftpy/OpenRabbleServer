@@ -10,6 +10,7 @@ export default [
             route("profile/:userId", "routes/users/profile.tsx"),
             route("bans", "routes/users/bans.tsx"),
         ]),
+        route("settings", "routes/settings.tsx"),
         route("unauthorized", "routes/unauthorized.tsx"),
     ]),
 ] satisfies RouteConfig;

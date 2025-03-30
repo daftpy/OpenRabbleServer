@@ -32,8 +32,8 @@ export function MessageRow(props : props) {
         <Flex gap={"1"} align={"center"}>
           <Text size="1" weight={"bold"} style={{color: "var(--iris-10)"}}>{ props.meessage.channel } #</Text>
           <Flex align={"center"} justify={"between"} flexGrow={"1"}>
-            <Flex gap={"1"} align={"center"}><PersonIcon />
-              <Heading size="1" style={{color: "var(--link-color)"}}>
+            <Flex gap={"1"} align={"center"} style={{color: "var(--indigo-12)"}}><PersonIcon />
+              <Heading size="1">
                 <Link to={`/users/profile/${props.meessage.username}`}>{ props.meessage.username }</Link>
               </Heading>
             </Flex>

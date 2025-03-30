@@ -29,6 +29,7 @@ export interface ChatMessage extends Message {
     channel: string;
     authored_at: string;
     id: number;
+    owner_id: string;
   }
 }
 
