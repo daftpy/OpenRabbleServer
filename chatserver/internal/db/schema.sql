@@ -1,5 +1,13 @@
 CREATE SCHEMA IF NOT EXISTS chatserver;
 
+CREATE TABLE IF NOT EXISTS chatserver.rate_limiter (
+    id SERIAL PRIMARY KEY,
+    owner_id VARCHAR(36) NOT NULL UNIQUE,
+    message_limit INT NOT NULL DEFAULT 10,
+    window_seconds INT NOT NULL DEFAULT 60,
+    updated_at TIMESTAMP DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS chatserver.channels (
     id SERIAL PRIMARY KEY,
     name VARCHAR(24) NOT NULL UNIQUE,

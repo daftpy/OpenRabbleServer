@@ -241,4 +241,5 @@ func RegisterRoutes(srv *Server, mux *http.ServeMux, db *pgxpool.Pool, cache *ca
 	mux.HandleFunc("/users/bans", handlers.HandleBanRecords(db))
 	mux.HandleFunc("/activity/sessions", handlers.HandleRecentActivity(db))
 	mux.HandleFunc("/activity/channels", handlers.HandleChannelActivity(db))
+	mux.HandleFunc("/ratelimits", handlers.HandleRateLimiter(db))
 }

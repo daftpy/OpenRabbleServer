@@ -39,6 +39,11 @@ func Connect() (*pgxpool.Pool, error) {
 
 	log.Println("Database schema applied successfully.")
 
+	if err := ensureDefaultRateLimit(dbPool); err != nil {
+		log.Println("Failed to ensure default rate limiter row:", err)
+		return nil, err
+	}
+
 	// Test query to verify connection works
 	if err := testQuery(dbPool); err != nil {
 		log.Println("Test query failed:", err)
