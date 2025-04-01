@@ -1,6 +1,9 @@
-package messages
+package api
 
-import "chatserver/internal/models"
+import (
+	"chatserver/internal/messages"
+	"chatserver/internal/models"
+)
 
 const (
 	SessionActivityMessageType = "session_activity"
@@ -10,8 +13,8 @@ type SessionActivityPayload struct {
 	Activity []models.SessionActivity `json:"session_activity"`
 }
 
-func NewSessionActivityMessage(activity []models.SessionActivity) BaseMessage {
-	return BaseMessage{
+func NewSessionActivityMessage(activity []models.SessionActivity) messages.BaseMessage {
+	return messages.BaseMessage{
 		Type:   SessionActivityMessageType,
 		Sender: "Server",
 		Payload: SessionActivityPayload{

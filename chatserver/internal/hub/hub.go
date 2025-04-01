@@ -4,6 +4,7 @@ import (
 	"chatserver/internal/cache"
 	"chatserver/internal/db"
 	"chatserver/internal/messages"
+	"chatserver/internal/messages/chat"
 	"chatserver/internal/models"
 	"fmt"
 	"log"
@@ -68,7 +69,7 @@ func (h *Hub) UnregisterClient(client ClientInterface, clientID string) {
 		closeClientSendChannel(client)
 
 		// Broadcast the disconnected message
-		msg := messages.NewUserStatusMessage(client.GetUsername(), false)
+		msg := chat.NewUserStatusMessage(client.GetUsername(), false)
 		h.Broadcast(msg)
 
 		log.Printf("User unregistered: %s", client.GetUsername())
@@ -107,7 +108,7 @@ It currently supports chat messages and user connection updates.
 */
 func (h *Hub) handleMessage(msg messages.BaseMessage) {
 	switch msg.Type {
-	case messages.ChatMessageType:
+	case chat.ChatMessageType:
 		log.Printf("Handling chat message from: %s", msg.Sender)
 		log.Printf("DEBUG: msg.Payload actual type: %T", msg.Payload)
 
@@ -136,11 +137,11 @@ func (h *Hub) handleMessage(msg messages.BaseMessage) {
 		// Now broadcast with cacheID included
 		h.Broadcast(msg)
 
-	case messages.UserStatusMessageType:
+	case chat.UserStatusMessageType:
 		log.Printf("Handling user status message for: %s - %v", msg.Sender, msg.Payload)
 		h.Broadcast(msg)
 
-	case messages.ConnectedUsersMessageType:
+	case chat.ConnectedUsersMessageType:
 		log.Println("Sending connected users list")
 		h.Broadcast(msg)
 

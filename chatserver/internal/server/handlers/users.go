@@ -2,7 +2,7 @@ package handlers
 
 import (
 	database "chatserver/internal/db"
-	"chatserver/internal/messages"
+	"chatserver/internal/messages/api"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -21,11 +21,11 @@ func HandleUsers(db *pgxpool.Pool) http.HandlerFunc {
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
-		payload := messages.UserSearchResultPayload{
+		payload := api.UserSearchResultPayload{
 			Users: users,
 		}
 
-		response := messages.NewUserSearchResultMessage(payload)
+		response := api.NewUserSearchResultMessage(payload)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 	}
@@ -175,7 +175,7 @@ func HandleBanRecords(db *pgxpool.Pool) http.HandlerFunc {
 		}
 
 		// Create message payload
-		response := messages.NewBanRecordsResultMessage(banRecords, hasMore)
+		response := api.NewBanRecordsResultMessage(banRecords, hasMore)
 
 		// Send response
 		w.Header().Set("Content-Type", "application/json")

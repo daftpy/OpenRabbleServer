@@ -3,7 +3,7 @@ package handlers
 import (
 	"chatserver/internal/cache"
 	database "chatserver/internal/db"
-	"chatserver/internal/messages"
+	"chatserver/internal/messages/api"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -54,13 +54,13 @@ func HandleMessages(db *pgxpool.Pool, cache *cache.MessageCache) http.HandlerFun
 			}
 
 			// Wrap messages in the correct struct
-			payload := messages.MessageSearchResultPayload{
+			payload := api.MessageSearchResultPayload{
 				Messages: search_messages, // Fixing struct usage
 				HasMore:  hasMore,
 			}
 
 			// Use NewMessageSearchResultMessage with correct payload
-			responseMessage := messages.NewMessageSearchResultMessage(payload)
+			responseMessage := api.NewMessageSearchResultMessage(payload)
 
 			// Send JSON response
 			w.Header().Set("Content-Type", "application/json")

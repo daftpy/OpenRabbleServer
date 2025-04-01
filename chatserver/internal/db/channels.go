@@ -1,7 +1,7 @@
 package db
 
 import (
-	"chatserver/internal/messages"
+	"chatserver/internal/messages/api"
 	"chatserver/internal/models"
 	"context"
 	"database/sql"
@@ -115,7 +115,7 @@ func UpdateChannel(db *pgxpool.Pool, ID int, name *string, description *string) 
 // It returns:
 //  1. A slice of ChannelMessageCount, where each item contains a channel name and a message count
 //  2. An error, if the query or row scanning fails
-func FetchMessageCountByChannel(db *pgxpool.Pool) ([]messages.ChannelMessageCount, error) {
+func FetchMessageCountByChannel(db *pgxpool.Pool) ([]api.ChannelMessageCount, error) {
 	rows, err := db.Query(context.Background(), `
 		SELECT channel, COUNT(*) AS message_count
 		FROM chatserver.chat_messages
@@ -126,9 +126,9 @@ func FetchMessageCountByChannel(db *pgxpool.Pool) ([]messages.ChannelMessageCoun
 	}
 	defer rows.Close()
 
-	var counts []messages.ChannelMessageCount
+	var counts []api.ChannelMessageCount
 	for rows.Next() {
-		var count messages.ChannelMessageCount
+		var count api.ChannelMessageCount
 		if err := rows.Scan(&count.Channel, &count.MessageCount); err != nil {
 			return nil, fmt.Errorf("failed to scan message count row: %w", err)
 		}

@@ -7,6 +7,8 @@ import (
 	database "chatserver/internal/db"
 	"chatserver/internal/hub"
 	"chatserver/internal/messages"
+	"chatserver/internal/messages/api"
+	"chatserver/internal/messages/chat"
 	"chatserver/internal/server/handlers"
 	"log"
 	"net/http"
@@ -124,7 +126,7 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 
 	// Notify the other clients that a new client has connected (if they did not connect through dashboard)
 	if clientID != "WebClient" {
-		newConnectionMessage := messages.NewUserStatusMessage(client.Username, true)
+		newConnectionMessage := chat.NewUserStatusMessage(client.Username, true)
 		s.hub.SendMessage(newConnectionMessage)
 	}
 
@@ -132,7 +134,7 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 	s.hub.RegisterClient(client, client.ClientID)
 
 	// Send Connected Users List to the new client
-	connectedMsg := messages.NewConnectedUsersMessage(s.hub.GetConnectedUsers())
+	connectedMsg := chat.NewConnectedUsersMessage(s.hub.GetConnectedUsers())
 	client.SendMessage(connectedMsg)
 
 	// If webclient (admin dash), send analytics
@@ -142,7 +144,7 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("Failed to get channel message counts")
 		}
-		analyticsMsg := messages.NewMessageCountByChannelMessage(counts)
+		analyticsMsg := api.NewMessageCountByChannelMessage(counts)
 		client.SendMessage(analyticsMsg)
 
 		// Send the activity analytics
@@ -150,14 +152,14 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("Failed to get recent activity: %v", err)
 		}
-		activityMsg := messages.NewSessionActivityMessage(activity)
+		activityMsg := api.NewSessionActivityMessage(activity)
 		client.SendMessage(activityMsg)
 	}
 
 	// Bulk send chat history to the new client
 	cachedMessages := s.hub.GetCachedChatMessages()
 	if len(cachedMessages) > 0 {
-		bulkMessage := messages.NewBulkChatMessages(cachedMessages)
+		bulkMessage := chat.NewBulkChatMessages(cachedMessages)
 		if err := conn.WriteJSON(bulkMessage); err != nil {
 			log.Printf("Failed to send bulk chat messages: %v", err)
 		} else {
@@ -174,7 +176,7 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Send active channels to the user
-	newActiveChannnelsMessage := messages.NewActiveChannelsMessage(channels)
+	newActiveChannnelsMessage := chat.NewActiveChannelsMessage(channels)
 	conn.WriteJSON(newActiveChannnelsMessage)
 
 	// Start Read/Write Pumps

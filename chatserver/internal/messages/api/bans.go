@@ -1,6 +1,9 @@
-package messages
+package api
 
-import "chatserver/internal/models"
+import (
+	"chatserver/internal/messages"
+	"chatserver/internal/models"
+)
 
 const (
 	BanRecordsResultType = "ban_records_result"
@@ -11,8 +14,8 @@ type BanRecordsPayload struct {
 	HasMore bool               `json:"has_more"`
 }
 
-func NewBanRecordsResultMessage(records []models.BanRecord, hasMore bool) BaseMessage {
-	return BaseMessage{
+func NewBanRecordsResultMessage(records []models.BanRecord, hasMore bool) messages.BaseMessage {
+	return messages.BaseMessage{
 		Type:   BanRecordsResultType,
 		Sender: "server",
 		Payload: BanRecordsPayload{

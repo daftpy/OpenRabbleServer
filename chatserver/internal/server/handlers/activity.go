@@ -2,7 +2,7 @@ package handlers
 
 import (
 	database "chatserver/internal/db"
-	"chatserver/internal/messages"
+	"chatserver/internal/messages/api"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -19,7 +19,7 @@ func HandleRecentActivity(db *pgxpool.Pool) http.HandlerFunc {
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
-		msg := messages.NewSessionActivityMessage(activity)
+		msg := api.NewSessionActivityMessage(activity)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(msg)
 	}
@@ -32,7 +32,7 @@ func HandleChannelActivity(db *pgxpool.Pool) http.HandlerFunc {
 			log.Printf("Failed to fetch channel message counts: %v", err)
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 		}
-		msg := messages.NewMessageCountByChannelMessage(activity)
+		msg := api.NewMessageCountByChannelMessage(activity)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(msg)
 	}
