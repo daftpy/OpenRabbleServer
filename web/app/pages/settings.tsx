@@ -1,8 +1,9 @@
 import { Link2Icon, StopwatchIcon } from "@radix-ui/react-icons";
 import { Box, Button, Flex, Heading, Text} from "@radix-ui/themes";
-import { useEffect } from "react";
+import { useState } from "react";
+import { RateLimitDialog } from "~/components/settings/rate_limit_dialog";
 
-type RateLimiter = {
+export type RateLimiter = {
   id: number;
   message_limit: number;
   window_seconds: number;
@@ -13,12 +14,10 @@ type props = {
 }
 
 export function SettingsPage(props: props) {
-  useEffect(() => {
-    console.log(props.rate_limiter);
-  }, [])
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   return (
     <>
-      <Box pb={"6"}>
+      <Box pt={"2"} pb={"4"}>
         <Heading color="indigo">Settings</Heading>
         <Text>Here you can update server settings such as rate limits, enable/disable registration, or mute chat.</Text>
       </Box>
@@ -37,8 +36,9 @@ export function SettingsPage(props: props) {
               <Text weight={"bold"} style={{color: "var(--indigo-12)"}}>Window Seconds:</Text>
               <Text>{ props.rate_limiter.window_seconds }</Text>
             </Flex>
+            <RateLimitDialog isOpen={isOpen} setIsOpen={setIsOpen} rateLimiter={props.rate_limiter} />
           </Flex>
-          <Button size={"1"} style={{float: "right"}}>Edit</Button>
+          <Button size={"1"} style={{float: "right"}} onClick={() => setIsOpen(true)}>Edit</Button>
         </Box>
       </Flex>
     </>
