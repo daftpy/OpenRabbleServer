@@ -232,18 +232,20 @@ func New(addr string, h hub.HubInterface, db *pgxpool.Pool, cache *cache.Message
 	}
 	cache.UpdateRateLimitSettings(rl.MessageLimit, rl.WindowSeconds)
 
+	serverIdentity := database.RegisterOrLoadServer(db)
+
 	// Register handlers
-	RegisterRoutes(srv, mux, db, cache)
+	RegisterRoutes(srv, mux, db, cache, serverIdentity)
 
 	return srv, nil
 }
 
-func RegisterRoutes(srv *Server, mux *http.ServeMux, db *pgxpool.Pool, cache *cache.MessageCache) {
+func RegisterRoutes(srv *Server, mux *http.ServeMux, db *pgxpool.Pool, cache *cache.MessageCache, identity database.ServerIdentity) {
 	// WebSocket route handled by Server struct
 	mux.HandleFunc("/ws", srv.handleConnection)
 
 	// Register the other endpoints
-	mux.HandleFunc("/discovery", handlers.HandleDiscovery())
+	mux.HandleFunc("/discovery", handlers.HandleDiscovery(identity))
 	mux.HandleFunc("/channels", handlers.HandleChannels(db))
 	mux.HandleFunc("/messages", handlers.HandleMessages(db, cache))
 	mux.HandleFunc("/users", handlers.HandleUsers(db))

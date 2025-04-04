@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"chatserver/internal/db"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -8,7 +9,7 @@ import (
 	"os"
 )
 
-func HandleDiscovery() http.HandlerFunc {
+func HandleDiscovery(identity db.ServerIdentity) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		KChostname := os.Getenv("KC_HOSTNAME")
 		chatClientName := os.Getenv("CHAT_CLIENT_NAME")
@@ -24,8 +25,8 @@ func HandleDiscovery() http.HandlerFunc {
 			"chat_client": chatClientName,
 			"chat_url":    "wss://chat." + hostname + "/ws",
 			"token_url":   url + "/token",
-			"server_name": "OnRabble",
-			"server_id":   "Placeholder",
+			"server_name": identity.Name,
+			"server_id":   identity.ID,
 		}
 
 		w.Header().Set("Content-Type", "application/json")

@@ -7,6 +7,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -93,4 +95,46 @@ func testQuery(db *pgxpool.Pool) error {
 	}
 	log.Printf("Database is responding. Current time: %s", currentTime.Format(time.RFC3339))
 	return nil
+}
+
+type ServerIdentity struct {
+	ID   string
+	Name string
+}
+
+func RegisterOrLoadServer(db *pgxpool.Pool) ServerIdentity {
+	serverID := uuid.New().String()
+	serverName := "OnRabble" // Make this configurable if needed
+
+	var identity ServerIdentity
+
+	// Try to insert new server and return its ID
+	err := db.QueryRow(context.Background(), `
+		INSERT INTO chatserver.server_instances (server_id, server_name)
+		VALUES ($1, $2)
+		ON CONFLICT (server_name) DO NOTHING
+		RETURNING server_id, server_name
+	`, serverID, serverName).Scan(&identity.ID, &identity.Name)
+
+	if err != nil && err != pgx.ErrNoRows {
+		log.Fatalf("failed to insert or check server instance: %v", err)
+	}
+
+	// If insert returned values, use them
+	if identity.ID != "" && identity.Name != "" {
+		return identity
+	}
+
+	// Otherwise, fetch the existing row by server_name
+	err = db.QueryRow(context.Background(), `
+		SELECT server_id, server_name FROM chatserver.server_instances
+		WHERE server_name = $1
+		LIMIT 1
+	`, serverName).Scan(&identity.ID, &identity.Name)
+
+	if err != nil {
+		log.Fatalf("failed to fetch existing server identity by name: %v", err)
+	}
+
+	return identity
 }

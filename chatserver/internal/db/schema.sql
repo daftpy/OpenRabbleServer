@@ -1,5 +1,23 @@
 CREATE SCHEMA IF NOT EXISTS chatserver;
 
+-- Update timestamp trigger function (must be declared before any trigger uses it)
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+   NEW.updated_at = now();
+   RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Tables
+CREATE TABLE IF NOT EXISTS chatserver.server_instances (
+    id SERIAL PRIMARY KEY,
+    server_id UUID NOT NULL UNIQUE,
+    server_name VARCHAR(36) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT now(),
+    updated_at TIMESTAMP DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS chatserver.rate_limiter (
     id SERIAL PRIMARY KEY,
     owner_id VARCHAR(36) NOT NULL UNIQUE,
@@ -50,3 +68,22 @@ CREATE TABLE IF NOT EXISTS chatserver.bans (
         (CASE WHEN end_time IS NOT NULL THEN end_time - start_time ELSE NULL END) STORED,
     pardoned BOOLEAN DEFAULT FALSE
 );
+
+-- Triggers to auto-update 'updated_at' timestamp
+DROP TRIGGER IF EXISTS update_server_instances_updated_at ON chatserver.server_instances;
+CREATE TRIGGER update_server_instances_updated_at
+BEFORE UPDATE ON chatserver.server_instances
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_channels_updated_at ON chatserver.channels;
+CREATE TRIGGER update_channels_updated_at
+BEFORE UPDATE ON chatserver.channels
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_rate_limiter_updated_at ON chatserver.rate_limiter;
+CREATE TRIGGER update_rate_limiter_updated_at
+BEFORE UPDATE ON chatserver.rate_limiter
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
