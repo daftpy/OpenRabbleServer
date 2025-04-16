@@ -9,25 +9,27 @@ const (
 
 type UserStatusPayload struct {
 	Username    string `json:"username"`
+	ID          string `json:"id"`
 	IsConnected bool   `json:"status"`
 }
 
-func NewUserStatusMessage(username string, isConnected bool) messages.BaseMessage {
+func NewUserStatusMessage(username, ID string, isConnected bool) messages.BaseMessage {
 	return messages.BaseMessage{
 		Type:   UserStatusMessageType,
 		Sender: "Server",
 		Payload: UserStatusPayload{
 			Username:    username,
+			ID:          ID,
 			IsConnected: isConnected,
 		},
 	}
 }
 
 type ConnectedUsersPayload struct {
-	Users []string `json:"users"`
+	Users []UserStatusPayload `json:"users"`
 }
 
-func NewConnectedUsersMessage(users []string) messages.BaseMessage {
+func NewConnectedUsersMessage(users []UserStatusPayload) messages.BaseMessage {
 	return messages.BaseMessage{
 		Type:   ConnectedUsersMessageType,
 		Sender: "Server",

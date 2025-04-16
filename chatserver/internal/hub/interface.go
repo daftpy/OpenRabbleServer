@@ -2,6 +2,7 @@ package hub
 
 import (
 	"chatserver/internal/messages"
+	"chatserver/internal/messages/chat"
 	"chatserver/internal/models"
 	"time"
 )
@@ -21,6 +22,6 @@ type HubInterface interface {
 	RegisterClient(ClientInterface, string)
 	UnregisterClient(ClientInterface, string)
 	SendMessage(messages.BaseMessage)
-	GetConnectedUsers() []string
+	GetConnectedUsers() []chat.UserStatusPayload
 	GetCachedChatMessages() []models.ChatMessage
 }

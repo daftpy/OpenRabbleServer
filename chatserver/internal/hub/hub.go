@@ -69,7 +69,7 @@ func (h *Hub) UnregisterClient(client ClientInterface, clientID string) {
 		closeClientSendChannel(client)
 
 		// Broadcast the disconnected message
-		msg := chat.NewUserStatusMessage(client.GetUsername(), false)
+		msg := chat.NewUserStatusMessage(client.GetUsername(), client.GetID(), false)
 		h.Broadcast(msg)
 
 		log.Printf("User unregistered: %s", client.GetUsername())
@@ -92,11 +92,16 @@ func (h *Hub) SendMessage(msg messages.BaseMessage) {
 }
 
 // Returns a list of the currently connected users.
-func (h *Hub) GetConnectedUsers() []string {
-	var users []string
+func (h *Hub) GetConnectedUsers() []chat.UserStatusPayload {
+	// var users []string
+	var users []chat.UserStatusPayload
 	for _, v := range h.Connections {
 		if v.GetClientID() != "WebClient" {
-			users = append(users, v.GetUsername())
+			users = append(users, chat.UserStatusPayload{
+				Username:    v.GetUsername(),
+				ID:          v.GetID(),
+				IsConnected: true,
+			})
 		}
 	}
 	return users

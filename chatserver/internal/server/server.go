@@ -126,7 +126,7 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 
 	// Notify the other clients that a new client has connected (if they did not connect through dashboard)
 	if clientID != "WebClient" {
-		newConnectionMessage := chat.NewUserStatusMessage(client.Username, true)
+		newConnectionMessage := chat.NewUserStatusMessage(client.Username, client.Sub, true)
 		s.hub.SendMessage(newConnectionMessage)
 	}
 
