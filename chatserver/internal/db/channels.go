@@ -44,7 +44,7 @@ func CreateChannel(db *pgxpool.Pool, name string, description string) error {
 //  1. A slice of Channel models
 //  2. An error, if any
 func FetchChannels(db *pgxpool.Pool) ([]models.Channel, error) {
-	rows, err := db.Query(context.Background(), "SELECT id, name, description FROM chatserver.channels ORDER BY sort_order, id")
+	rows, err := db.Query(context.Background(), "SELECT id, name, description, sort_order FROM chatserver.channels ORDER BY sort_order, id")
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch channels: %w", err)
 	}
@@ -55,7 +55,7 @@ func FetchChannels(db *pgxpool.Pool) ([]models.Channel, error) {
 		var channel models.Channel
 		var description sql.NullString
 
-		if err := rows.Scan(&channel.ID, &channel.Name, &description); err != nil {
+		if err := rows.Scan(&channel.ID, &channel.Name, &description, &channel.SortOrder); err != nil {
 			return nil, fmt.Errorf("failed to scan channel row: %w", err)
 		}
 

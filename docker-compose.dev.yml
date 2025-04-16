@@ -21,6 +21,7 @@ services:
       - start-dev
       - --proxy-headers=xforwarded
       - --import-realm
+      - --health-enabled=true # enable health checks endpoint
     env_file: "./keycloak/.env.dev"
     volumes:
       - ./keycloak/chat-realm.dev.json:/opt/keycloak/data/import/chat-realm.json
@@ -29,6 +30,7 @@ services:
       - app_network
     expose:
       - "8080"
+      - "9000"
     depends_on:
       - postgres
 

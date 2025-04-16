@@ -58,7 +58,7 @@ export const WebSocketProvider = ({ token, children } : { token: string | undefi
 
         // Add the message to the circular buffer
         if (message.type === "chat_message") {
-          addMessage({username: message.payload.username, channel: message.payload.channel, message: message.payload.message, authored_at: message.payload.authored_at });
+          addMessage({owner_id: message.payload.owner_id, username: message.payload.username, channel: message.payload.channel, message: message.payload.message, authored_at: message.payload.authored_at });
         } else if (message.type === "bulk_chat_messages") {
           setMessages((prev) => {
             const newMessages = [...prev, ...message.payload.messages];
