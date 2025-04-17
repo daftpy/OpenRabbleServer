@@ -150,6 +150,10 @@ func (h *Hub) handleMessage(msg messages.BaseMessage) {
 		log.Println("Sending connected users list")
 		h.Broadcast(msg)
 
+	case chat.PrivateChatMessageType:
+		log.Println("Received a private chat message")
+		h.Whisper(msg)
+
 	default:
 		log.Printf("Unhandled message type: %s", msg.Type)
 	}
@@ -173,6 +177,29 @@ func (h *Hub) Broadcast(msg messages.BaseMessage) {
 	for _, client := range h.Connections {
 		log.Printf("Sending message to: %s", client.GetUsername())
 		client.SendMessage(msg)
+	}
+}
+
+func (h *Hub) Whisper(msg messages.BaseMessage) {
+	log.Printf("Whispering message of type: %s", msg.Type)
+
+	// Extract private message payload
+	payload, ok := msg.Payload.(models.PrivateChatMessage)
+	if !ok {
+		log.Println("Invalid private chat message payload")
+		return
+	}
+
+	senderID := payload.OwnerID
+	recipientID := payload.RecipientID
+
+	for key, client := range h.Connections {
+		clientID := client.GetID()
+
+		if clientID == senderID || clientID == recipientID {
+			log.Printf("Sending whisper to: %s (key: %s)", client.GetUsername(), key)
+			client.SendMessage(msg)
+		}
 	}
 }
 

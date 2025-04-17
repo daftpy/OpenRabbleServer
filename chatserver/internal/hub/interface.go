@@ -19,6 +19,7 @@ type ClientInterface interface {
 
 type HubInterface interface {
 	Broadcast(messages.BaseMessage)
+	Whisper(messages.BaseMessage)
 	RegisterClient(ClientInterface, string)
 	UnregisterClient(ClientInterface, string)
 	SendMessage(messages.BaseMessage)

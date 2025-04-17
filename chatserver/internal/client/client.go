@@ -78,10 +78,14 @@ func (c *Client) ReadPump() {
 		}
 
 		// Unmarshal the JSON message into a struct
+		// The received message will contain a type,
+		// message, and either a channel or recipient
+		// depending on if it's a private chat
 		var receivedMessage struct {
-			Type    string `json:"type"`
-			Channel string `json:"channel"`
-			Message string `json:"message"`
+			Type        string `json:"type"`
+			Channel     string `json:"channel,omitempty"`
+			RecipientID string `json:"recipient_id,omitempty"`
+			Message     string `json:"message"`
 		}
 		if err := json.Unmarshal(p, &receivedMessage); err != nil {
 			log.Printf("Invalid message from %s: %v", c.Username, err)
@@ -91,8 +95,13 @@ func (c *Client) ReadPump() {
 		log.Printf("Received channel: %s", receivedMessage.Channel)
 		log.Printf("Receiived message: %s", receivedMessage.Message)
 
+		var msg messages.BaseMessage
 		// Process received message
-		msg := chat.NewChatMessage(c.Sub, c.Username, receivedMessage.Channel, receivedMessage.Message, time.Now())
+		if receivedMessage.Type == chat.ChatMessageType {
+			msg = chat.NewChatMessage(c.Sub, c.Username, receivedMessage.Channel, receivedMessage.Message, time.Now())
+		} else if receivedMessage.Type == chat.PrivateChatMessageType {
+			msg = chat.NewPrivateChatMessage(c.Sub, c.Username, receivedMessage.RecipientID, receivedMessage.Message, time.Now())
+		}
 		log.Printf("Message received from %s", c.Username)
 
 		// Send the message to the hub

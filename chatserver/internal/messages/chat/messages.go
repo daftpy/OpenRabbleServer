@@ -8,9 +8,24 @@ import (
 )
 
 const (
-	ChatMessageType      = "chat_message"
-	BulkChatMessagesType = "bulk_chat_messages"
+	ChatMessageType        = "chat_message"
+	BulkChatMessagesType   = "bulk_chat_messages"
+	PrivateChatMessageType = "private_chat_message"
 )
+
+func NewPrivateChatMessage(ID, username, recipientID, message string, authoredAt time.Time) messages.BaseMessage {
+	return messages.BaseMessage{
+		Type:   PrivateChatMessageType,
+		Sender: username,
+		Payload: models.PrivateChatMessage{
+			OwnerID:     ID,
+			Username:    username,
+			RecipientID: recipientID,
+			Message:     message,
+			Sent:        authoredAt,
+		},
+	}
+}
 
 func NewChatMessage(ID, username, channel, message string, authoredAt time.Time) messages.BaseMessage {
 	log.Printf("DEBUG STEP LOOK %s, %s, %s", username, channel, message)

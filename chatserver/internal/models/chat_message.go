@@ -15,3 +15,13 @@ type ChatMessage struct {
 	Message  string    `json:"message"`
 	Sent     time.Time `json:"authored_at"`
 }
+
+// PrivateChatMessage represents a private message sent between two users.
+type PrivateChatMessage struct {
+	ID          int       `json:"id,omitempty"`
+	OwnerID     string    `json:"owner_id"`     // Sender's ID
+	Username    string    `json:"username"`     // Sender's username
+	RecipientID string    `json:"recipient_id"` // Receiver's username
+	Message     string    `json:"message"`
+	Sent        time.Time `json:"authored_at"`
+}
