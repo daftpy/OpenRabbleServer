@@ -93,6 +93,7 @@ func (m *MessageCache) StartPeriodicFlush() {
 		for range ticker.C {
 			log.Println("Periodic flush triggered.")
 			m.FlushCacheToDB()
+			m.FlushPrivateMessagesToDB()
 		}
 	}()
 }

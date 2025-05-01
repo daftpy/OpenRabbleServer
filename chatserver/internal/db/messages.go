@@ -164,3 +164,39 @@ func RemoveMessages(db *pgxpool.Pool, messageIDs []int) (int64, []int, error) {
 
 	return cmd.RowsAffected(), cacheIDs, nil
 }
+
+// FlushPrivateMessages inserts a batch of private messages into the database.
+func FlushPrivateMessages(db *pgxpool.Pool, messages []models.PrivateChatMessage) error {
+	ctx := context.Background()
+
+	if len(messages) == 0 {
+		log.Println("No private messages to insert.")
+		return nil
+	}
+
+	tx, err := db.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to start transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	for _, msg := range messages {
+		_, err := tx.Exec(
+			ctx,
+			`INSERT INTO chatserver.private_messages 
+			(cache_id, owner_id, username, recipient_id, recipient, message, authored_at)
+			VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+			msg.CacheID, msg.OwnerID, msg.Username, msg.RecipientID, msg.Recipient, msg.Message, msg.Sent,
+		)
+		if err != nil {
+			return fmt.Errorf("failed to insert private message with cacheID %d: %w", msg.CacheID, err)
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit private message transaction: %w", err)
+	}
+
+	log.Printf("Successfully inserted %d private messages to the database.", len(messages))
+	return nil
+}

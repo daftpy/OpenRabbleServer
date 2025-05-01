@@ -11,6 +11,7 @@ const (
 	ChatMessageType        = "chat_message"
 	BulkChatMessagesType   = "bulk_chat_messages"
 	PrivateChatMessageType = "private_chat_message"
+	BulkPrivateMessageType = "bulk_private_messages"
 )
 
 func NewPrivateChatMessage(ID, username, recipientID, recipient, message string, authoredAt time.Time) messages.BaseMessage {
@@ -52,6 +53,20 @@ func NewBulkChatMessages(msgs []models.ChatMessage) messages.BaseMessage {
 		Type:   BulkChatMessagesType,
 		Sender: "Server",
 		Payload: BulkChatMessagesPayload{
+			Messages: msgs,
+		},
+	}
+}
+
+type BulkPrivateMessagesPayload struct {
+	Messages []models.PrivateChatMessage `json:"messages"`
+}
+
+func NewBulkPrivateMessages(msgs []models.PrivateChatMessage) messages.BaseMessage {
+	return messages.BaseMessage{
+		Type:   BulkPrivateMessageType,
+		Sender: "Server",
+		Payload: BulkPrivateMessagesPayload{
 			Messages: msgs,
 		},
 	}

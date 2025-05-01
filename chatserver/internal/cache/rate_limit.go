@@ -70,3 +70,21 @@ func (m *MessageCache) AttemptCacheWithRateLimit(userID string, msg models.ChatM
 	}
 	return cacheID, nil
 }
+
+func (m *MessageCache) AttemptCachePrivateWithRateLimit(userID string, msg models.PrivateChatMessage) (int, error) {
+	allowed, err := m.CheckRateLimitValkey(userID, m.MessageLimit, m.WindowSeconds)
+	if err != nil {
+		return -1, fmt.Errorf("rate limit check failed: %v", err)
+	}
+
+	if !allowed {
+		return -1, fmt.Errorf("rate limit exceeded for user %s", userID)
+	}
+
+	cacheID := m.CachePrivateMessage(msg)
+	if cacheID == -1 {
+		return -1, fmt.Errorf("failed to cache private message for user %s", userID)
+	}
+
+	return cacheID, nil
+}

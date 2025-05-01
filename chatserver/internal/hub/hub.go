@@ -44,6 +44,13 @@ func (h *Hub) RegisterClient(client interfaces.ClientInterface, clientID string)
 	h.Connections[key] = client
 	client.StartConnectionTimer()
 	log.Printf("User registered: %s", client.GetUsername())
+
+	privateMessages := h.MessageCache.GetCachedPrivateMessages(client.GetID())
+	if len(privateMessages) > 0 {
+		bulk := chat.NewBulkPrivateMessages(privateMessages)
+		client.SendMessage(bulk)
+		log.Printf("Sent %d cached private messages to %s", len(privateMessages), client.GetUsername())
+	}
 }
 
 // UnregisterClient removes a client from the hub and logs the session duration.
@@ -144,7 +151,25 @@ func (h *Hub) handleMessage(msg messages.BaseMessage) {
 		h.Broadcast(msg)
 
 	case chat.PrivateChatMessageType:
-		log.Println("Received a private chat message")
+		// log.Println("Received a private chat message")
+		// h.Whisper(msg)
+		log.Println("Handling private chat message")
+
+		payload, ok := msg.Payload.(models.PrivateChatMessage)
+		if !ok {
+			log.Println("invalid private chat message payload")
+			break
+		}
+
+		cacheID, err := h.MessageCache.AttemptCachePrivateWithRateLimit(payload.OwnerID, payload)
+		if err != nil {
+			log.Printf("Rate limited or error (private): %v", err)
+			break
+		}
+
+		payload.CacheID = cacheID
+		msg.Payload = payload
+
 		h.Whisper(msg)
 
 	default:
