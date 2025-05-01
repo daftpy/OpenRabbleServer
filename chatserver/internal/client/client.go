@@ -11,55 +11,55 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-/*
-Represents a single websocket connection from a user.
-Manages receiving and sending messages to/from the server.
-*/
+// Client represents a single WebSocket connection from a user.
+// It manages receiving and sending messages to/from the server.
 type Client struct {
 	Username    string
 	Conn        *websocket.Conn
 	Send        chan messages.BaseMessage
 	Hub         interfaces.HubInterface
 	Sub         string // Keycloak stable user ID
-	ClientID    string
+	ClientID    string // OAuth client ID, e.g., "ChatClient" or "WebClient"
 	ConnectedAt time.Time
 }
 
-// Returns the clients username.
+// GetUsername returns the client's username.
 func (c *Client) GetUsername() string {
 	return c.Username
 }
 
-// Places messages into the send channel to be picked up by WritePump().
+// SendMessage places a message into the send channel to be picked up by WritePump().
 func (c *Client) SendMessage(msg messages.BaseMessage) {
 	c.Send <- msg
 }
 
-// Closes the send channel
+// CloseSendChannel closes the client's outgoing message channel.
 func (c *Client) CloseSendChannel() {
 	close(c.Send)
 }
 
+// GetID returns the stable user ID (usually from Keycloak).
 func (c *Client) GetID() string {
 	return c.Sub
 }
 
+// GetClientID returns the OAuth client ID used to identify the source application.
 func (c *Client) GetClientID() string {
 	return c.ClientID
 }
 
+// StartConnectionTimer records the time when the client connects.
 func (c *Client) StartConnectionTimer() {
 	c.ConnectedAt = time.Now()
 }
 
+// GetConnectedAt returns the timestamp when the client connected.
 func (c *Client) GetConnectedAt() time.Time {
 	return c.ConnectedAt
 }
 
-/*
-Listens for incoming messages from the websocket and processes the
-messages which are then sent to the hub for broadcast.
-*/
+// ReadPump listens for incoming messages from the WebSocket and processes them.
+// Parsed messages are sent to the hub for broadcast or private delivery.
 func (c *Client) ReadPump() {
 	defer func() {
 		c.Hub.UnregisterClient(c, c.ClientID)
@@ -78,9 +78,6 @@ func (c *Client) ReadPump() {
 		}
 
 		// Unmarshal the JSON message into a struct
-		// The received message will contain a type,
-		// message, and either a channel or recipient
-		// depending on if it's a private chat
 		var receivedMessage struct {
 			Type        string `json:"type"`
 			Channel     string `json:"channel,omitempty"`
@@ -114,10 +111,8 @@ func (c *Client) ReadPump() {
 	}
 }
 
-/*
-Listens for messages in the send channel and writes them to the
-websocket. It ensures ouutgoing messages are sent asynchronously.
-*/
+// WritePump listens for messages on the send channel and writes them to the WebSocket.
+// It ensures that outgoing messages are sent asynchronously.
 func (c *Client) WritePump() {
 	defer func() {
 		c.Conn.Close()
@@ -128,7 +123,7 @@ func (c *Client) WritePump() {
 		err := c.Conn.WriteJSON(msg)
 		if err != nil {
 			log.Printf("Write error for %s: %v", c.Username, err)
-			break // Exit loop if there's an error
+			break
 		}
 		log.Printf("Message sent for %s: %v", c.Username, msg.Type)
 	}

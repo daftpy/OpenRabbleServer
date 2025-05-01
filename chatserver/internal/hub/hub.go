@@ -14,11 +14,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-/*
-Hub manages all active client connections and routes messages.
-It recceives incoming messages, handles client registration/unregistration,
-and broadcasts messages to clients.
-*/
+// Hub manages all active client connections, routes messages,
+// and handles broadcasting, registration, and unregistration.
 type Hub struct {
 	Connections  map[string]interfaces.ClientInterface
 	Messages     chan messages.BaseMessage
@@ -28,9 +25,8 @@ type Hub struct {
 	db           *pgxpool.Pool
 }
 
-// Creates a new Hub instance
+// NewHub creates and returns a new Hub instance.
 func NewHub(db *pgxpool.Pool, cache *cache.MessageCache) *Hub {
-
 	return &Hub{
 		Connections:  make(map[string]interfaces.ClientInterface),
 		Messages:     make(chan messages.BaseMessage),
@@ -41,7 +37,7 @@ func NewHub(db *pgxpool.Pool, cache *cache.MessageCache) *Hub {
 	}
 }
 
-// Registers a new client with the hub, allowing them to send and receive messages.
+// RegisterClient adds a client to the hub and tracks its connection start time.
 func (h *Hub) RegisterClient(client interfaces.ClientInterface, clientID string) {
 	key := fmt.Sprintf("%s:%s", client.GetID(), clientID)
 	log.Println("Hub Registered:", key)
@@ -50,7 +46,7 @@ func (h *Hub) RegisterClient(client interfaces.ClientInterface, clientID string)
 	log.Printf("User registered: %s", client.GetUsername())
 }
 
-// Unregisters a client from the hub, stopping them from sending and receiving messages.
+// UnregisterClient removes a client from the hub and logs the session duration.
 func (h *Hub) UnregisterClient(client interfaces.ClientInterface, clientID string) {
 	key := fmt.Sprintf("%s:%s", client.GetID(), clientID)
 	if _, ok := h.Connections[key]; ok {
@@ -63,7 +59,7 @@ func (h *Hub) UnregisterClient(client interfaces.ClientInterface, clientID strin
 		if err != nil {
 			log.Printf("Failed to record session for %s: %v", client.GetUsername(), err)
 		} else {
-			log.Printf("Session recorded for %s (duration: %v)", client.GetUsername(), (sessionEnd.Sub(sessionStart)))
+			log.Printf("Session recorded for %s (duration: %v)", client.GetUsername(), sessionEnd.Sub(sessionStart))
 		}
 
 		// Safely close the channel only if it's not already closed
@@ -77,7 +73,7 @@ func (h *Hub) UnregisterClient(client interfaces.ClientInterface, clientID strin
 	}
 }
 
-// Helper function to safely close the channel
+// closeClientSendChannel safely closes a client’s send channel, recovering from any panic.
 func closeClientSendChannel(client interfaces.ClientInterface) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -87,14 +83,14 @@ func closeClientSendChannel(client interfaces.ClientInterface) {
 	client.CloseSendChannel()
 }
 
-// Sends a message to the hub Messages channel for processing and broadcasting.
+// SendMessage sends a message into the hub’s internal message loop for handling.
 func (h *Hub) SendMessage(msg messages.BaseMessage) {
 	h.Messages <- msg
 }
 
-// Returns a list of the currently connected users.
+// GetConnectedUsers returns a list of currently connected user payloads,
+// excluding clients identified as "WebClient".
 func (h *Hub) GetConnectedUsers() []chat.UserStatusPayload {
-	// var users []string
 	var users []chat.UserStatusPayload
 	for _, v := range h.Connections {
 		if v.GetClientID() != "WebClient" {
@@ -108,10 +104,8 @@ func (h *Hub) GetConnectedUsers() []chat.UserStatusPayload {
 	return users
 }
 
-/*
-Processes incoming messages based on their type.
-It currently supports chat messages and user connection updates.
-*/
+// handleMessage processes an incoming message based on its type,
+// including public chat, private chat, and user status updates.
 func (h *Hub) handleMessage(msg messages.BaseMessage) {
 	switch msg.Type {
 	case chat.ChatMessageType:
@@ -139,8 +133,6 @@ func (h *Hub) handleMessage(msg messages.BaseMessage) {
 		msg.Payload = payload // Update BaseMessage with new payload
 
 		log.Printf("Broadcasting message with cacheID %d", cacheID)
-
-		// Now broadcast with cacheID included
 		h.Broadcast(msg)
 
 	case chat.UserStatusMessageType:
@@ -160,7 +152,7 @@ func (h *Hub) handleMessage(msg messages.BaseMessage) {
 	}
 }
 
-// Retrieves chat messages from the MessageCache and returns them as a slice of ChatMessage
+// GetCachedChatMessages returns a slice of chat messages from the message cache.
 func (h *Hub) GetCachedChatMessages() []models.ChatMessage {
 	chatMessages := h.MessageCache.GetCachedChatMessages()
 	for i := 0; i < len(chatMessages); i++ {
@@ -169,10 +161,7 @@ func (h *Hub) GetCachedChatMessages() []models.ChatMessage {
 	return chatMessages
 }
 
-/*
-Broadcasts a message to all connected clients.
-Every client in the hub receives the message.
-*/
+// Broadcast sends the given message to all connected clients in the hub.
 func (h *Hub) Broadcast(msg messages.BaseMessage) {
 	log.Printf("Broadcasting message of type: %s", msg.Type)
 	for _, client := range h.Connections {
@@ -181,6 +170,7 @@ func (h *Hub) Broadcast(msg messages.BaseMessage) {
 	}
 }
 
+// Whisper sends a private message only to the sender and recipient clients.
 func (h *Hub) Whisper(msg messages.BaseMessage) {
 	log.Printf("Whispering message of type: %s", msg.Type)
 
@@ -196,7 +186,6 @@ func (h *Hub) Whisper(msg messages.BaseMessage) {
 
 	for key, client := range h.Connections {
 		clientID := client.GetID()
-
 		if clientID == senderID || clientID == recipientID {
 			log.Printf("Sending whisper to: %s (key: %s)", client.GetUsername(), key)
 			client.SendMessage(msg)
@@ -204,31 +193,26 @@ func (h *Hub) Whisper(msg messages.BaseMessage) {
 	}
 }
 
-/*
-Listens for client registration, unregistration, and incoming messages.
-Runs in a separate goroutine to handle Hub events asynchronously.
-*/
+// Run starts the hub's main loop and handles registration, unregistration, and messages.
 func (h *Hub) Run() {
 	for {
 		select {
 		case client := <-h.Register:
 			h.RegisterClient(client, client.GetClientID())
-
 		case client := <-h.Unregister:
 			h.UnregisterClient(client, client.GetClientID())
-
 		case message := <-h.Messages:
 			h.handleMessage(message)
 		}
 	}
 }
 
-// FindUsernameByUserID searches all connections and returns the username associated with the given user ID.
+// FindUsernameByUserID returns the username for a given user ID, if connected.
 func (h *Hub) FindUsernameByUserID(userID string) (string, bool) {
 	for _, client := range h.Connections {
 		if client.GetID() == userID {
 			return client.GetUsername(), true
 		}
 	}
-	return "", false // not found
+	return "", false
 }
