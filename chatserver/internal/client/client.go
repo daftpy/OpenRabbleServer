@@ -1,7 +1,7 @@
 package client
 
 import (
-	"chatserver/internal/hub"
+	"chatserver/internal/interfaces"
 	"chatserver/internal/messages"
 	"chatserver/internal/messages/chat"
 	"encoding/json"
@@ -19,7 +19,7 @@ type Client struct {
 	Username    string
 	Conn        *websocket.Conn
 	Send        chan messages.BaseMessage
-	Hub         hub.HubInterface
+	Hub         interfaces.HubInterface
 	Sub         string // Keycloak stable user ID
 	ClientID    string
 	ConnectedAt time.Time

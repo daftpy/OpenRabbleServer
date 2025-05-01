@@ -3,6 +3,7 @@ package hub
 import (
 	"chatserver/internal/cache"
 	"chatserver/internal/db"
+	"chatserver/internal/interfaces"
 	"chatserver/internal/messages"
 	"chatserver/internal/messages/chat"
 	"chatserver/internal/models"
@@ -19,10 +20,10 @@ It recceives incoming messages, handles client registration/unregistration,
 and broadcasts messages to clients.
 */
 type Hub struct {
-	Connections  map[string]ClientInterface
+	Connections  map[string]interfaces.ClientInterface
 	Messages     chan messages.BaseMessage
-	Register     chan ClientInterface
-	Unregister   chan ClientInterface
+	Register     chan interfaces.ClientInterface
+	Unregister   chan interfaces.ClientInterface
 	MessageCache *cache.MessageCache
 	db           *pgxpool.Pool
 }
@@ -31,17 +32,17 @@ type Hub struct {
 func NewHub(db *pgxpool.Pool, cache *cache.MessageCache) *Hub {
 
 	return &Hub{
-		Connections:  make(map[string]ClientInterface),
+		Connections:  make(map[string]interfaces.ClientInterface),
 		Messages:     make(chan messages.BaseMessage),
-		Register:     make(chan ClientInterface),
-		Unregister:   make(chan ClientInterface),
+		Register:     make(chan interfaces.ClientInterface),
+		Unregister:   make(chan interfaces.ClientInterface),
 		MessageCache: cache,
 		db:           db,
 	}
 }
 
 // Registers a new client with the hub, allowing them to send and receive messages.
-func (h *Hub) RegisterClient(client ClientInterface, clientID string) {
+func (h *Hub) RegisterClient(client interfaces.ClientInterface, clientID string) {
 	key := fmt.Sprintf("%s:%s", client.GetID(), clientID)
 	log.Println("Hub Registered:", key)
 	h.Connections[key] = client
@@ -50,7 +51,7 @@ func (h *Hub) RegisterClient(client ClientInterface, clientID string) {
 }
 
 // Unregisters a client from the hub, stopping them from sending and receiving messages.
-func (h *Hub) UnregisterClient(client ClientInterface, clientID string) {
+func (h *Hub) UnregisterClient(client interfaces.ClientInterface, clientID string) {
 	key := fmt.Sprintf("%s:%s", client.GetID(), clientID)
 	if _, ok := h.Connections[key]; ok {
 		delete(h.Connections, key)
@@ -77,7 +78,7 @@ func (h *Hub) UnregisterClient(client ClientInterface, clientID string) {
 }
 
 // Helper function to safely close the channel
-func closeClientSendChannel(client ClientInterface) {
+func closeClientSendChannel(client interfaces.ClientInterface) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Printf("Recovered from panic when closing channel: %v", r)
