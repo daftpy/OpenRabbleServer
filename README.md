@@ -30,7 +30,7 @@ OnRabble is a modern chat server designed to be secure, scalable, and efficient.
 ### `valkey`
 - Acts as a caching layer for the chat server.
 - Reduces database load for real-time operations.
-- See [`internal/cache/README.md`](.chatserver/internal/cache/README.md) for implementation details.
+- See [`internal/cache/README.md`](chatserver/internal/cache/README.md) for implementation details.
 
 ### `caddy`
 - Reverse proxy that handles HTTPS and routing.
