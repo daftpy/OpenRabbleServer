@@ -48,15 +48,15 @@
 ## 🔧 Development Setup
 
 1. Trust Caddy’s internal root certificate if running locally.
-2. Run: `docker-compose up --build`
-3. Open the app at: [https://chat.localhost](https://chat.localhost)
+2. Run: `docker compose -f docker-compose.dev.yml up -d --build`
+3. Open the dashboard at: [https://localhost](https://localhost)
 
 > ⚠️ Ensure your browser trusts Caddy's local CA or HTTPS will be blocked.
 
 
 ## Future Improvements
 
-- [ ] Continue refactoring message types for better modularity
+- [ ] Refactor message types for better modularity
 - [x] Add pardon/unban functionality for admins
 - [ ] Include unsaved cached messages in search results
 - [ ] Allow configuration of cache size from the admin dashboard
