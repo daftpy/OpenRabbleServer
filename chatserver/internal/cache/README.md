@@ -1,65 +1,117 @@
 # Chat Message Caching System
 
-This project implements a hybrid caching mechanism for a chat application, combining in-memory caching with persistent storage to ensure efficient message handling and durability. It leverages Valkey (a Redis-compatible in-memory data store) for rapid access and PostgreSQL for long-term storage.
+This project implements a hybrid caching mechanism for a chat application, combining in-memory caching with persistent storage to ensure efficient message handling and durability. It leverages **Valkey** (a Redis-compatible in-memory data store) for rapid access and **PostgreSQL** for long-term storage.
 
----
 
 ## Architecture
 
-### Components
+### Valkey (In-Memory Cache)
 
-- **Valkey (In-Memory Cache):**
-  - `recent_messages`: A circular buffer maintaining the most recent messages for quick retrieval.
-  - `flush_messages`: A queue storing messages awaiting persistence to the database.
-  - `cache_message_id`: A counter generating unique identifiers for each message.
+- `recent_messages`: Circular buffer of recent public messages.
+- `flush_messages`: Queue of public messages waiting to be persisted.
+- `recent_private_messages:<userID>`: Per-user circular cache of private messages (both sent and received).
+- `flush_private_messages`: Global queue of private messages pending database flush.
+- `cache_message_id`: Auto-increment counter for public messages.
+- `cache_private_message_id`: Auto-increment counter for private messages.
+- `ratelimit:<userID>`: Tracks per-user message counts for rate limiting.
 
-- **PostgreSQL (Persistent Storage):**
-  - `chat_messages` table: Stores all chat messages with associated metadata for long-term access.
 
----
+### PostgreSQL (Persistent Storage)
+
+- `chat_messages`: Stores all flushed public chat messages.
+- `private_messages`: Stores all flushed private messages.
+
 
 ## 🔁 Workflow
 
-1. **Message Ingestion:**
-   - Incoming messages are serialized to JSON and enriched with a unique `cache_id`.
-   - A Lua script atomically:
-     - Increments the `cache_message_id`.
-     - Appends the message to both `recent_messages` and `flush_messages`.
-     - Trims `recent_messages` to maintain a fixed size.
+### 1. Message Ingestion
 
-2. **Rate Limiting:**
-   - Each user has an associated rate limit key (`ratelimit:<userID>`).
-   - A Lua script increments the user's message count and sets an expiration based on the defined window.
-   - If the user exceeds the allowed message count within the window, further messages are rejected.
+- Public and private messages are serialized as JSON and enriched with a unique `cache_id`.
+- A Lua script:
+  - Atomically increments the appropriate counter (`cache_message_id` or `cache_private_message_id`).
+  - Stores messages in both:
+    - Circular cache for recent access.
+    - Flush queue for eventual DB persistence.
+  - If the sender is also the recipient (a DM to self), the message is only stored once.
 
-3. **Flushing to Database:**
-   - When `flush_messages` reaches a predefined size or at regular intervals, messages are batch-inserted into the `chat_messages` table.
-   - After successful insertion, `flush_messages` is cleared to prevent duplicate entries.
 
----
+### 2. 🚦 Rate Limiting
 
-## ⚙️ Configuration
+- Each user is tracked via a key: `ratelimit:<userID>`.
+- A Lua script:
+  - Uses `INCR` to count messages.
+  - Applies `EXPIRE` to set the time window.
+  - Rejects messages once the limit is exceeded.
+- Limits are customizable:
+  - `MessageLimit`: max messages per window.
+  - `WindowSeconds`: length of the rate window in seconds.
 
-- **`maxCacheSize`**: Maximum number of messages stored in `recent_messages` (default: 500).
-- **`flushInterval`**: Interval for periodic flushing of messages to the database (default: 2 minutes).
-- **`MessageLimit`**: Maximum number of messages a user can send within the rate limit window.
-- **`WindowSeconds`**: Duration of the rate limit window in seconds.
+
+### 3. Flushing to Database
+
+- Flush is triggered when:
+  - The flush queue (`flush_messages` or `flush_private_messages`) reaches the threshold (`maxCacheSize`).
+  - Or periodically using a timer (`flushInterval`).
+- Messages are written to the database in a single transaction.
+- Upon success, the flush queue is cleared to prevent duplicates.
+
+
+## Configuration
+
+| Setting           | Purpose                                         | Default        |
+|------------------|--------------------------------------------------|----------------|
+| `maxCacheSize`   | Max number of messages to keep before flush     | `500`          |
+| `flushInterval`  | Interval to flush messages automatically        | `2 minutes`    |
+| `MessageLimit`   | Max number of messages allowed per user         | configurable   |
+| `WindowSeconds`  | Duration of message window for rate limiting    | configurable   |
+
+You can update rate limits dynamically using:
+
+```go
+cache.UpdateRateLimitSettings(limit, window)
+```
+
+
+## Features
+
+- Atomic caching and trimming via Lua.
+- Full support for both public and private messages.
+- Automatic and manual database flush control.
+- Per-user rate limiting with Lua-based enforcement.
+- Self-DMs are deduplicated to avoid storing duplicates.
+
 
 ## 📝 TODO
 
-- [ ] **Scope cache keys by channel or scene**  
-  Currently, all messages are stored under global keys (`recent_messages`, `flush_messages`, etc.). To support multi-channel or multi-room functionality, prepend keys with the channel ID or scene ID to isolate caches per chat context.
-
 - [ ] **Improve error recovery on DB flush**  
-  Right now, a single failed `INSERT` can abort the entire flush. Consider:
-  - Logging and skipping bad messages (`continue` instead of `return`)
-  - Adding a fallback queue for failed messages
+  A single bad message aborts the entire transaction. Consider:
+  - Logging and skipping failed inserts with `continue`
+  - Fallback queue for unflushable messages
 
-- [ ] **Unit and integration test coverage**  
-  Write tests for:
-  - Lua script execution via Valkey client mocks
-  - Rate limit enforcement
-  - Cache serialization and flush logic
+- [ ] **Add testing coverage**  
+  Write unit and integration tests for:
+  - Lua execution
+  - Flush logic and failure paths
+  - Rate limiting behavior
+  - Serialization integrity
 
-- [ ] **Graceful shutdown and flush**  
-  Ensure that on server shutdown, any remaining `flush_messages` are flushed to the DB before exit.
+- [ ] **Graceful shutdown**  
+  Ensure that any pending flush queues are committed to the DB on application shutdown.
+
+
+## 🧪 Dev Notes
+
+You can inspect and delete private message keys in Valkey using:
+
+```bash
+valkey-cli
+127.0.0.1:6379> keys recent_private_messages:*
+127.0.0.1:6379> del recent_private_messages:<userID>
+```
+
+To clear **all private message caches**:
+
+```bash
+valkey-cli --scan --pattern 'recent_private_messages:*' | xargs valkey-cli del
+```
+
