@@ -57,14 +57,21 @@
 ## Future Improvements
 
 - [ ] Continue refactoring message types for better modularity
-- [✅] Add pardon/unban functionality for admins
+- [x] Add pardon/unban functionality for admins
 - [ ] Include unsaved cached messages in search results
 - [ ] Allow configuration of cache size from the admin dashboard
-- [✅] Enable updating and deleting of chat channels
-- [✅] Expand developer documentation
+- [x] Enable updating and deleting of chat channels
+- [x] Expand developer documentation
 - [ ] Add a full “Getting Started” guide
 
 
-## 📄 License
+## Licensing
 
-TBD
+This project is licensed under the MIT License ([LICENSE](./LICENSE)).
+
+The services defined in `docker-compose.dev.yml` and `docker-compose.prod.yml` use external software (e.g., Keycloak, PostgreSQL, Valkey, etc.), documented in [`THIRD_PARTY_SERVICES.md`](./THIRD_PARTY_SERVICES.md).
+
+Each subproject may have additional third-party dependencies:
+
+- `chatserver/`: see [`chatserver/THIRD_PARTY_LICENSES.md`](./chatserver/THIRD_PARTY_LICENSES.md)
+- `web/`: see [`web/THIRD_PARTY_LICENSES.md`](./web/THIRD_PARTY_LICENSES.md)
