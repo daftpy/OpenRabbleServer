@@ -12,5 +12,6 @@ export default defineConfig({
     watch: {
       usePolling: true, // Required for Docker to detect file changes
     },
+    allowedHosts: ["example.com"],
   },
 });
