@@ -50,7 +50,6 @@ var cacheMessageScript = valkey.NewLuaScript(`
 `)
 
 const maxCacheSize = 500
-const cacheTTL = 24 * 60 * 60 // 24 hours in seconds
 const flushInterval = 2 * time.Minute
 
 // Caches a chat message in Valkey and triggers a DB flush if max cache size is reached
