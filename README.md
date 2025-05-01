@@ -1,55 +1,70 @@
 # OnRabble
 
-OnRabble is a modern chat server designed to be secure, scalable, and efficient. It integrates authentication via Keycloak, a WebSocket-based chat server, a admin dashboard, and a reverse proxy for secure access.
+**OnRabble** is a modern, self-hostable real-time chat platform designed for security, scalability, and observability. It combines WebSocket messaging, Keycloak-based authentication, PostgreSQL for persistence, Valkey for caching, and a React-based admin dashboard — all orchestrated behind a Caddy reverse proxy.
 
-## Features
 
-- **Secure Authentication**: Keycloak handles user authentication and authorization.
-- **WebSocket Chat Server**: Built in Go, allowing real-time communication.
-- **Scalable Database**: PostgreSQL stores user and chat data.
-- **Caching Layer**: Valkey (a Redis alternative) provides fast caching.
-- **Reverse Proxy**: Caddy serves as a secure reverse proxy.
-- **Admin Dashboard**: A web-based client for seamless server administration.
+## 🚀 Features
 
-## Services
+- **Secure Authentication** – Keycloak provides robust user management and JWT-based authentication.
+- **Real-Time Messaging** – Go-based WebSocket server for fast, reliable chat delivery.
+- **Scalable Storage** – PostgreSQL stores messages, users, and analytics data.
+- **High-Speed Caching** – Valkey (a Redis-compatible engine) caches recent messages and enforces rate limits.
+- **Reverse Proxy (HTTPS)** – Caddy terminates TLS and securely routes traffic.
+- **Admin Dashboard** – A web-based React app for user moderation and analytics.
+
+
+## 🧩 Services Overview
 
 ### `postgres`
-- Stores user and chat data.
-- Uses environment variables from `./postgres/.env.[mode]`.
-- Health checks ensure it's available before dependent services start.
+- Relational database backing for users, messages, channels, and sessions.
+- Configured via environment variables from `./postgres/.env.[mode]`.
+- Health checks used for startup synchronization.
 
 ### `keycloak`
-- Manages authentication and user management.
-- Imports realm configuration from `./keycloak/chat-realm.[mode].json`.
+- Manages authentication, user roles, and client credentials.
+- Auto-imports realm config from `./keycloak/chat-realm.[mode].json`.
 
 ### `chatserver`
-- The WebSocket-based chat backend.
-- Built from the `./chatserver` directory.
-- Relies on PostgreSQL and Valkey.
+- Go-based WebSocket backend, located in `./chatserver`.
+- Communicates with PostgreSQL and Valkey.
+- Handles routing, caching, rate limiting, and moderation.
 
 ### `valkey`
-- Acts as a caching layer for the chat server.
-- Reduces database load for real-time operations.
-- See [`internal/cache/README.md`](chatserver/internal/cache/README.md) for implementation details.
+- Redis-compatible caching system.
+- Supports message buffering, rate limiting, and recent history.
+- See [`chatserver/internal/cache/README.md`](chatserver/internal/cache/README.md) for implementation details.
 
 ### `caddy`
-- Reverse proxy that handles HTTPS and routing.
-- Configuration stored in `./caddy/Caddyfile.[mode]`.
+- Handles HTTPS and request routing.
+- Uses automatic TLS via Let's Encrypt in production.
+- Configuration in `./caddy/Caddyfile.dev` and `Caddyfile.prod`.
 
 ### `web`
-- Admin dashboard application built with React.
-- Currently runs in development mode and connects to the chat server.
+- React-based admin dashboard.
+- Communicates with the `chatserver` over WebSockets and REST.
+- Provides analytics, message history, server settings, and user moderation tools.
+
+
+## 🔧 Development Setup
+
+1. Trust Caddy’s internal root certificate if running locally.
+2. Run: `docker-compose up --build`
+3. Open the app at: [https://chat.localhost](https://chat.localhost)
+
+> ⚠️ Ensure your browser trusts Caddy's local CA or HTTPS will be blocked.
+
 
 ## Future Improvements
 
-- Continue refactor of the chat server message types.
-- Enable admins to pardon bans.
-- Add messages in the cache, but not yet in the database to search results.
-- Enable configuration of the message cache size from the admin dashbaord.
-- Enable updating and deletion of Channels.
-- Improve documentation.
-- Add a getting started section.
+- [ ] Continue refactoring message types for better modularity
+- [✅] Add pardon/unban functionality for admins
+- [ ] Include unsaved cached messages in search results
+- [ ] Allow configuration of cache size from the admin dashboard
+- [✅] Enable updating and deleting of chat channels
+- [✅] Expand developer documentation
+- [ ] Add a full “Getting Started” guide
 
-## License
+
+## 📄 License
 
 TBD
