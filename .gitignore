@@ -3,3 +3,5 @@ caddy/caddy_data/*
 caddy/current-root.crt
 
 keycloak/exported-realms/*
+
+.local.README.md
