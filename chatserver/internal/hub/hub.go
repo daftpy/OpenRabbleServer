@@ -221,3 +221,13 @@ func (h *Hub) Run() {
 		}
 	}
 }
+
+// FindUsernameByUserID searches all connections and returns the username associated with the given user ID.
+func (h *Hub) FindUsernameByUserID(userID string) (string, bool) {
+	for _, client := range h.Connections {
+		if client.GetID() == userID {
+			return client.GetUsername(), true
+		}
+	}
+	return "", false // not found
+}

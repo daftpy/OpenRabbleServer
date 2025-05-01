@@ -13,7 +13,7 @@ const (
 	PrivateChatMessageType = "private_chat_message"
 )
 
-func NewPrivateChatMessage(ID, username, recipientID, message string, authoredAt time.Time) messages.BaseMessage {
+func NewPrivateChatMessage(ID, username, recipientID, recipient, message string, authoredAt time.Time) messages.BaseMessage {
 	return messages.BaseMessage{
 		Type:   PrivateChatMessageType,
 		Sender: username,
@@ -21,6 +21,7 @@ func NewPrivateChatMessage(ID, username, recipientID, message string, authoredAt
 			OwnerID:     ID,
 			Username:    username,
 			RecipientID: recipientID,
+			Recipient:   recipient,
 			Message:     message,
 			Sent:        authoredAt,
 		},

@@ -25,4 +25,5 @@ type HubInterface interface {
 	SendMessage(messages.BaseMessage)
 	GetConnectedUsers() []chat.UserStatusPayload
 	GetCachedChatMessages() []models.ChatMessage
+	FindUsernameByUserID(userID string) (string, bool)
 }

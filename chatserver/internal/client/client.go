@@ -100,7 +100,12 @@ func (c *Client) ReadPump() {
 		if receivedMessage.Type == chat.ChatMessageType {
 			msg = chat.NewChatMessage(c.Sub, c.Username, receivedMessage.Channel, receivedMessage.Message, time.Now())
 		} else if receivedMessage.Type == chat.PrivateChatMessageType {
-			msg = chat.NewPrivateChatMessage(c.Sub, c.Username, receivedMessage.RecipientID, receivedMessage.Message, time.Now())
+			username, ok := c.Hub.FindUsernameByUserID(receivedMessage.RecipientID)
+			if ok {
+				msg = chat.NewPrivateChatMessage(c.Sub, c.Username, receivedMessage.RecipientID, username, receivedMessage.Message, time.Now())
+			} else {
+				continue
+			}
 		}
 		log.Printf("Message received from %s", c.Username)
 
