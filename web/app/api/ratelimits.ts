@@ -1,5 +1,7 @@
+const hostname = import.meta.env.VITE_HOSTNAME;
+
 export async function fetchRateLimits() {
-  const response = await fetch("https://chat.localhost/ratelimits")
+  const response = await fetch(`https://chat.${hostname}/ratelimits`)
 
   if (!response.ok) {
     throw new Response("Failed to load rate limits", { status: response.status });
@@ -19,7 +21,7 @@ export async function updateRateLimits({
   messageLimit: number;
   windowSeconds: number;
 }) {
-  const response = await fetch("https://chat.localhost/ratelimits", {
+  const response = await fetch(`https://chat.${hostname}/ratelimits`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",

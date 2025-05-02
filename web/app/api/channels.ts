@@ -4,8 +4,10 @@ import type { AddChannelPayload, AddChannelResponse, EditChannelResponse, FetchC
 import type { EditChannelPayload, ReorderChannelPayload } from "~/types/api/channel";
 import type { Channel } from "~/types/components/channel";
 
+const hostname = import.meta.env.VITE_HOSTNAME;
+
 export async function fetchChannels(): Promise<Channel[]> {
-  const response = await fetch("https://chat.localhost/channels");
+  const response = await fetch(`https://chat.${hostname}/channels`);
   if (!response.ok) {
     throw new Response("Failed too load channels", { status: response.status });
   }
@@ -15,7 +17,7 @@ export async function fetchChannels(): Promise<Channel[]> {
 }
 
 export async function editChannel(payload : EditChannelPayload): Promise<string> {
-  const response = await fetch("https://chat.localhost/channels", {
+  const response = await fetch(`https://chat.${hostname}/channels`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -32,7 +34,7 @@ export async function editChannel(payload : EditChannelPayload): Promise<string>
 }
 
 export const redorderChannel = async (payload: ReorderChannelPayload): Promise<string> => {
-  const response = await fetch("https://chat.localhost/channels", {
+  const response = await fetch(`https://chat.${hostname}/channels`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -52,11 +54,11 @@ export const deleteChannel = async (id: number, purge: number) => {
   if (![0, 1].includes(purge)) {
     throw new Error("Invalid purge value - must be 0 or 1");
   }
-  return await fetch(`https://chat.localhost/channels?id=${id}&purge=${purge}`, {method: "DELETE"});
+  return await fetch(`https://chat.${hostname}/channels?id=${id}&purge=${purge}`, {method: "DELETE"});
 }
 
 export const addChannel = async (payload: AddChannelPayload): Promise<AddChannelResponse> => {
-  const response = await fetch(`https://chat.localhost/channels`, {
+  const response = await fetch(`https://chat.${hostname}/channels`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),

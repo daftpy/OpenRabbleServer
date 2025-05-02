@@ -1,5 +1,7 @@
 import type { FetchMessagesResponse } from "~/types/api/message";
 
+const hostname = import.meta.env.VITE_HOSTNAME;
+
 export async function fetchMessagesFromAPI(params: { keyword?: string; channels?: string[]; user_id?: string; limit?: string; offset?: string }) 
   : Promise<FetchMessagesResponse["payload"]> {
   const { keyword = "", channels = [], user_id, limit = "10", offset = "0" } = params;
@@ -14,7 +16,7 @@ export async function fetchMessagesFromAPI(params: { keyword?: string; channels?
   console.log("Fetching messages with params:", queryParams.toString());
 
   try {
-    const response = await fetch(`https://chat.localhost/messages?${queryParams.toString()}`);
+    const response = await fetch(`https://chat.${hostname}/messages?${queryParams.toString()}`);
     if (!response.ok) throw new Response("Failed to fetch messages", { status: response.status });
 
     const messageData : FetchMessagesResponse = await response.json();
@@ -36,7 +38,7 @@ export async function deleteMessagesFromAPI(ids: number[]): Promise<Response> {
   }
 
   const body = JSON.stringify({ ids });
-  const response = await fetch("https://chat.localhost/messages", {
+  const response = await fetch(`https://chat.${hostname}/messages`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
