@@ -21,6 +21,7 @@ services:
       - start-dev
       - --proxy-headers=xforwarded
       - --import-realm
+      - --health-enabled=true # enable health checks endpoint
     env_file: "./keycloak/.env.prod"
     volumes:
       - ./keycloak/chat-realm.prod.json:/opt/keycloak/data/import/chat-realm.json
@@ -39,12 +40,25 @@ services:
       - app_network
     expose:
       - "8080"
+      - "9000"
     env_file: 
      - ".env.prod"
      - "./keycloak/.env.prod"
     depends_on:
       postgres:
         condition: service_healthy
+      valkey:
+        condition: service_started
+
+  valkey:
+    image: valkey/valkey:latest
+    ports:
+      - "6380:6379"
+    networks:
+      - app_network
+    volumes:
+      - valkey_data:/data
+    command: ["valkey-server", "--loglevel", "warning"]
       
   caddy:
     image: caddy:latest

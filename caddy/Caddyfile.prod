@@ -18,7 +18,12 @@ chat.example.com {
     }
 }
 
-keycloak.example.com {
+# Proxy to Keycloak
+keycloak.localhost {
+    # health check reverse proxy
+    @health path /health /health/*
+    reverse_proxy @health keycloak:9000
+
     reverse_proxy keycloak:8080
     log {
         output stdout
