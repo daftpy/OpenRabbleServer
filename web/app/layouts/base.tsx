@@ -4,6 +4,7 @@ import { Link, Outlet, useNavigate } from "react-router";
 
 export default function BaseLayout() {
   const navigate = useNavigate();
+  const hostname = import.meta.env.VITE_HOSTNAME;
   return (
     <Container px={"6"}>
       <Box pt={"6"} pb={"4"}>
@@ -15,7 +16,7 @@ export default function BaseLayout() {
           <Button onClick={() => navigate("/messages")} style={{backgroundColor: "var(--menu-button)"}}><MagnifyingGlassIcon /> Messages</Button>
           <Button onClick={() => navigate("/settings")} style={{backgroundColor: "var(--menu-button)"}}><GearIcon /> Settings</Button>
           <Button asChild>
-            <a href="https://keycloak.localhost/" target="_blank" rel="noopener noreferrer" style={{backgroundColor: "var(--menu-button)", display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px 16px', borderRadius: '4px'}}>
+            <a href={`https://keycloak.${hostname}/`} target="_blank" rel="noopener noreferrer" style={{backgroundColor: "var(--menu-button)", display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px 16px', borderRadius: '4px'}}>
               <LockClosedIcon /> Keycloak
             </a>
           </Button>        

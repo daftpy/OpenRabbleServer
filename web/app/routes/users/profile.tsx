@@ -3,6 +3,8 @@ import { UserPage } from "~/pages/users/profile";
 import type { Route } from "./+types/profile";
 import { banUser, fetchUser, pardonUser } from "~/api/users";
 
+const hostname = import.meta.env.VITE_HOSTNAME;
+
 // Get the users information by username.
 export async function loader({ params }: Route.LoaderArgs) {
   return await fetchUser(params.userId); // userId is actually username
@@ -15,10 +17,10 @@ export async function clientLoader({
 }: Route.ClientLoaderArgs) {
   
   const serverData = await serverLoader();
-  const messagesRes = await fetch(`https://chat.localhost/messages?user_id=${serverData.id}&limit=10&offset=0`);
+  const messagesRes = await fetch(`https://chat.${hostname}/messages?user_id=${serverData.id}&limit=10&offset=0`);
   const messagesData = await messagesRes.json();
 
-  const activityRes = await fetch(`https://chat.localhost/activity/sessions?user_id=${serverData.id}`)
+  const activityRes = await fetch(`https://chat.${hostname}/activity/sessions?user_id=${serverData.id}`)
   const activityData = await activityRes.json();
   console.log("ACTIVITY: ", activityData);
   console.log("MESSAGES:", messagesData);
