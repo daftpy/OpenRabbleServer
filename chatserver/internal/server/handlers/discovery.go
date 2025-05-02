@@ -19,12 +19,13 @@ func HandleDiscovery(identity db.ServerIdentity) http.HandlerFunc {
 		log.Printf("KC_HOSTNAME: %s", KChostname)
 		log.Printf("REALM_NAME: %s", realmName)
 
-		url := fmt.Sprintf("%s/realms/%s/protocol/openid-connect", KChostname, realmName)
+		URL := fmt.Sprintf("%s/realms/%s/protocol/openid-connect", KChostname, realmName)
 		response := map[string]string{
-			"auth_url":    url + "/auth",
-			"chat_client": chatClientName,
-			"chat_url":    "wss://chat." + hostname + "/ws",
-			"token_url":   url + "/token",
+			"auth_url":    URL + "/auth",                    // URL to authenticate against
+			"chat_client": chatClientName,                   // The keycloak client to connect through
+			"chat_url":    "wss://chat." + hostname + "/ws", // Websocket URL for chat connections
+			"token_url":   URL + "/token",
+			"health_url":  fmt.Sprintf("%s/health", KChostname), // Health check URL for the authentication service
 			"server_name": identity.Name,
 			"server_id":   identity.ID,
 		}
