@@ -1,0 +1,55 @@
+{
+    "realm": "${REALM_NAME}",
+    "enabled": true,
+    "registrationAllowed": true,
+    "roles": {
+      "realm": [
+        {
+          "name": "admin",
+          "description": "chat admin",
+          "composite": false,
+          "clientRole": false
+        }
+      ]
+    },
+    "users": [
+      {
+        "username": "Daftpy",
+        "enabled": true,
+        "credentials": [
+          {
+            "type": "admin",
+            "value": "adminpass"
+          }
+        ],
+        "realmRoles" : [ "admin" ]
+      }
+    ],
+    "clients": [
+        {
+            "clientId": "${CHAT_CLIENT_NAME}",
+            "enabled": true,
+            "publicClient": true,
+            "directAccessGrantsEnabled": true,
+            "standardFlowEnabled": true,
+            "redirectUris": [
+                "http://localhost:1337/callback",
+                "http://127.0.0.1:1337/callback"
+            ]
+        },
+        {
+          "clientId": "${WEB_CLIENT_NAME}",
+          "enabled": true,
+          "publicClient": true,
+          "directAccessGrantsEnabled": true,
+          "standardFlowEnabled": true,
+          "redirectUris": [
+            "https://example.com/*"
+          ],
+          "webOrigins": [
+            "https://example.com"
+          ]
+        }
+    ]
+  }
+  
