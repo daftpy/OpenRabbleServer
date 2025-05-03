@@ -3,6 +3,8 @@ import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
+const hostname = process.env.VITE_HOSTNAME;
+
 export default defineConfig({
   plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
   server: {
@@ -12,6 +14,6 @@ export default defineConfig({
     watch: {
       usePolling: true, // Required for Docker to detect file changes
     },
-    allowedHosts: ["example.com"],
+    allowedHosts: [hostname ?? 'localhost'],
   },
 });
