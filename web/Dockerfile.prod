@@ -1,49 +1,24 @@
-# FROM node:20-alpine AS development-dependencies-env
-# COPY . /app
-# WORKDIR /app
-# RUN npm ci
-
-# FROM node:20-alpine AS production-dependencies-env
-# COPY ./package.json package-lock.json /app/
-# WORKDIR /app
-# RUN npm ci --omit=dev
-
-# FROM node:20-alpine AS build-env
-# COPY . /app/
-# COPY --from=development-dependencies-env /app/node_modules /app/node_modules
-# WORKDIR /app
-# RUN npm run build
-
-# FROM node:20-alpine
-# COPY ./package.json package-lock.json /app/
-# COPY --from=production-dependencies-env /app/node_modules /app/node_modules
-# COPY --from=build-env /app/build /app/build
-# WORKDIR /app
-# CMD ["npm", "run", "start"]
-
-# Install all dependencies for build (including dev)
+# Install all deps (dev+prod) for build phase
 FROM node:20-alpine AS build
 WORKDIR /app
-
-# Install deps and build the app
 COPY package.json package-lock.json ./
 RUN npm ci
 
+# Copy the entire project and build it
 COPY . .
 RUN npm run build
 
-# Use a lightweight image to serve the app
-FROM node:20-alpine AS production
+# Create production image
+FROM node:20-alpine
 WORKDIR /app
+ENV NODE_ENV=production
 
-# Install only serve (not your whole dev deps)
-RUN npm install -g serve
+# Only install production dependencies
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
 
-# Copy build output only
-COPY --from=build /app/build ./build
+# Copy full build output, including server files
+COPY --from=build /app/build /app/build
 
-# Expose port for production server
-EXPOSE 3000
-
-# Serve the React build with fallback routing (needed for React Router)
-CMD ["serve", "-s", "build", "-l", "3000"]
+# Start using react-router's server
+CMD ["npm", "run", "start"]

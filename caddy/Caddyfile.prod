@@ -3,6 +3,9 @@
 }
 
 example.com {
+    @index path /index
+    rewrite @index /
+
     reverse_proxy web:3000
 }
 

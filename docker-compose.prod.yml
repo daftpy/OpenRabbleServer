@@ -19,7 +19,6 @@ services:
     # Flags for reverse proxy
     command:
       - start
-      - --hostname=keycloak.example.com
       - --proxy-headers=xforwarded
       - --http-enabled=true
       - --import-realm
@@ -87,7 +86,6 @@ services:
     environment:
       NODE_ENV: production
     volumes:
-      - ./web:/app
       - /app/node_modules
 
 volumes:
