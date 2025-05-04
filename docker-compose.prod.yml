@@ -20,7 +20,7 @@ services:
     command:
       - start
       - --hostname=keycloak.example.com
-      - --proxy=edge
+      - --proxy-headers=xforwarded
       - --http-enabled=true
       - --import-realm
       - --health-enabled=true
