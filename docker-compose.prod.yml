@@ -18,10 +18,12 @@ services:
     image: quay.io/keycloak/keycloak:latest
     # Flags for reverse proxy
     command:
-      - start-dev
-      - --proxy-headers=xforwarded
+      - start
+      - --hostname=keycloak.example.com
+      - --proxy=edge
+      - --http-enabled=true
       - --import-realm
-      - --health-enabled=true # enable health checks endpoint
+      - --health-enabled=true
     env_file: "./keycloak/.env.prod"
     volumes:
       - ./keycloak/chat-realm.prod.json:/opt/keycloak/data/import/chat-realm.json
@@ -87,8 +89,6 @@ services:
     volumes:
       - ./web:/app
       - /app/node_modules
-    extra_hosts:
-      - "chat.example.com:172.17.0.1" 
 
 volumes:
   postgres_data:

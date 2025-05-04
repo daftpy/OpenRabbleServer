@@ -1,4 +1,3 @@
-
 {
     email email@example.com
 }
@@ -9,8 +8,8 @@ example.com {
 
 chat.example.com {
     reverse_proxy chatserver:8080 {
-        header_up {host}
-        header_up X-Forwarded-Proto [schema]
+        header_up Host {host}
+        header_up X-Forwarded-Proto {scheme}
     }
     log {
         output stdout
@@ -19,12 +18,15 @@ chat.example.com {
 }
 
 # Proxy to Keycloak
-keycloak.localhost {
-    # health check reverse proxy
+keycloak.example.com {
     @health path /health /health/*
     reverse_proxy @health keycloak:9000
 
-    reverse_proxy keycloak:8080
+    reverse_proxy keycloak:8080 {
+        header_up Host {host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
     log {
         output stdout
         level debug
