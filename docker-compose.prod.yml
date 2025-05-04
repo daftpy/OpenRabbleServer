@@ -77,15 +77,15 @@ services:
   web:
     build:
       context: ./web
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     networks:
       - app_network
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     depends_on:
       - caddy
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
     volumes:
       - ./web:/app
       - /app/node_modules
