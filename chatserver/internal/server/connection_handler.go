@@ -7,6 +7,7 @@ import (
 	"chatserver/internal/messages"
 	"chatserver/internal/messages/api"
 	"chatserver/internal/messages/chat"
+	"errors"
 	"log"
 	"net/http"
 
@@ -33,46 +34,14 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse JWT Token
-	parsedToken, err := jwt.Parse(token, s.jwkKeyFunc)
-	if err != nil || parsedToken == nil || !parsedToken.Valid {
-		log.Println("Invalid token, rejecting connection:", err)
+	username, userSub, clientID, err := s.parseAndValidateJWT(token)
+	if err != nil {
+		log.Printf("Token validation failed: %v", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	// Extract Username from Claims
-	var username string
-	var userSub string
-	var clientID string
-	if claims, ok := parsedToken.Claims.(jwt.MapClaims); ok {
-		if u, ok := claims["preferred_username"].(string); ok {
-			username = u
-		} else {
-			log.Println("No username found in token claims")
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-
-		// sub (User ID)
-		if s, ok := claims["sub"].(string); ok {
-			userSub = s
-			log.Println("Sub found", userSub)
-		} else {
-			log.Println("No sub found in token claims.")
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-
-		if c, ok := claims["azp"].(string); ok {
-			clientID = c
-			log.Printf("%s connecting through %s", username, clientID)
-		} else {
-			log.Println("No keycloak client found.")
-			http.Error(w, "Bad Request", http.StatusBadRequest)
-			return
-		}
-	}
+	log.Printf("%s connecting through %s", username, clientID)
 
 	banned, err := db.IsUserBanned(s.db, userSub)
 	if err != nil {
@@ -163,4 +132,34 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 	log.Println("Starting read/write pumps")
 	go client.ReadPump()
 	go client.WritePump()
+}
+
+// parseAndValidateJWT parses and validates the JWT token and extracts the username, subject, and clientID.
+func (s *Server) parseAndValidateJWT(token string) (string, string, string, error) {
+	parsedToken, err := jwt.Parse(token, s.jwkKeyFunc)
+	if err != nil || parsedToken == nil || !parsedToken.Valid {
+		return "", "", "", errors.New("invalid token")
+	}
+
+	claims, ok := parsedToken.Claims.(jwt.MapClaims)
+	if !ok {
+		return "", "", "", errors.New("invalid token claims")
+	}
+
+	username, ok := claims["preferred_username"].(string)
+	if !ok {
+		return "", "", "", errors.New("username missing from token")
+	}
+
+	sub, ok := claims["sub"].(string)
+	if !ok {
+		return "", "", "", errors.New("sub missing from token")
+	}
+
+	clientID, ok := claims["azp"].(string)
+	if !ok {
+		return "", "", "", errors.New("client ID missing from token")
+	}
+
+	return username, sub, clientID, nil
 }
