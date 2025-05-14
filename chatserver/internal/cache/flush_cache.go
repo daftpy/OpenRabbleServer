@@ -1,11 +1,12 @@
 package cache
 
 import (
-	"chatserver/internal/models"
 	"context"
 	"encoding/json"
 	"log"
 	"time"
+
+	"onrabble.com/chatserver/internal/models"
 )
 
 // Flushes cached messages to the PostgreSQL database

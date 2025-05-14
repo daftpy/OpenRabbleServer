@@ -1,8 +1,9 @@
 package interfaces
 
 import (
-	"chatserver/internal/messages"
 	"time"
+
+	"onrabble.com/chatserver/internal/messages"
 )
 
 // ClientInterface defines the contract for a client that connects to the hub

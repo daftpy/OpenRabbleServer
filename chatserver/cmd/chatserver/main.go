@@ -1,12 +1,13 @@
 package main
 
 import (
-	"chatserver/internal/cache"
-	"chatserver/internal/db"
-	"chatserver/internal/hub"
-	"chatserver/internal/server"
 	"log"
 	"net/http"
+
+	"onrabble.com/chatserver/internal/cache"
+	"onrabble.com/chatserver/internal/db"
+	"onrabble.com/chatserver/internal/hub"
+	"onrabble.com/chatserver/internal/server"
 
 	"github.com/gorilla/websocket"
 	"github.com/valkey-io/valkey-go"

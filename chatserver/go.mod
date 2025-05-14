@@ -1,4 +1,4 @@
-module chatserver
+module onrabble.com/chatserver
 
 go 1.23.5
 

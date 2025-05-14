@@ -1,15 +1,16 @@
 package hub
 
 import (
-	"chatserver/internal/cache"
-	"chatserver/internal/db"
-	"chatserver/internal/interfaces"
-	"chatserver/internal/messages"
-	"chatserver/internal/messages/chat"
-	"chatserver/internal/models"
 	"fmt"
 	"log"
 	"time"
+
+	"onrabble.com/chatserver/internal/cache"
+	"onrabble.com/chatserver/internal/db"
+	"onrabble.com/chatserver/internal/interfaces"
+	"onrabble.com/chatserver/internal/messages"
+	"onrabble.com/chatserver/internal/messages/chat"
+	"onrabble.com/chatserver/internal/models"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )

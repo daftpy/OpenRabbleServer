@@ -1,13 +1,14 @@
 package handlers
 
 import (
-	database "chatserver/internal/db"
-	"chatserver/internal/messages/api"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
+
+	database "onrabble.com/chatserver/internal/db"
+	"onrabble.com/chatserver/internal/messages/api"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )

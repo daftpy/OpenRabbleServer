@@ -1,12 +1,13 @@
 package client
 
 import (
-	"chatserver/internal/interfaces"
-	"chatserver/internal/messages"
-	"chatserver/internal/messages/chat"
 	"encoding/json"
 	"log"
 	"time"
+
+	"onrabble.com/chatserver/internal/interfaces"
+	"onrabble.com/chatserver/internal/messages"
+	"onrabble.com/chatserver/internal/messages/chat"
 
 	"github.com/gorilla/websocket"
 )

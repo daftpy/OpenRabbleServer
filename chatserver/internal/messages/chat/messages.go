@@ -1,10 +1,11 @@
 package chat
 
 import (
-	"chatserver/internal/messages"
-	"chatserver/internal/models"
 	"log"
 	"time"
+
+	"onrabble.com/chatserver/internal/messages"
+	"onrabble.com/chatserver/internal/models"
 )
 
 const (

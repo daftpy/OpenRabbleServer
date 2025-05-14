@@ -1,8 +1,8 @@
 package api
 
 import (
-	"chatserver/internal/messages"
-	"chatserver/internal/models"
+	"onrabble.com/chatserver/internal/messages"
+	"onrabble.com/chatserver/internal/models"
 )
 
 const (

@@ -1,12 +1,13 @@
 package handlers
 
 import (
-	"chatserver/internal/db"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+
+	"onrabble.com/chatserver/internal/db"
 )
 
 func HandleDiscovery(identity db.ServerIdentity) http.HandlerFunc {

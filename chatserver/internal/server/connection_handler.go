@@ -1,13 +1,14 @@
 package server
 
 import (
-	"chatserver/internal/client"
-	"chatserver/internal/db"
-	"chatserver/internal/messages"
-	"chatserver/internal/messages/chat"
 	"errors"
 	"log"
 	"net/http"
+
+	"onrabble.com/chatserver/internal/client"
+	"onrabble.com/chatserver/internal/db"
+	"onrabble.com/chatserver/internal/messages"
+	"onrabble.com/chatserver/internal/messages/chat"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/websocket"

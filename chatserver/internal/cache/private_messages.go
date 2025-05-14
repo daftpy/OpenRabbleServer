@@ -1,12 +1,13 @@
 package cache
 
 import (
-	database "chatserver/internal/db"
-	"chatserver/internal/models"
 	"context"
 	"encoding/json"
 	"fmt"
 	"log"
+
+	database "onrabble.com/chatserver/internal/db"
+	"onrabble.com/chatserver/internal/models"
 
 	"github.com/valkey-io/valkey-go"
 )

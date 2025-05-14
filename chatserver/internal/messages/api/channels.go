@@ -1,6 +1,6 @@
 package api
 
-import "chatserver/internal/messages"
+import "onrabble.com/chatserver/internal/messages"
 
 const MessageCountByChannelType = "message_count_by_channel"
 

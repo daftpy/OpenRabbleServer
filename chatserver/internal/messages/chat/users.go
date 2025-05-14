@@ -1,6 +1,6 @@
 package chat
 
-import "chatserver/internal/messages"
+import "onrabble.com/chatserver/internal/messages"
 
 const (
 	UserStatusMessageType     = "user_status"

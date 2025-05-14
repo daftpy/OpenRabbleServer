@@ -1,8 +1,6 @@
 package db
 
 import (
-	"chatserver/internal/messages/api"
-	"chatserver/internal/models"
 	"context"
 	"database/sql"
 	"errors"
@@ -10,6 +8,9 @@ import (
 	"log"
 	"strconv"
 	"strings"
+
+	"onrabble.com/chatserver/internal/messages/api"
+	"onrabble.com/chatserver/internal/models"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"

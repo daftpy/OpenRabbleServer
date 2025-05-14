@@ -1,12 +1,13 @@
 package db
 
 import (
-	"chatserver/internal/models"
 	"context"
 	"database/sql"
 	"fmt"
 	"log"
 	"time"
+
+	"onrabble.com/chatserver/internal/models"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )

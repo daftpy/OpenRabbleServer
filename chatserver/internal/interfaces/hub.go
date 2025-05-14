@@ -1,9 +1,9 @@
 package interfaces
 
 import (
-	"chatserver/internal/messages"
-	"chatserver/internal/messages/chat"
-	"chatserver/internal/models"
+	"onrabble.com/chatserver/internal/messages"
+	"onrabble.com/chatserver/internal/messages/chat"
+	"onrabble.com/chatserver/internal/models"
 )
 
 // HubInterface defines the contract for a Hub that manages connected clients,
