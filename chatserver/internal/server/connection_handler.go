@@ -3,9 +3,7 @@ package server
 import (
 	"chatserver/internal/client"
 	"chatserver/internal/db"
-	database "chatserver/internal/db"
 	"chatserver/internal/messages"
-	"chatserver/internal/messages/api"
 	"chatserver/internal/messages/chat"
 	"errors"
 	"log"
@@ -86,25 +84,6 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 	connectedMsg := chat.NewConnectedUsersMessage(s.hub.GetConnectedUsers())
 	client.SendMessage(connectedMsg)
 
-	// If webclient (admin dash), send analytics
-	if clientID == "WebClient" {
-		// Send the channel message count analytics
-		counts, err := database.FetchMessageCountByChannel(s.db)
-		if err != nil {
-			log.Printf("Failed to get channel message counts")
-		}
-		analyticsMsg := api.NewMessageCountByChannelMessage(counts)
-		client.SendMessage(analyticsMsg)
-
-		// Send the activity analytics
-		activity, err := database.FetchSessionActivity(s.db, "")
-		if err != nil {
-			log.Printf("Failed to get recent activity: %v", err)
-		}
-		activityMsg := api.NewSessionActivityMessage(activity)
-		client.SendMessage(activityMsg)
-	}
-
 	// Bulk send chat history to the new client
 	cachedMessages := s.hub.GetCachedChatMessages()
 	if len(cachedMessages) > 0 {
@@ -134,7 +113,7 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 	go client.WritePump()
 }
 
-// parseAndValidateJWT parses and validates the JWT token and extracts the username, subject, and clientID.
+// parseAndValidateJWT parses and validates the JWT token and extracts the username, useerID (sub), and clientID.
 func (s *Server) parseAndValidateJWT(token string) (string, string, string, error) {
 	parsedToken, err := jwt.Parse(token, s.jwkKeyFunc)
 	if err != nil || parsedToken == nil || !parsedToken.Valid {
