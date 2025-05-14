@@ -80,32 +80,15 @@ func (s *Server) handleConnection(w http.ResponseWriter, r *http.Request) {
 	// Register Client with the Hub
 	s.hub.RegisterClient(client, client.ClientID)
 
-	// Send Connected Users List to the new client
-	connectedMsg := chat.NewConnectedUsersMessage(s.hub.GetConnectedUsers())
-	client.SendMessage(connectedMsg)
-
-	// Bulk send chat history to the new client
-	cachedMessages := s.hub.GetCachedChatMessages()
-	if len(cachedMessages) > 0 {
-		bulkMessage := chat.NewBulkChatMessages(cachedMessages)
-		if err := conn.WriteJSON(bulkMessage); err != nil {
-			log.Printf("Failed to send bulk chat messages: %v", err)
-		} else {
-			log.Printf("Sent %d cached messages to client", len(cachedMessages))
-		}
-	}
-
-	// Fetch channels from the database
-	channels, err := db.FetchChannels(s.db)
-	if err != nil {
-		log.Println("Failed to load channels from database:", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	// Send the active channels and cached server messages to the client
+	if err := s.sendChannelsAndCachedMessages(conn); err != nil {
+		http.Error(w, "Failed to initialize chat data.", http.StatusInternalServerError)
 		return
 	}
 
-	// Send active channels to the user
-	newActiveChannnelsMessage := chat.NewActiveChannelsMessage(channels)
-	conn.WriteJSON(newActiveChannnelsMessage)
+	// Send Connected Users List to the new client
+	connectedMsg := chat.NewConnectedUsersMessage(s.hub.GetConnectedUsers())
+	client.SendMessage(connectedMsg)
 
 	// Start Read/Write Pumps
 	log.Println("Starting read/write pumps")
@@ -141,4 +124,33 @@ func (s *Server) parseAndValidateJWT(token string) (string, string, string, erro
 	}
 
 	return username, sub, clientID, nil
+}
+
+// sendChannelsAndCachedMessages sends cached chat messages and active channel list to the connected client.
+func (s *Server) sendChannelsAndCachedMessages(conn *websocket.Conn) error {
+	// Send cached chat messages
+	cachedMessages := s.hub.GetCachedChatMessages()
+	if len(cachedMessages) > 0 {
+		bulkMessage := chat.NewBulkChatMessages(cachedMessages)
+		if err := conn.WriteJSON(bulkMessage); err != nil {
+			log.Printf("Failed to send bulk chat messages: %v", err)
+		} else {
+			log.Printf("Sent %d cached messages to client", len(cachedMessages))
+		}
+	}
+
+	// Fetch and send channels
+	channels, err := db.FetchChannels(s.db)
+	if err != nil {
+		log.Println("Failed to load channels from database:", err)
+		return err
+	}
+
+	newActiveChannnelsMessage := chat.NewActiveChannelsMessage(channels)
+	if err := conn.WriteJSON(newActiveChannnelsMessage); err != nil {
+		log.Printf("Failed to send channels to client: %v", err)
+		return err
+	}
+
+	return nil
 }
