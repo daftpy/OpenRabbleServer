@@ -18,7 +18,7 @@ The `chatserver` module provides a fully self-hostable, real-time chat backend w
 | `messages`      | Defines chat and API message types (including subtype folders `chat`, `api`) |
 
 
-## ✅ Features
+## Features
 
 - JWT-based authentication using [Keycloak](https://www.keycloak.org/)
 - WebSocket support for real-time messaging (`/ws`)
@@ -35,7 +35,7 @@ The `chatserver` module provides a fully self-hostable, real-time chat backend w
 
 ### Requirements
 
-- Go 1.21+
+- Go 1.24.3+
 - PostgreSQL 16+
 - Valkey (or Redis)
 - Keycloak (used for JWT auth)
@@ -53,7 +53,7 @@ This project is configured for local development using Docker Compose and Caddy.
 > ⚠️ Make sure you trust Caddy’s root certificate or your browser will block HTTPS requests locally.
 
 
-## 🔐 Security
+## Security
 
 - All communication is authenticated with JWT tokens.
 - Connections must use `wss://` in production (Caddy handles this).
@@ -91,20 +91,14 @@ This project is configured for local development using Docker Compose and Caddy.
 - [ ] **Ping/pong keepalive and idle timeout**  
       Detect and clean up stale client connections automatically.
 
-- [ ] **Throttle dashboard analytics**  
-      Prevent `WebClient` connections from overwhelming the browser by staggering analytics updates.
-
 - [ ] **Retry failed whispers**  
       Implement a retry queue for private messages if the target client is momentarily disconnected.
 
 - [ ] **Split whisper/broadcast queues**  
       Process `Broadcast()` and `Whisper()` flows in separate background goroutines to isolate errors and improve throughput.
 
-- [ ] **Support multi-realm JWTs**  
-      Allow parsing/validation of tokens from multiple Keycloak realms or issuers.
-
-- [ ] **Expose Prometheus metrics (optional)**  
-      Emit hub/client/caching counters and durations for system health visibility.
+- [ ] **Expose Prometheus metrics**  
+      Provide system health stats like connected clients, message rates, and cache timings at a /metrics endpoint for Prometheus to scrape.
 
 - [ ] **Improve dashboard load UX**  
       Introduce loading states and staged delivery to avoid UI stalls.

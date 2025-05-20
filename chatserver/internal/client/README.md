@@ -27,7 +27,7 @@ The `client` package represents a single active WebSocket connection to the serv
   - `ConnectedAt`: timestamp of connection start.
 
 
-## 🔁 Workflow
+## Workflow
 
 1. **Connection Setup**:
    - A `Client` is created with an active WebSocket connection and registered with the hub.

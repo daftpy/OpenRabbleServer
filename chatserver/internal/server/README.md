@@ -39,7 +39,7 @@ The `server` package handles incoming HTTP and WebSocket connections, authentica
    - Optionally sends analytics and cached messages based on client type
 
 
-## 🔁 Connection Lifecycle
+## Connection Lifecycle
 
 - **Client Connects**:
   - Validates the JWT
@@ -120,9 +120,6 @@ chat.example.com {
 
 - [ ] **Graceful shutdown support**  
       On termination, user session data to the database and close WebSocket connections cleanly.
-
-- [ ] **Ping/pong keepalive & idle timeout**  
-      Add support for WebSocket heartbeats to detect stale clients and clean up connections automatically.
 
 - [ ] **Throttle dashboard analytics**  
       When `WebClient` connects, batch or delay analytics messages to avoid overwhelming low-powered clients.

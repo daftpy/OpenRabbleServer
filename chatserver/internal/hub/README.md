@@ -30,7 +30,7 @@ The `hub` package is the central message coordinator in the chat server. It mana
   - Requests for current user list
 
 
-## 🔁 Workflow
+## Workflow
 
 1. **Client Registers**:
    - On connect, a `Client` sends itself to the hub's `Register` channel.
@@ -40,7 +40,7 @@ The `hub` package is the central message coordinator in the chat server. It mana
    - Chat messages are received via the `Messages` channel.
    - The hub delegates by:
      - Checking message type.
-     - Enriching with a `cacheID` (via `MessageCache`).
+     - Adding a `cacheID` (via `MessageCache`).
      - Broadcasting to all clients or sending privately.
 
 3. **Client Disconnects**:

@@ -22,7 +22,7 @@ This project implements a hybrid caching mechanism for a chat application, combi
 - `private_messages`: Stores all flushed private messages.
 
 
-## 🔁 Workflow
+## Workflow
 
 ### 1. Message Ingestion
 
